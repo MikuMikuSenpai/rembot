@@ -22,7 +22,11 @@ dependencies {
         exclude(module = "tink") // for encrypting and decrypting audio, dont need this
     }
     implementation("ch.qos.logback:logback-classic:1.5.32") // needed for logging (https://jda.wiki/setup/logging/)
+    compileOnly("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
+    annotationProcessor("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
 
+    testCompileOnly("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
 
