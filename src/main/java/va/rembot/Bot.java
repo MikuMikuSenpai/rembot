@@ -1,4 +1,4 @@
-package me.rembot;
+package va.rembot;
 
 public class Bot {
 
