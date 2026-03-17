@@ -1,11 +1,19 @@
 package va.rembot;
 
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import va.rembot.commands.non_slash.PingPong;
+import va.rembot.commands.slash.Ban;
 
 /// All global variables should be here
 /// Configuration related to EventListeners and adding slash commands should be set in "onReady" method
 /// The "onReady" method ensures rembot is fully loaded/started
+@Slf4j
 public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
@@ -18,11 +26,16 @@ public class BotConfig extends ListenerAdapter {
 
         var bot = event.getJDA();
 
-        //TODO add the event listeners
-        bot.addEventListener();
+        bot.addEventListener(
+                new Ban(),
+                new PingPong());
 
-        //TODO add the slash commands
-        bot.updateCommands().addCommands().queue();
-
+        bot.updateCommands()
+                .addCommands(
+                        Commands.slash("ban", "Ban someone.")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.BAN_MEMBERS))
+                                .addOption(OptionType.USER, "username", "The user to be banned.", true)
+                                .addOption(OptionType.STRING, "reason", "Reason for ban.", false))
+                .queue(success -> log.info("Successfully loaded all slash commands."));
     }
 }

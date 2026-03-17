@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 
 @Slf4j
 /// ONLY starts the bot nothing else.
@@ -15,12 +16,13 @@ public class Bot {
 
         JDA bot = null;
         try {
-            bot = JDABuilder.createDefault(BOT_TOKEN).build().awaitReady();
+            bot = JDABuilder.createDefault(
+                    BOT_TOKEN,
+                    GatewayIntent.GUILD_MESSAGES,
+                    GatewayIntent.MESSAGE_CONTENT)
+                    .build();
         } catch (InvalidTokenException e) {
             log.error("Bot token is invalid, check your .env file.");
-        } catch (InterruptedException e) {
-            log.error("This thread got interrupted while starting the bot.");
-            log.error(e.getMessage());
         } catch (Exception e){
             log.error("Something went wrong while starting the bot.");
             log.error(e.getMessage());
