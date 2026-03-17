@@ -42,9 +42,16 @@ public class Ban extends ListenerAdapter {
                             .and(event.getHook().deleteOriginal())
                             .queue();
                 }, new ErrorHandler()
+                        //TODO speak w miku on how we should let the user know in discord itself (currently only logs error to terminal)
                         .handle(ErrorResponse.MISSING_PERMISSIONS,
-                                e -> log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower discord role hierarchy than target)."))
+                                e -> {
+                                    log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy than target).");
+                                    event.getHook().deleteOriginal().queue();
+                                })
                         .handle(ErrorResponse.UNKNOWN_USER,
-                                e -> log.error("Dont know who the target user is. (Unknown user)")));
+                                e -> {
+                                    log.error("Dont know who the target user is. (Unknown user)");
+                                    event.getHook().deleteOriginal().queue();
+                                }));
     }
 }
