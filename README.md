@@ -19,3 +19,25 @@ Remastered mbot get it mbot rembot yeah my bad
    * Manage Messages
 2. Copy [.env.example](.env.example) and create your own .env variant
 3. ```docker compose up --build```
+
+## TODO:
+
+Only for core features other stuff will be worked on after v1.0 release of rembot.
+This will be removed when all done, here for organization.
+
+- [ ] Admin Features:
+  - [ ] Ban
+    - [x] backend
+    - [ ] frontend
+  - [ ] Unban
+    - [ ] backend
+    - [ ] frontend
+  - [ ] Kick
+    - [ ] backend
+    - [ ] frontend
+  - [ ] Mute
+    - [ ] backend
+    - [ ] frontend
+- [ ] Moderation:
+  - [ ] Banned words filter
+  - [ ] Anti-spam filter
