@@ -3,6 +3,7 @@ package va.rembot.commands.non_slash;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -20,8 +21,10 @@ public class PingPong extends ListenerAdapter {
             var timeSent = event.getMessage().getTimeCreated().toLocalDateTime();
             var timeNow = LocalDateTime.now();
             var timeTook = Duration.between(timeSent, timeNow).abs().getNano();
+            var timeTookInMs = (double) timeTook / 1_000_000;
+            var df = new DecimalFormat("#.##"); // only print 2 decimals
 
-            event.getMessage().reply("pong (took " + timeTook + " ns to handle)" ).queue();
+            event.getMessage().reply("pong (took " + df.format(timeTookInMs) + " ms)" ).queue();
         }
     }
 }
