@@ -22,6 +22,7 @@ public class Ban extends ListenerAdapter {
             var target = event.getOption("username").getAsUser();
             var usrSnowflake = UserSnowflake.fromId(target.getId());
 
+            // "reason" is an optional input, could be null so handle it:
             try {
                 var reason = event.getOption("reason").getAsString();
                 ban(event, usrSnowflake, reason);
