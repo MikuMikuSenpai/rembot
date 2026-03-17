@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
 import java.util.concurrent.TimeUnit;
@@ -30,7 +32,6 @@ public class Ban extends ListenerAdapter {
     }
 
     private void ban(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason){
-        //TODO for acexcy: add error handling tried it last night not working idk atm
         event.getGuild()
                 .ban(usrSnowflake, 0, TimeUnit.MINUTES)
                 .reason(reason)
@@ -40,6 +41,10 @@ public class Ban extends ListenerAdapter {
                             .sendMessage("[DARWIN CHANNEL] Some dumbass got banned lulz heres his name: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
                             .and(event.getHook().deleteOriginal())
                             .queue();
-                });
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS,
+                                e -> log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower discord role hierarchy than target)."))
+                        .handle(ErrorResponse.UNKNOWN_USER,
+                                e -> log.error("Dont know who the target user is. (Unknown user)")));
     }
 }
