@@ -22,7 +22,7 @@ Remastered mbot get it mbot rembot yeah my bad
 
 ## TODO:
 
-Only for core features other stuff will be worked on after v1.0 release of rembot.
+Only for core features other stuff will be worked on after v1.0.0 release of rembot.
 This will be removed when all done, here for organization.
 
 - [ ] Admin Features:

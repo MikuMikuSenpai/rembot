@@ -45,6 +45,7 @@ java {
 
 application {
     mainClass = "va.rembot.Bot"
+    version = "0.0.0-PRERELEASE"
 }
 
 tasks.named<Test>("test") {
