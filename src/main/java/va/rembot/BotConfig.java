@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import va.rembot.commands.non_slash.PingPong;
-import va.rembot.commands.slash.Ban;
+import va.rembot.commands.slash.admin.Ban;
 
 /// All global variables should be here
 /// Configuration related to EventListeners and adding slash commands should be set in "onReady" method

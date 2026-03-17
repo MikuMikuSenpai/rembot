@@ -1,4 +1,4 @@
-package va.rembot.commands.slash;
+package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.UserSnowflake;
