@@ -41,3 +41,8 @@ This will be removed when all done, here for organization.
 - [ ] Moderation:
   - [ ] Banned words filter
   - [ ] Anti-spam filter
+- [ ] Docker
+  - [x] Dockerfile
+    - [ ] Being automatically build by GH Actions?
+  - [x] docker-compose (for development)
+  - [ ] docker-compose (for production)
