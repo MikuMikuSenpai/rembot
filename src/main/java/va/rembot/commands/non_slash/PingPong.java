@@ -15,10 +15,11 @@ public class PingPong extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var msg = event.getMessage().getContentRaw();
+        var msg = event.getMessage();
+        var msgRaw = msg.getContentRaw();
 
-        if (msg.equals("&ping")){
-            var timeSent = event.getMessage().getTimeCreated().toLocalDateTime();
+        if (msgRaw.equals("&ping")){
+            var timeSent = msg.getTimeCreated().toLocalDateTime();
             var timeNow = LocalDateTime.now();
             var timeTook = Duration.between(timeSent, timeNow).abs().getNano();
             var timeTookInMs = (double) timeTook / 1_000_000;
