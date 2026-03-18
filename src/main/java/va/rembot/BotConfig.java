@@ -12,6 +12,7 @@ import va.rembot.commands.slash.admin.Ban;
 import va.rembot.commands.slash.admin.Kick;
 import va.rembot.commands.slash.admin.Mute;
 import va.rembot.commands.slash.admin.Unban;
+import va.rembot.moderation.BannedWordsFilter;
 
 /// All global variables should be here
 /// Configuration related to EventListeners and adding slash commands should be set in "onReady" method
@@ -23,6 +24,7 @@ public class BotConfig extends ListenerAdapter {
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
     public static final String DARWIN_CHANNEL_ID = System.getenv("DARWIN_CHANNEL_ID");
     public static final String BANNED_WORDS = System.getenv("BANNED_WORDS");
+    public static final String[] BANNED_WORDS_LIST = BANNED_WORDS.split(",");
 
     @Override
     public void onReady(ReadyEvent event) {
@@ -34,6 +36,7 @@ public class BotConfig extends ListenerAdapter {
                 new Unban(),
                 new Kick(),
                 new Mute(),
+                new BannedWordsFilter(),
                 new PingPong());
 
         bot.updateCommands()
