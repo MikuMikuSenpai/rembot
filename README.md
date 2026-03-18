@@ -36,7 +36,7 @@ This will be removed when all done, here for organization.
     - [x] backend
     - [ ] frontend
   - [ ] Mute
-    - [ ] backend
+    - [x] backend
     - [ ] frontend
 - [ ] Moderation:
   - [ ] Banned words filter

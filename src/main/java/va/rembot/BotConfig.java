@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import va.rembot.commands.non_slash.PingPong;
 import va.rembot.commands.slash.admin.Ban;
 import va.rembot.commands.slash.admin.Kick;
+import va.rembot.commands.slash.admin.Mute;
 import va.rembot.commands.slash.admin.Unban;
 
 /// All global variables should be here
@@ -32,6 +33,7 @@ public class BotConfig extends ListenerAdapter {
                 new Ban(),
                 new Unban(),
                 new Kick(),
+                new Mute(),
                 new PingPong());
 
         bot.updateCommands()
@@ -47,7 +49,13 @@ public class BotConfig extends ListenerAdapter {
                         Commands.slash("kick", "Kick someone.")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.KICK_MEMBERS))
                                 .addOption(OptionType.USER, "username", "The user to be kicked.", true)
-                                .addOption(OptionType.STRING, "reason", "Reason for kick.", false))
+                                .addOption(OptionType.STRING, "reason", "Reason for kick.", false),
+                        Commands.slash("mute", "Mute someone.")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
+                                .addOption(OptionType.USER, "username", "The user to be muted.", true)
+                                .addOption(OptionType.INTEGER, "minutes", "The amount of minutes to be muted for.", true)
+                                .addOption(OptionType.STRING, "reason", "Reason for mute.", false)
+                                .addOption(OptionType.INTEGER, "hours", "The amount of hours to be muted for.", false))
                 .queue(success -> log.info("Successfully loaded all slash commands."));
     }
 }
