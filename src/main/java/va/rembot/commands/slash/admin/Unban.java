@@ -55,7 +55,7 @@ public class Unban extends ListenerAdapter {
                             log.error("Couldn't unban that user because the ban is unknown (possibly not banned?).");
                             log.error("{} tried to unban {}", slashCommandUser, targetUser);
                             event.getHook()
-                                    .editOriginal("Failed to unban that user because I think that user is banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
+                                    .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_USER, e -> {
