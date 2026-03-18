@@ -66,7 +66,7 @@ public class Mute extends ListenerAdapter {
                             log.error("The member that was being muted was already removed from this server before finishing the muting task.");
                             log.error("{} tried to muted {}", slashCommandUser, targetUser);
                             event.getHook()
-                                    .editOriginal("The user you tried to mute was already removed from this server. (failure: this should be rare)" + slashCommandUser.getAsMention())
+                                    .editOriginal("The user you tried to mute was already removed from this server." + slashCommandUser.getAsMention())
                                     .queue();
                         }));
     }

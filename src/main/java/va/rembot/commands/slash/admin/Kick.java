@@ -55,7 +55,7 @@ public class Kick extends ListenerAdapter {
                            log.error("The member that was being kicked was already removed from this server before finishing the kicking task.");
                            log.error("{} tried to kick {}", slashCommandUser, targetUser);
                            event.getHook()
-                                   .editOriginal("The user you tried to kick was already removed from this server. (failure: this should be rare)" + slashCommandUser.getAsMention())
+                                   .editOriginal("The user you tried to kick was already removed from this server." + slashCommandUser.getAsMention())
                                    .queue();
                        }));
     }
