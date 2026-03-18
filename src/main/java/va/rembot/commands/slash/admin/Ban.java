@@ -1,6 +1,8 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -10,6 +12,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
+import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -27,14 +30,33 @@ public class Ban extends ListenerAdapter {
             // "reason" is an optional input, could be null so handle it:
             try {
                 var reason = event.getOption("reason").getAsString();
-                ban(event, usrSnowflake, reason, slashCommandUser, target);
+                var embedMsg = buildEmbed(target, reason);
+                ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
             } catch (NullPointerException e) {
-                ban(event, usrSnowflake, "No reason provided.", slashCommandUser, target);
+                var reason = "No reason provided.";
+                var embedMsg = buildEmbed(target, reason);
+                ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
             }
         }
     }
 
-    private void ban(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser){
+    private MessageEmbed buildEmbed(User targetUser, String reason){
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.addField("TestField", "TestValue", true); // cant create empty embed so this some filler (delete when u start)
+        /*
+        heres a guide on what u can change: https://raw.githubusercontent.com/discord-jda/JDA/assets/assets/docs/embeds/01-Overview.png
+        use below as example:
+        embed.setColor(0xbb0a1e); //hexadecimal color needs to start w "0x"
+        embed.setTitle("Someone got banned");
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Reason", reason, false);
+        embed.setFooter("rekt xd");
+        embed.setTimestamp(Instant.now());
+         */
+        return embed.build();
+    }
+
+    private void ban(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser, MessageEmbed embed){
         event.getGuild()
                 .ban(usrSnowflake, 0, TimeUnit.MINUTES)
                 .reason(reason)
@@ -42,6 +64,7 @@ public class Ban extends ListenerAdapter {
                     //TODO add your frontend logic here
                     event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessage("[DARWIN CHANNEL] Some dumbass got banned lulz heres his name: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
+                            .and(event.getGuildChannel().sendMessageEmbeds(embed))
                             .and(event.getHook().deleteOriginal())
                             .queue();
                 }, new ErrorHandler()
