@@ -2,8 +2,5 @@ services:
   rembot:
     build: .
     container_name: rembot
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - LOG_CHANNEL_ID=${LOG_CHANNEL_ID}
-      - DARWIN_CHANNEL_ID=${DARWIN_CHANNEL_ID}
-      - BANNED_WORDS=${BANNED_WORDS}
+    env_file:
+      - .env
