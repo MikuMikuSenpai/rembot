@@ -47,19 +47,19 @@ public class Ban extends ListenerAdapter {
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS,
                                 e -> {
-                                    log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
-                                    log.error("{} tried to ban {}", slashCommandUser, targetUser);
-                                    event.getHook()
-                                            .editOriginal("Failed to ban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
-                                            .queue();
+                            log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
+                            log.error("{} tried to ban {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to ban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .queue();
                                 })
                         .handle(ErrorResponse.UNKNOWN_USER,
                                 e -> {
-                                    log.error("Dont know who the target user is (Unknown user).");
-                                    log.error("{} tried to ban {}", slashCommandUser, targetUser);
-                                    event.getHook()
-                                            .editOriginal("I can't find the person you are trying to ban (unknown user)." + slashCommandUser.getAsMention())
-                                            .queue();
-                                }));
+                            log.error("Dont know who the target user is (Unknown user).");
+                            log.error("{} tried to ban {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("I can't find the person you are trying to ban (unknown user)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        }));
     }
 }
