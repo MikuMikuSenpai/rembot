@@ -42,6 +42,8 @@ public class Ban extends ListenerAdapter {
 
     private MessageEmbed buildEmbed(User targetUser, String reason){
         EmbedBuilder embed = new EmbedBuilder();
+        //TODO if you want embed message make it here do same for other classes if we repeat a lot in diff classes
+        // we can make on generic method for this in BotConfig
         embed.addField("TestField", "TestValue", true); // cant create empty embed so this some filler (delete when u start)
         /*
         heres a guide on what u can change: https://raw.githubusercontent.com/discord-jda/JDA/assets/assets/docs/embeds/01-Overview.png
