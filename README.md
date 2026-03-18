@@ -30,7 +30,7 @@ This will be removed when all done, here for organization.
     - [x] backend
     - [ ] frontend
   - [ ] Unban
-    - [ ] backend
+    - [x] backend
     - [ ] frontend
   - [ ] Kick
     - [ ] backend
