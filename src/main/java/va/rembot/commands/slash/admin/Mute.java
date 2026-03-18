@@ -21,7 +21,7 @@ public class Mute extends ListenerAdapter {
 
             event.deferReply(true).queue();
 
-            String reason = "No reason provided";
+            var reason = "No reason provided";
             var target = event.getOption("username").getAsUser();
             var minutes = event.getOption("minutes").getAsInt();
             var usrSnowflake = UserSnowflake.fromId(target.getId());
