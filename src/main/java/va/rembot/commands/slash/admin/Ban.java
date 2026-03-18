@@ -21,6 +21,7 @@ public class Ban extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (event.getName().equals("ban")){
+
             event.deferReply(true).queue();
 
             var target = event.getOption("username").getAsUser();
