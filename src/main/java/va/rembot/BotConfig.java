@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import va.rembot.commands.non_slash.PingPong;
 import va.rembot.commands.slash.admin.Ban;
+import va.rembot.commands.slash.admin.Kick;
 import va.rembot.commands.slash.admin.Unban;
 
 /// All global variables should be here
@@ -30,6 +31,7 @@ public class BotConfig extends ListenerAdapter {
         bot.addEventListener(
                 new Ban(),
                 new Unban(),
+                new Kick(),
                 new PingPong());
 
         bot.updateCommands()
@@ -41,7 +43,11 @@ public class BotConfig extends ListenerAdapter {
                         Commands.slash("unban", "Unban someone.")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.BAN_MEMBERS))
                                 .addOption(OptionType.USER, "username", "The user to be unbanned.", true)
-                                .addOption(OptionType.STRING, "reason", "Reason for unban.", false))
+                                .addOption(OptionType.STRING, "reason", "Reason for unban.", false),
+                        Commands.slash("kick", "Kick someone.")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.KICK_MEMBERS))
+                                .addOption(OptionType.USER, "username", "The user to be kicked.", true)
+                                .addOption(OptionType.STRING, "reason", "Reason for kick.", false))
                 .queue(success -> log.info("Successfully loaded all slash commands."));
     }
 }
