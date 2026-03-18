@@ -30,7 +30,6 @@ public class Bot {
         }
 
         bot.addEventListener(new BotConfig());
-
     }
 
     private static void printLogo(){
