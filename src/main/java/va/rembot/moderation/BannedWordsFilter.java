@@ -32,11 +32,16 @@ public class BannedWordsFilter extends ListenerAdapter {
         for (String word : substitutedMsg) {
 
             // check if msg has any combined words that are whitelisted
+            // if so, exclude the whitelisted words from the original msg
+            // and do another loop over this new list checking
+            // if there are any banned words present
             if (hasWhitelistedCombinedWords(combinedWordsList)){
                 loopOverMsgExcludeWhitelist(combinedWordsList, substitutedMsg, event, msg);
-            break;
+                break;
             }
 
+            // TODO loop another time over this with excluded whitelisted word
+            //  and recheck for banned words comparable to what we do in combined words
             // check message for a single whitelisted word
             if (whitelistedWords.stream().anyMatch(s -> s.equals(word)))
                 break;
