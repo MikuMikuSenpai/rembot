@@ -43,7 +43,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             // check message for a single whitelisted word afterward loop over list
             // excluding the whitelisted word and check again for banned words
             if (whitelistedWords.stream().anyMatch(s -> s.equals(word))) {
-                loopOverMsgExcludeWhitelistSingle(word, substitutedMsg, event, msg);
+                loopOverMsgExcludeWhitelist(word, substitutedMsg, event, msg);
                 break;
             }
 
@@ -64,17 +64,17 @@ public class BannedWordsFilter extends ListenerAdapter {
                 .queue();
     }
 
-    /// this one was added for combined words support (reminder to ace for later)
+    // For looping over a msg with a combined whitelist word
     private void loopOverMsgExcludeWhitelist(List<String> combinedWordsList, List<String> substituteMsg, MessageReceivedEvent event, String msg){
 
         var whiteListedWords = getWhiteListedWords(combinedWordsList);
 
-        log.info("INSIDE loopOverMsgExcludeWhitelist, substituteMsg: {}", substituteMsg);
-        log.info("INSIDE loopOverMsgExcludeWhitelist, whiteListedWords: {}", whiteListedWords);
+        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), substituteMsg: {}", substituteMsg);
+        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), whiteListedWords: {}", whiteListedWords);
 
         for (String word : substituteMsg){
             if (!whiteListedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.info("NONWHITELIST WORD: {}", word);
+                log.debug("NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
@@ -82,16 +82,15 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
-    private void loopOverMsgExcludeWhitelistSingle(String whitelistWord, List<String> substituteMsg, MessageReceivedEvent event, String msg){
+    // For looping over a msg if only 1 whitelist word present
+    private void loopOverMsgExcludeWhitelist(String whitelistedWord, List<String> substituteMsg, MessageReceivedEvent event, String msg){
 
-        var whitelistedWord = whitelistWord;
-
-        log.info("INSIDE loopOverMsgExcludeWhitelist, substituteMsg: {}", substituteMsg);
-        log.info("INSIDE loopOverMsgExcludeWhitelist, whitelistedWord: {}", whitelistWord);
+        log.debug("INSIDE loopOverMsgExcludeWhitelist (single whitelist word), substituteMsg: {}", substituteMsg);
+        log.debug("INSIDE loopOverMsgExcludeWhitelist (single whitelist word), whitelistedWord: {}", whitelistedWord);
 
         for (String word : substituteMsg){
             if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.info("NONWHITELIST WORD: {}", word);
+                log.debug("NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
@@ -117,16 +116,16 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String combinedWord : combinedWordsList){
             if (whitelistedWords.contains(combinedWord)){
-                log.info("getWhiteListedWords: {}", Arrays.toString(combinedWord.split(" ")));
+                log.debug("inside getWhiteListedWords method combined word: {}", Arrays.toString(combinedWord.split(" ")));
 
                 for (String word : combinedWord.split(" ")){
-                    log.info("Whitelisted decombined word: {}", word);
+                    log.debug("Whitelisted decombined word: {}", word);
                     whitelistedWordsList.add(word);
                 }
             }
         }
 
-        log.info("whitelistedWordsList: {}", whitelistedWordsList);
+        log.debug("returning whitelistedWordsList: {}", whitelistedWordsList);
         return whitelistedWordsList;
     }
 
