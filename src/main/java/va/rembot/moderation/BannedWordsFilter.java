@@ -13,20 +13,25 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
 
+    /// TODO ADD AUTO BAN (DO THIS AT THE LAST STAGE OF BANNNED WORDS FILTER RECHECK W MIKU)
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
         var msg = event.getMessage().getContentRaw();
         var msgAsArray = msg.split(" ");
-
         var substitutedMsg = substitute(msgAsArray);
+        var combinedWordsList = getCombinedWords(substitutedMsg);
 
-        //TODO ask miku if this is fine that there will be a bypass
-        // if someone says a bad word AFTER the whitelist (whitelist atm basically tells the filter to stop)
-        // the alternative (better moderation but maybe less performant is to
-        // do another loop excluding the current word we whitelisted
+        // TODO delete message even if combo word white list present
+        //  atm {WHITELISTED_WORD} TEXT {BANNED_WORD} will still go through because whitelist stops the loop
         for (String word : substitutedMsg){
+
+            // check if msg has any combined words that are whitelisted
+            if (hasWhitelistedCombinedWords(combinedWordsList))
+                break;
+
+            // check message for a single whitelisted word
             if (whitelistedWords.stream().anyMatch(s -> s.equals(word)))
                 break;
 
@@ -41,6 +46,49 @@ public class BannedWordsFilter extends ListenerAdapter {
                 break;
             }
         }
+    }
+
+    private boolean hasWhitelistedCombinedWords(List<String> combinedWordsList){
+
+        for (String word : combinedWordsList){
+            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<String> getCombinedWords(List<String> substitutedMsg) {
+
+        List<String> combinedWordsList = new ArrayList<>();
+        String combinedWord;
+        int comboWordIndexStart = 0;
+        int comboWordIndexNext = 1;
+
+        for (int i = 0; i< substitutedMsg.size(); i++){
+            if (substitutedMsg.size() == 1)
+                break;
+
+            log.debug("Combo word ONE: {}", substitutedMsg.get(comboWordIndexStart));
+            log.debug("Combo word TWO: {}", substitutedMsg.get(comboWordIndexNext));
+
+            combinedWord = substitutedMsg.get(comboWordIndexStart) + " " + substitutedMsg.get(comboWordIndexNext);
+            combinedWordsList.add(combinedWord);
+
+            log.debug("Combined word: {}", combinedWord);
+            log.debug("Combo word being build: {}", combinedWordsList);
+
+            comboWordIndexStart += 1;
+            comboWordIndexNext += 1;
+
+            // prevent out of bounds error when going through list:
+            if (comboWordIndexStart >= substitutedMsg.size() || comboWordIndexNext + 1 >= substitutedMsg.size())
+                break;
+        }
+
+        log.debug("The list being returned: {}", combinedWordsList);
+        return combinedWordsList;
     }
 
     /// 1. take an array of strings
