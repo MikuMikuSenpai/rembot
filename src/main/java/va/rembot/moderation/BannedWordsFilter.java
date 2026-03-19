@@ -35,19 +35,19 @@ public class BannedWordsFilter extends ListenerAdapter {
             // if so, exclude the whitelisted words from the original msg
             // and do another loop over this new list checking
             // if there are any banned words present
-            if (hasWhitelistedCombinedWords(combinedWordsList)){
+            if (hasWhitelistedCombinedWords(combinedWordsList)) {
                 loopOverMsgExcludeWhitelist(combinedWordsList, substitutedMsg, event, msg);
                 break;
             }
 
-            // TODO loop another time over this with excluded whitelisted word
-            //  and recheck for banned words comparable to what we do in combined words
-            // check message for a single whitelisted word
-            if (whitelistedWords.stream().anyMatch(s -> s.equals(word)))
+            // check message for a single whitelisted word afterward loop over list
+            // excluding the whitelisted word and check again for banned words
+            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))) {
+                loopOverMsgExcludeWhitelistSingle(word, substitutedMsg, event, msg);
                 break;
+            }
 
             if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
-
                 deleteMsg(event, msg, word);
                 break;
             }
@@ -74,6 +74,23 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String word : substituteMsg){
             if (!whiteListedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+                log.info("NONWHITELIST WORD: {}", word);
+
+                deleteMsg(event, msg, word);
+                break;
+            }
+        }
+    }
+
+    private void loopOverMsgExcludeWhitelistSingle(String whitelistWord, List<String> substituteMsg, MessageReceivedEvent event, String msg){
+
+        var whitelistedWord = whitelistWord;
+
+        log.info("INSIDE loopOverMsgExcludeWhitelist, substituteMsg: {}", substituteMsg);
+        log.info("INSIDE loopOverMsgExcludeWhitelist, whitelistedWord: {}", whitelistWord);
+
+        for (String word : substituteMsg){
+            if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.info("NONWHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
