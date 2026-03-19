@@ -14,6 +14,14 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
 
     /// TODO ADD AUTO BAN (DO THIS AT THE LAST STAGE OF BANNNED WORDS FILTER RECHECK W MIKU)
+    ///
+    /// TODO ADD DOCUMENTATION FOR EACH METHOD (MANY MOVING PARTS WHERE THINGS CAN BREAK)
+    ///
+    /// TODO CHANGE LOGGERS TO DEBUG WHERE NEEDED OR ADD MORE
+    ///
+    /// TODO EXTRACT THE DELETE MESSAGE EVENT CUS ITS REPEATED TWICE
+    ///
+    /// TODO REVIEW DOCUMENT CHANGE SILLY VAR NAMES OR METHOD NAMES WHERE NEEDED BUT WILL BE RECHECKED IN PR SO NOT BIGGEST DEAL ATM
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
@@ -23,19 +31,43 @@ public class BannedWordsFilter extends ListenerAdapter {
         var substitutedMsg = substitute(msgAsArray);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
-        // TODO delete message even if combo word white list present
-        //  atm {WHITELISTED_WORD} TEXT {BANNED_WORD} will still go through because whitelist stops the loop
-        for (String word : substitutedMsg){
+        for (String word : substitutedMsg) {
 
             // check if msg has any combined words that are whitelisted
-            if (hasWhitelistedCombinedWords(combinedWordsList))
-                break;
+            if (hasWhitelistedCombinedWords(combinedWordsList)){
+                loopOverMsgExcludeWhitelist(combinedWordsList, substitutedMsg, event, msg);
+            break;
+            }
 
             // check message for a single whitelisted word
             if (whitelistedWords.stream().anyMatch(s -> s.equals(word)))
                 break;
 
             if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+                log.info("A banned word was spotted in a message: {}", msg);
+                log.info("The banned word was: {}", word);
+                event.getMessage()
+                        .getChannel()
+                        .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
+                        .and(event.getMessage().delete())
+                        .queue();
+                break;
+            }
+        }
+    }
+
+    /// this one was added for combined words support (reminder to ace for later)
+    private void loopOverMsgExcludeWhitelist(List<String> combinedWordsList, List<String> substituteMsg, MessageReceivedEvent event, String msg){
+
+        var whiteListedWords = getWhiteListedWords(combinedWordsList);
+
+        log.info("INSIDE loopOverMsgExcludeWhitelist, substituteMsg: {}", substituteMsg);
+        log.info("INSIDE loopOverMsgExcludeWhitelist, whiteListedWords: {}", whiteListedWords);
+
+        for (String word : substituteMsg){
+            if (!whiteListedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+                log.info("NONWHITELIST WORD: {}", word);
+
                 log.info("A banned word was spotted in a message: {}", msg);
                 log.info("The banned word was: {}", word);
                 event.getMessage()
@@ -59,6 +91,26 @@ public class BannedWordsFilter extends ListenerAdapter {
         return false;
     }
 
+    /// this one was added for combined words support (reminder to ace for later)
+    private List<String> getWhiteListedWords(List<String> combinedWordsList){
+
+        List<String> whitelistedWordsList = new ArrayList<>();
+
+        for (String combinedWord : combinedWordsList){
+            if (whitelistedWords.contains(combinedWord)){
+                log.info("getWhiteListedWords: {}", Arrays.toString(combinedWord.split(" ")));
+
+                for (String word : combinedWord.split(" ")){
+                    log.info("Whitelisted decombined word: {}", word);
+                    whitelistedWordsList.add(word);
+                }
+            }
+        }
+
+        log.info("whitelistedWordsList: {}", whitelistedWordsList);
+        return whitelistedWordsList;
+    }
+
     private List<String> getCombinedWords(List<String> substitutedMsg) {
 
         List<String> combinedWordsList = new ArrayList<>();
@@ -67,6 +119,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         int comboWordIndexNext = 1;
 
         for (int i = 0; i< substitutedMsg.size(); i++){
+
             if (substitutedMsg.size() == 1)
                 break;
 
