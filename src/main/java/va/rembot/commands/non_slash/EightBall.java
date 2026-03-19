@@ -26,11 +26,19 @@ public class EightBall extends ListenerAdapter {
 
         if (msg.startsWith("&8ball")){
 
-            var rnd = new Random();
-            var randomInt = rnd.nextInt(0, eightBallAnswers.toArray().length);
-            var result = eightBallAnswers.get(randomInt);
+            try {
 
-            event.getMessage().reply(result).queue();
+                if (msg.split(" ")[1] != null){
+                    var rnd = new Random();
+                    var randomInt = rnd.nextInt(0, eightBallAnswers.toArray().length);
+                    var result = eightBallAnswers.get(randomInt);
+
+                    event.getMessage().reply(result).queue();
+                }
+
+            } catch (ArrayIndexOutOfBoundsException e){
+                    event.getMessage().reply("You didn't ask a question?").queue();
+            }
         }
     }
 }
