@@ -19,8 +19,6 @@ public class BannedWordsFilter extends ListenerAdapter {
     ///
     /// TODO CHANGE LOGGERS TO DEBUG WHERE NEEDED OR ADD MORE
     ///
-    /// TODO EXTRACT THE DELETE MESSAGE EVENT CUS ITS REPEATED TWICE
-    ///
     /// TODO REVIEW DOCUMENT CHANGE SILLY VAR NAMES OR METHOD NAMES WHERE NEEDED BUT WILL BE RECHECKED IN PR SO NOT BIGGEST DEAL ATM
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -44,16 +42,21 @@ public class BannedWordsFilter extends ListenerAdapter {
                 break;
 
             if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
-                log.info("A banned word was spotted in a message: {}", msg);
-                log.info("The banned word was: {}", word);
-                event.getMessage()
-                        .getChannel()
-                        .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
-                        .and(event.getMessage().delete())
-                        .queue();
+
+                deleteMsg(event, msg, word);
                 break;
             }
         }
+    }
+
+    private void deleteMsg(MessageReceivedEvent event, String msg, String bannedWord){
+        log.info("A banned word was spotted in a message: {}", msg);
+        log.info("The banned word was: {}", bannedWord);
+        event.getMessage()
+                .getChannel()
+                .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
+                .and(event.getMessage().delete())
+                .queue();
     }
 
     /// this one was added for combined words support (reminder to ace for later)
@@ -68,13 +71,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             if (!whiteListedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.info("NONWHITELIST WORD: {}", word);
 
-                log.info("A banned word was spotted in a message: {}", msg);
-                log.info("The banned word was: {}", word);
-                event.getMessage()
-                        .getChannel()
-                        .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
-                        .and(event.getMessage().delete())
-                        .queue();
+                deleteMsg(event, msg, word);
                 break;
             }
         }
