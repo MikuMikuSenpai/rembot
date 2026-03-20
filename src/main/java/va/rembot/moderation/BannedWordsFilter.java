@@ -180,8 +180,18 @@ public class BannedWordsFilter extends ListenerAdapter {
         subsForChars.put('@', 'a');
         subsForChars.put('4', 'a');
         subsForChars.put('3', 'e');
+        subsForChars.put('9', 'g');
         subsForChars.put('1', 'i');
         subsForChars.put('|', 'i');
+        subsForChars.put('!', 'i');
+        subsForChars.put('¡', 'i');
+        subsForChars.put('0', 'o');
+        subsForChars.put('●', 'o');
+        subsForChars.put('○', 'o');
+        subsForChars.put('°', 'o');
+
+        StringBuilder doubleAntiCensorChecker = new StringBuilder();
+        boolean skipNext = false;
 
         for (String word : inputList) {
 
@@ -193,6 +203,15 @@ public class BannedWordsFilter extends ListenerAdapter {
 
             for (int i = 0; i < word.length(); i++) {
 
+                // need this for checking if double characters are a specific letter
+                // such as () becomes the letter o
+                if (skipNext){
+                    skipNext = false;
+                    continue;
+                }
+
+                doubleAntiCensorChecker.setLength(0);
+
                 //print every character
                 log.debug(String.valueOf(chars[i]));
 
@@ -201,6 +220,24 @@ public class BannedWordsFilter extends ListenerAdapter {
                     log.debug("Substitute char spotted: {}", subsForChars.get(chars[i]));
                     newWord += subsForChars.get(chars[i]);
                     continue;// skip this iteration
+                }
+
+                // this is for converting 2 chars into a letter
+                try {
+                    doubleAntiCensorChecker.append(chars[i]);
+                    log.debug("first char: {}", doubleAntiCensorChecker);
+                    doubleAntiCensorChecker.append(chars[i+1]);
+                    log.debug("second char: {}", doubleAntiCensorChecker);
+
+                    // add more if statements for 2 characters that can be converted to a letter
+                    if (doubleAntiCensorChecker.toString().equals("()")){
+                        newWord += "o";
+                        skipNext = true; // skip another iteration because we merged 2 characters into 1
+                        continue;
+                    }
+                    log.debug("is it in map?: {} another one: {}", subsForChars.get(chars[i]), subsForChars.get(chars[i]));
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    log.debug(e.getMessage());
                 }
 
                 newWord += chars[i];
