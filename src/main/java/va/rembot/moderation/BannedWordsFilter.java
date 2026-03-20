@@ -7,19 +7,19 @@ import va.rembot.BotConfig;
 
 import java.util.*;
 
+/// TODO ADD AUTO BAN (DO THIS AT THE LAST STAGE OF BANNNED WORDS FILTER RECHECK W MIKU)
+///
+/// TODO ADD DOCUMENTATION FOR EACH METHOD (MANY MOVING PARTS WHERE THINGS CAN BREAK)
+///
+/// TODO CHANGE LOGGERS TO DEBUG WHERE NEEDED OR ADD MORE
+///
+/// TODO REVIEW DOCUMENT CHANGE SILLY VAR NAMES OR METHOD NAMES WHERE NEEDED BUT WILL BE RECHECKED IN PR SO NOT BIGGEST DEAL ATM
 @Slf4j
 public class BannedWordsFilter extends ListenerAdapter {
 
     private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
-
-    /// TODO ADD AUTO BAN (DO THIS AT THE LAST STAGE OF BANNNED WORDS FILTER RECHECK W MIKU)
-    ///
-    /// TODO ADD DOCUMENTATION FOR EACH METHOD (MANY MOVING PARTS WHERE THINGS CAN BREAK)
-    ///
-    /// TODO CHANGE LOGGERS TO DEBUG WHERE NEEDED OR ADD MORE
-    ///
-    /// TODO REVIEW DOCUMENT CHANGE SILLY VAR NAMES OR METHOD NAMES WHERE NEEDED BUT WILL BE RECHECKED IN PR SO NOT BIGGEST DEAL ATM
+    
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
