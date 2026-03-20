@@ -64,16 +64,17 @@ public class BannedWordsFilter extends ListenerAdapter {
                 .queue();
     }
 
-    // For looping over a msg with a combined whitelist word
+    /// Loops over substituted message, for each word looks for any non-whitelisted combined word (2 words)
+    /// AND if it is a banned word, if yes it calls the delete method
     private void loopOverMsgExcludeWhitelist(List<String> combinedWordsList, List<String> substituteMsg, MessageReceivedEvent event, String msg){
 
-        var whiteListedWords = getWhiteListedWords(combinedWordsList);
+        var whitelistedWords = getWhitelistedWords(combinedWordsList);
 
         log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), substituteMsg: {}", substituteMsg);
-        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), whiteListedWords: {}", whiteListedWords);
+        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), whiteListedWords: {}", whitelistedWords);
 
         for (String word : substituteMsg){
-            if (!whiteListedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+            if (!whitelistedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.debug("NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
@@ -82,7 +83,8 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
-    // For looping over a msg if only 1 whitelist word present
+    /// Loops over substituted message, for each word looks for any non-whitelisted word
+    /// AND if it is a banned word, if yes it calls the delete method
     private void loopOverMsgExcludeWhitelist(String whitelistedWord, List<String> substituteMsg, MessageReceivedEvent event, String msg){
 
         log.debug("INSIDE loopOverMsgExcludeWhitelist (single whitelist word), substituteMsg: {}", substituteMsg);
@@ -98,6 +100,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
+    /// returns true if input list has a whitelisted combined word
     private boolean hasWhitelistedCombinedWords(List<String> combinedWordsList){
 
         for (String word : combinedWordsList){
@@ -109,8 +112,8 @@ public class BannedWordsFilter extends ListenerAdapter {
         return false;
     }
 
-    /// this one was added for combined words support (reminder to ace for later)
-    private List<String> getWhiteListedWords(List<String> combinedWordsList){
+    /// returns a list of strings of whitelisted combined words split up (e.g. ["Good Word"] becomes ["Good", "Word"]
+    private List<String> getWhitelistedWords(List<String> combinedWordsList){
 
         List<String> whitelistedWordsList = new ArrayList<>();
 
@@ -138,6 +141,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (int i = 0; i< substitutedMsg.size(); i++){
 
+            // combined word cant be one word
             if (substitutedMsg.size() == 1)
                 break;
 
