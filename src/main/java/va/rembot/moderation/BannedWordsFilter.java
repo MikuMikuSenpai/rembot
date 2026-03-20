@@ -179,6 +179,8 @@ public class BannedWordsFilter extends ListenerAdapter {
         //TODO should add support for when a substitute can be used for two or more chars (letters)
         // a scuffed solution could be to have a boolean that detects that and creates multiple words
         // puts them in the new substituted list and just hands them over to the delete msg bs above (draft idea)
+
+        //keep these alphabetically sorted (on values [letters]) for ease
         Map<Character, Character> subsForChars = new HashMap<>();
         subsForChars.put('@', 'a');
         subsForChars.put('4', 'a');
