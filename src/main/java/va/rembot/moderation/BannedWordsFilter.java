@@ -7,19 +7,12 @@ import va.rembot.BotConfig;
 
 import java.util.*;
 
-/// TODO ADD AUTO BAN (DO THIS AT THE LAST STAGE OF BANNNED WORDS FILTER RECHECK W MIKU)
-///
-/// TODO ADD DOCUMENTATION FOR EACH METHOD (MANY MOVING PARTS WHERE THINGS CAN BREAK)
-///
-/// TODO CHANGE LOGGERS TO DEBUG WHERE NEEDED OR ADD MORE
-///
-/// TODO REVIEW DOCUMENT CHANGE SILLY VAR NAMES OR METHOD NAMES WHERE NEEDED BUT WILL BE RECHECKED IN PR SO NOT BIGGEST DEAL ATM
 @Slf4j
 public class BannedWordsFilter extends ListenerAdapter {
 
     private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
-    
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
@@ -28,6 +21,9 @@ public class BannedWordsFilter extends ListenerAdapter {
         var msgAsArray = msg.split(" ");
         var substitutedMsg = substitute(msgAsArray);
         var combinedWordsList = getCombinedWords(substitutedMsg);
+
+        log.debug("Substituted msg: {}", substitutedMsg);
+        log.debug("checking for combined words list value: {}", combinedWordsList);
 
         for (String word : substitutedMsg) {
 
@@ -173,45 +169,41 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// 5. put rebuild words in a new array and return it
     private List<String> substitute(String[] inputList){
 
+        //TODO I think there is a bug where it makes a duplicate of first word ( im prob tripping)
+
         String newWord;
-        List<String> newArray = new ArrayList<>();
+        List<String> newList = new ArrayList<>();
 
-        //TODO should add support for when a substitute can be used for two or more chars (letters)
-        // a scuffed solution could be to have a boolean that detects that and creates multiple words
-        // puts them in the new substituted list and just hands them over to the delete msg bs above (draft idea)
+        // keep these alphabetically sorted (on keys [letters]) for ease
+        Map<Character, List<Character>> subsForChars = new HashMap<>();
+        subsForChars.put('a', List.of('@', '4', '^'));
+        subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
-        //keep these alphabetically sorted (on values [letters]) for ease
-        Map<Character, Character> subsForChars = new HashMap<>();
-        subsForChars.put('@', 'a');
-        subsForChars.put('4', 'a');
-        subsForChars.put('3', 'e');
-        subsForChars.put('9', 'g');
-        subsForChars.put('1', 'i');
-        subsForChars.put('|', 'i');
-        subsForChars.put('!', 'i');
-        subsForChars.put('¡', 'i');
-        subsForChars.put('0', 'o');
-        subsForChars.put('●', 'o');
-        subsForChars.put('○', 'o');
-        subsForChars.put('°', 'o');
-
+        // per index can be multiple subs
+        Map<Integer, Set<Character>> indexForSubs = new HashMap<>();
+        // prevent duplicates
+        Set<Character> potentialSubs = new HashSet<>();
+        int indexForSub = 0;
+        boolean isSub = false;
         StringBuilder doubleAntiCensorChecker = new StringBuilder();
-        boolean skipNext = false;
+        boolean skip = false;
 
         for (String word : inputList) {
 
             char[] chars = word.toCharArray();
             newWord = "";
+            indexForSubs.clear();
+            potentialSubs.clear();
 
-            //print out every word:
-            log.debug(Arrays.toString(chars));
+            log.debug("[substitute method] characters: {}", Arrays.toString(chars));
+            log.debug("[substitute method] word: {}", word);
 
             for (int i = 0; i < word.length(); i++) {
 
                 // need this for checking if double characters are a specific letter
                 // such as () becomes the letter o
-                if (skipNext){
-                    skipNext = false;
+                if (skip){
+                    skip = false;
                     continue;
                 }
 
@@ -221,26 +213,47 @@ public class BannedWordsFilter extends ListenerAdapter {
                 log.debug(String.valueOf(chars[i]));
 
                 // if char is a suspected substitute:
-                if (subsForChars.containsKey(chars[i])){
-                    log.debug("Substitute char spotted: {}", subsForChars.get(chars[i]));
-                    newWord += subsForChars.get(chars[i]);
-                    continue;// skip this iteration
+                log.debug("KEYS of subsForChars: {}", subsForChars.keySet());
+
+                // example a, b, c, ... (letters)
+                for (var key : subsForChars.keySet()){
+                    log.debug("Each key (subsForChars): {}", key);
+
+                    // example @, 4, ... (substitute chars/replacements)
+                    for (var value : subsForChars.get(key)){
+                        log.debug("Each value (subsForChars): {} for key: {}", value, key);
+
+                        if (value.equals(chars[i])){
+                            log.debug("Substitute char found: {} in word: {}", value, word);
+                            potentialSubs.add(key);
+                            indexForSub = i;
+                            isSub = true;
+                        }
+                    }
                 }
+
+                if (isSub)
+                    indexForSubs.put(indexForSub, potentialSubs);
+                log.debug("indexForSubs BUILDING IT: {}", indexForSubs);
+                log.debug("potentialSubs: {}", potentialSubs);
+                log.debug("Current index: {}", i);
+
 
                 // this is for converting 2 chars into a letter
                 try {
+
                     doubleAntiCensorChecker.append(chars[i]);
-                    log.debug("first char: {}", doubleAntiCensorChecker);
-                    doubleAntiCensorChecker.append(chars[i+1]);
-                    log.debug("second char: {}", doubleAntiCensorChecker);
+                    doubleAntiCensorChecker.append(chars[i + 1]);
+
+                    log.debug("First char (checking combined word): {}", doubleAntiCensorChecker);
+                    log.debug("Second char (checking combined word): {}", doubleAntiCensorChecker);
 
                     // add more if statements for 2 characters that can be converted to a letter
                     if (doubleAntiCensorChecker.toString().equals("()")){
                         newWord += "o";
-                        skipNext = true; // skip another iteration because we merged 2 characters into 1
+                        skip = true; // skip another iteration because we merged 2 characters into 1
                         continue;
                     }
-                    log.debug("is it in map?: {} another one: {}", subsForChars.get(chars[i]), subsForChars.get(chars[i]));
                 } catch (ArrayIndexOutOfBoundsException e) {
                     log.debug(e.getMessage());
                 }
@@ -248,11 +261,53 @@ public class BannedWordsFilter extends ListenerAdapter {
                 newWord += chars[i];
                 log.debug("Current new word (building it): {}", newWord);
             }
-            log.debug("New word: {}", newWord);
-            newArray.add(newWord);
+
+            isSub = false;
+
+            StringBuilder stringBuilder = new StringBuilder(newWord);
+            replaceSubWithChar(stringBuilder, 0, indexForSubs, newList);
+
+            log.debug("newList: {}", newList);
+            log.debug("FINAL newWord: {}", newWord);
+
+            newList.add(newWord);
         }
 
-        log.debug("New array: {}", newArray);
-        return newArray;
+        log.debug("Returning this newList: {}", newList);
+        return newList;
+    }
+
+    /// This method is essential part of substitute and does the main work it uses backtracking to make each variant
+    /// 1. check if index is string's length = we checked every character
+    /// 2. Check if current index (starts with 0) has any substitute characters by using the possibleSubs map
+    /// 2.1. If there is a substitute character use the stored set and loop over each one and replace them
+    ///   (this is done recursively by calling the same method again added a higher index of 1)
+    /// 2.2. If there is no substitute char at this index just go to next index
+    /// 3. When done back at the first if put in newList
+    public static void replaceSubWithChar(StringBuilder stringBuilder, int index, Map<Integer, Set<Character>> possibleSubs, List<String> newList){
+
+        if (index == stringBuilder.length()){
+            newList.add(String.valueOf(stringBuilder));
+            log.debug("New array replacing subs with normal chars: {}", newList);
+            log.debug("stringBuilder value at end: {}", stringBuilder);
+            return;
+        }
+
+        if (possibleSubs.containsKey(index)){
+
+            char originalChar = stringBuilder.charAt(index);
+            log.debug("originalChar: {}", originalChar);
+
+            for (Character sub : possibleSubs.get(index)){
+                stringBuilder.setCharAt(index, sub);
+                log.debug("sub: {}", sub);
+
+                replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
+            }
+
+            stringBuilder.setCharAt(index, originalChar);
+        } else {
+            replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
+        }
     }
 }
