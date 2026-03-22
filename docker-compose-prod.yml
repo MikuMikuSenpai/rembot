@@ -1,0 +1,6 @@
+services:
+  rembot:
+    image: ghcr.io/mikumikusenpai/rembot
+    container_name: rembot
+    env_file:
+      - .env
