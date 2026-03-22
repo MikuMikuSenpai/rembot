@@ -11,17 +11,17 @@ public class EmojiHelper {
     /// Converts all emojis (that are registered in emojiSubsMap()) to their corresponding character.
     public static String emojiToChar(String msg) {
 
-        String normalMsg = msg;
+        String msgExcludingEmojis = msg;
         final Map<String, Character> emojiForChar = emojiSubsMap();
 
         for (Map.Entry<String, Character> entry : emojiForChar.entrySet()) {
 
-            normalMsg = normalMsg.replace(entry.getKey(), String.valueOf(entry.getValue()));
+            msgExcludingEmojis = msgExcludingEmojis.replace(entry.getKey(), String.valueOf(entry.getValue()));
+
         }
 
-        log.debug("[emojiTurnedToChar] returning this new message: {}", normalMsg);
-
-        return normalMsg;
+        log.debug("[emojiToChar] returning this new message: {}", msgExcludingEmojis);
+        return msgExcludingEmojis;
     }
 
     private static Map<String, Character> emojiSubsMap() {
