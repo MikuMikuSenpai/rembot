@@ -18,12 +18,24 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         var msg = event.getMessage().getContentRaw();
+        var msgEmojisConvertedToChars = EmojiHelper.emojiTurnedToChar(msg);
+        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll("\s", "");
         var msgAsArray = msg.split(" ");
-        var substitutedMsg = substitute(msgAsArray);
+        var msgAsArrayAsList = Arrays.stream(msgAsArray).toList();
+        var msgTotal = msgAsArrayAsList + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed;
+        var msgTotalArray = msgTotal.split(" ");
+        var substitutedMsg = substitute(msgTotalArray);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
-        log.debug("Substituted msg: {}", substitutedMsg);
-        log.debug("checking for combined words list value: {}", combinedWordsList);
+        log.debug("[onMessageReceived] msg: {}", msg);
+        log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
+        log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
+        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
+        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
+        log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
+        log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
+        log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
+        log.debug("[onMessageReceived] combinedWordsList: {}", combinedWordsList);
 
         for (String word : substitutedMsg) {
 
