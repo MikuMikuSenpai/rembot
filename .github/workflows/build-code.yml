@@ -1,6 +1,6 @@
 # https://docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle
 # This is to catch any errors before merging (if code doesn't build)
-name: Build code on PR
+name: Build code on PR into main
 on:
   pull_request:
     branches:
@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v5
+      - name: Setup JDK
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -22,4 +24,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build with Gradle
-        run: ./gradlew shadowJar #./gradlew -b ci.gradle package
+        run: ./gradlew shadowJar
