@@ -53,8 +53,8 @@ This will be removed when all done, here for organization.
 - [ ] Moderation:
   - [ ] Banned words filter
   - [ ] Anti-spam filter
-- [ ] Docker
+- [x] Docker
   - [x] Dockerfile
     - [x] Being automatically build by GH Actions?
   - [x] docker-compose (for development)
-  - [ ] docker-compose (for production)
+  - [x] docker-compose (for production)
