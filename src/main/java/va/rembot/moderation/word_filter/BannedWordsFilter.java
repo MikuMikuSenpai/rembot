@@ -1,4 +1,4 @@
-package va.rembot.moderation;
+package va.rembot.moderation.word_filter;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -18,7 +18,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         var msg = event.getMessage().getContentRaw();
-        var msgEmojisConvertedToChars = EmojiHelper.emojiTurnedToChar(msg);
+        var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll("\s", "");
         var msgAsArray = msg.split(" ");
         var msgAsArrayAsList = Arrays.stream(msgAsArray).toList();

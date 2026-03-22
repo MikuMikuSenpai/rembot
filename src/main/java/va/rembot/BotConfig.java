@@ -12,7 +12,7 @@ import va.rembot.commands.slash.admin.Ban;
 import va.rembot.commands.slash.admin.Kick;
 import va.rembot.commands.slash.admin.Mute;
 import va.rembot.commands.slash.admin.Unban;
-import va.rembot.moderation.BannedWordsFilter;
+import va.rembot.moderation.word_filter.BannedWordsFilter;
 
 /// All global variables should be here
 /// Configuration related to EventListeners and adding slash commands should be set in "onReady" method
