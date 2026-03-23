@@ -78,12 +78,6 @@ public class BannedWordsFilter extends ListenerAdapter {
             }
         }
 
-        if (!hasSubInMsg)
-            return;
-
-        var substitutedMsg = substitute(msgTotalArrayTrimmed);
-        var combinedWordsList = getCombinedWords(substitutedMsg);
-
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
         log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
@@ -93,6 +87,26 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
+        log.debug("[onMessageReceived] listBannedWords: {}", listBannedWords);
+
+        //check if there are banned words obfuscated by whitespaces
+        for (var word : msgTotalArrayTrimmed) {
+
+            log.debug("[onMessageReceived] word: {}", word);
+
+            if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+                deleteMsg(event, msg, word);
+                log.debug("[onMessageReceived] Word is banned! {}", word);
+                break;
+            }
+        }
+
+        if (!hasSubInMsg)
+            return;
+
+        var substitutedMsg = substitute(msgTotalArrayTrimmed);
+        var combinedWordsList = getCombinedWords(substitutedMsg);
+
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
         log.debug("[onMessageReceived] combinedWordsList: {}", combinedWordsList);
 

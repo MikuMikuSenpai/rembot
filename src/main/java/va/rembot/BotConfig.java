@@ -15,6 +15,10 @@ import va.rembot.commands.slash.admin.Mute;
 import va.rembot.commands.slash.admin.Unban;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /// All global variables should be here
 /// Configuration related to EventListeners and adding slash commands should be set in "onReady" method
 /// The "onReady" method ensures rembot is fully loaded/started
@@ -28,7 +32,8 @@ public class BotConfig extends ListenerAdapter {
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
     public static final String DARWIN_CHANNEL_ID = System.getenv("DARWIN_CHANNEL_ID");
     public static final String BANNED_WORDS = System.getenv("BANNED_WORDS");
-    public static final String[] BANNED_WORDS_LIST = BANNED_WORDS.split(",");
+    public static String[] BANNED_WORDS_LIST_TEMP = BANNED_WORDS.split(",");
+    public static String[] BANNED_WORDS_LIST = getBannedWordsArray();
     public static final String WHITELISTED_WORDS = System.getenv("WHITELISTED_WORDS");
     public static final String[] WHITELISTED_WORDS_LIST = WHITELISTED_WORDS.split(",");
 
@@ -78,5 +83,56 @@ public class BotConfig extends ListenerAdapter {
             bot.shutdown();
 
         }
+
+    }
+
+    /// returns a string with replicas of the banned words including plural form this eases the bot hosting for the hoster
+    /// normally they would have to manually type "badword,badwordbadword" etc. for the edge cases where users
+    /// send bad words next to each other to avoid censor but this is automated now, including plural form (+s)
+    /// other plural forms (i.e +es) need to be added by the host in their .env (this can be added later but not urgent)
+    private static String[] getBannedWordsArray() {
+
+        List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterwards all the items are added to real list
+        StringBuilder newWord = new StringBuilder();
+        List<String> bannedWordsList = new ArrayList<>(Arrays.asList(BANNED_WORDS_LIST_TEMP));
+        var amountOfReplicas = 10;
+
+        log.debug("[onReady] Current new bannedWordsList: {}", bannedWordsList);
+
+        for (var word : bannedWordsList) {
+            newWord.setLength(0);
+
+            //amount of time to replicate word which means: word wordword wordwordword wordwordwordword
+            for (int i = 0; i < amountOfReplicas; i++) {
+
+                newWord.append(word);
+                bannedWordsListTemp.add(newWord.toString());
+
+                log.debug("[onReady] Building word: {}", newWord);
+                log.debug("[onReady] Building list: {}", bannedWordsListTemp);
+
+            }
+
+            //plural form
+            for (int i = 0; i < amountOfReplicas; i++) {
+
+                newWord.append("s"); //create plural variant by just adding a 's' (ofc, there might be some words where this doesnt make sense this is the responsibility of the bot owner to adjust their .env)
+                bannedWordsListTemp.add(newWord.toString());
+                log.debug("[onReady] Building word plural: {}", newWord);
+                log.debug("[onReady] Building list plural: {}", bannedWordsListTemp);
+
+            }
+        }
+
+        bannedWordsList.addAll(bannedWordsListTemp);
+
+        log.debug("[onReady] Final built list: {}", bannedWordsListTemp);
+        log.debug("[onReady] Final list with banned words + original from .env: {}", bannedWordsList);
+
+        String[] bannedWordsArray = bannedWordsList.toArray(new String[0]);
+
+        log.debug("[onReady] Final bannedWordsArray: {}", (Object) bannedWordsArray);
+
+        return bannedWordsArray;
     }
 }
