@@ -12,6 +12,8 @@ public class BannedWordsFilter extends ListenerAdapter {
 
     private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
+    private static final Map<Character, List<Character>> subsPerChar = getSubsForChars();
+    private static Set<Character> substituteChars = new HashSet<>();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -43,7 +45,41 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (checkMsgBeforeSubstituting(msgTotalArray, event, msg))
             return;
 
-        //TODO add check if statement: if no sub char in msg dont do substitute (performance improvement)
+        //the below two for loops are used to check if there are any substitute chars in current msg
+        // if NOT skip checking for banned words since we did that above
+        // letters: a, b, c,...
+        for (var key : subsPerChar.keySet()) {
+
+            log.debug("[onMessageReceived] letter: {}", key.toString());
+
+            // substitute chars: @, 4, !, ...
+            for (var value : subsPerChar.get(key)) {
+
+                log.debug("[onMessageReceived] substitute char: {}", value.toString());
+                substituteChars.add(value);
+
+            }
+        }
+
+        var hasSubInMsg = false;
+        for (var word : msgTotalArray) {
+
+            var charArray = word.toCharArray();
+
+            //same as foreach char of word
+            for (var character : charArray){
+
+                log.debug("[onMessageReceived] character {}", character);
+
+                if (substituteChars.contains(character)) {
+                    log.debug("[onMessageReceived] Substitute char detected");
+                    hasSubInMsg = true;
+                }
+            }
+        }
+
+        if (!hasSubInMsg)
+            return;
 
         var substitutedMsg = substitute(msgTotalArrayTrimmed);
         var combinedWordsList = getCombinedWords(substitutedMsg);
@@ -282,9 +318,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         List<String> newList = new ArrayList<>();
 
         // keep these alphabetically sorted (on keys [letters]) for ease
-        Map<Character, List<Character>> subsForChars = new HashMap<>();
-        subsForChars.put('a', List.of('@', '4', '^'));
-        subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
+        Map<Character, List<Character>> subsForChars = subsPerChar;
 
         // per index can be multiple subs
         Map<Integer, Set<Character>> indexForSubs = new HashMap<>();
@@ -419,5 +453,14 @@ public class BannedWordsFilter extends ListenerAdapter {
         } else {
             replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
         }
+    }
+
+    /// returns current subs supported per character
+    private static Map<Character, List<Character>> getSubsForChars() {
+        Map<Character, List<Character>> newMap = new HashMap<>();
+        newMap.put('a', List.of('@', '4', '^'));
+        newMap.put('o', List.of('0', '●', '○', '°', '@'));
+
+        return newMap;
     }
 }
