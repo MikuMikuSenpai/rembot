@@ -38,6 +38,13 @@ public class BannedWordsFilter extends ListenerAdapter {
         var msgTotal = msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed;
         var msgTotalArray = msgTotal.split(" ");
         var msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
+
+        // skip the heavy (slow) substitute method if possible
+        if (checkMsgBeforeSubstituting(msgTotalArray, event, msg))
+            return;
+
+        //TODO add check if statement: if no sub char in msg dont do substitute (performance improvement)
+
         var substitutedMsg = substitute(msgTotalArrayTrimmed);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
@@ -78,6 +85,38 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
+    /// returns true if there is a banned word spotted in msg without substituting
+    /// this results in significantly faster deleting of the message
+    private boolean checkMsgBeforeSubstituting(String[] msgTotal, MessageReceivedEvent event, String originalMsgRaw) {
+
+        var combinedWords = getCombinedWords(Arrays.stream(msgTotal).toList());
+        var msgTotalList = Arrays.stream(msgTotal).toList();
+
+        log.debug("[checkMsgBeforeSubstituting] msgTotal {}", (Object) msgTotal);
+        log.debug("[checkMsgBeforeSubstituting] combinedWords {}", combinedWords);
+        log.debug("[checkMsgBeforeSubstituting] msgTotalList {}", msgTotalList);
+
+        // this is copied from above (inside onMessageReceived method), for more info read above
+        for (var word : msgTotalList){
+
+            if (hasWhitelistedCombinedWords(combinedWords)) {
+                return loopOverMsgExcludeWhitelistBoolean(combinedWords, msgTotalList, event, originalMsgRaw);
+            }
+
+            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))) {
+                return loopOverMsgExcludeWhitelistBoolean(word, msgTotalList, event, originalMsgRaw);
+            }
+
+            if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+                deleteMsg(event, originalMsgRaw, word);
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
     private void deleteMsg(MessageReceivedEvent event, String msg, String bannedWord){
         log.info("[deleteMsg] A banned word was spotted in a message: {}", msg);
         log.info("[deleteMsg] The banned word was: {}", bannedWord);
@@ -86,6 +125,48 @@ public class BannedWordsFilter extends ListenerAdapter {
                 .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
                 .and(event.getMessage().delete())
                 .queue();
+    }
+
+    /// This variant is made for checkMsgBeforeSubstituting method
+    /// Loops over msgTotal, for each word looks for any non-whitelisted combined word (2 words)
+    /// AND if it is a banned word, if yes it calls the delete method AND returns true (so that substitute method is skipped)
+    private boolean loopOverMsgExcludeWhitelistBoolean(List<String> combinedWordsList, List<String> msgTotalList, MessageReceivedEvent event, String msg){
+
+        var whitelistedWords = getWhitelistedWords(combinedWordsList);
+
+        log.debug("[loopOverMsgExcludeWhitelistBoolean] (combined whitelist word) msgTotalList: {}", msgTotalList);
+        log.debug("[loopOverMsgExcludeWhitelistBoolean] (combined whitelist word) whiteListedWords: {}", whitelistedWords);
+
+        for (String word : msgTotalList){
+            if (!whitelistedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
+
+                deleteMsg(event, msg, word);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// This variant is made for checkMsgBeforeSubstituting method
+    /// Loops over msgTotal, for each word looks for any non-whitelisted word
+    /// AND if it is a banned word, if yes it calls the delete method AND returns true (so that substitute method is skipped)
+    private boolean loopOverMsgExcludeWhitelistBoolean(String whitelistedWord, List<String> msgTotalList, MessageReceivedEvent event, String msg){
+
+        log.debug("[loopOverMsgExcludeWhitelistBoolean] (single whitelist word) msgTotalList: {}", msgTotalList);
+        log.debug("[loopOverMsgExcludeWhitelistBoolean] (single whitelist word) whitelistedWord: {}", whitelistedWord);
+
+        for (String word : msgTotalList){
+            if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
+
+                deleteMsg(event, msg, word);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// Loops over substituted message, for each word looks for any non-whitelisted combined word (2 words)
