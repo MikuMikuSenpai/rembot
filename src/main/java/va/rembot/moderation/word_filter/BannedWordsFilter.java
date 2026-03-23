@@ -13,7 +13,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
     private static final Map<Character, List<Character>> subsPerChar = getSubsForChars();
-    private static Set<Character> substituteChars = new HashSet<>();
+    private static final Set<Character> substituteChars = new HashSet<>();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
