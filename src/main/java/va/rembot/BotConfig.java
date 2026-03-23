@@ -21,6 +21,7 @@ import va.rembot.moderation.word_filter.BannedWordsFilter;
 public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
+    public static final long MOD_ROLE_ID = Long.parseLong(System.getenv("MOD_ROLE_ID"));
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
     public static final String DARWIN_CHANNEL_ID = System.getenv("DARWIN_CHANNEL_ID");
     public static final String BANNED_WORDS = System.getenv("BANNED_WORDS");

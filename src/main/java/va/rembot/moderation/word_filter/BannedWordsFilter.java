@@ -17,6 +17,14 @@ public class BannedWordsFilter extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
+        var member = event.getMember();
+        var modRole = event.getJDA().getRoleById(BotConfig.MOD_ROLE_ID);
+
+        if (member.getUnsortedRoles().contains(modRole)) {
+            log.debug("[onMessageReceived] This user is mod, banned filter not applied.");
+            return;
+        }
+
         var msg = event.getMessage().getContentRaw();
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", ""); // its not possible to handle all cases as the input will be highly variable (e.g. a edge case now would be that "w ord w ord" is turned into "wordword") i will implement a method in botconfig that multiplies words for an x amount (x=not yet decided)
