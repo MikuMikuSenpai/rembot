@@ -19,21 +19,29 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         var msg = event.getMessage().getContentRaw();
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
-        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll("\s", "");
+        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", ""); // its not possible to handle all cases as the input will be highly variable (e.g. a edge case now would be that "w ord w ord" is turned into "wordword") i will implement a method in botconfig that multiplies words for an x amount (x=not yet decided)
         var msgAsArray = msg.split(" ");
-        var msgAsArrayAsList = Arrays.stream(msgAsArray).toList();
-        var msgTotal = msgAsArrayAsList + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed;
+        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
+        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).toList();
+
+        StringBuilder msgAsArrayAsListString = new StringBuilder();
+        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
+
+        var msgTotal = msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed;
         var msgTotalArray = msgTotal.split(" ");
-        var substitutedMsg = substitute(msgTotalArray);
+        var msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
+        var substitutedMsg = substitute(msgTotalArrayTrimmed);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
         log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
         log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
+        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
         log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
+        log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
         log.debug("[onMessageReceived] combinedWordsList: {}", combinedWordsList);
 
@@ -181,8 +189,6 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// 5. put rebuild words in a new array and return it
     private List<String> substitute(String[] inputList){
 
-        //TODO I think there is a bug where it makes a duplicate of first word ( im prob tripping)
-
         String newWord;
         List<String> newList = new ArrayList<>();
 
@@ -296,6 +302,10 @@ public class BannedWordsFilter extends ListenerAdapter {
     ///   (this is done recursively by calling the same method again added a higher index of 1)
     /// 2.2. If there is no substitute char at this index just go to next index
     /// 3. When done back at the first if put in newList
+    /// /!\ if a message is huge AND it contains potential substitute chars this will throw a java.lang.OutOfMemoryError
+    /// I m not sure how to handle this atm, basically the message will just be sent to disc and not handled properly
+    /// this is also pretty slow for big messages but it works so I'll keep it,
+    /// need to find some way to make this more performant in the future
     public static void replaceSubWithChar(StringBuilder stringBuilder, int index, Map<Integer, Set<Character>> possibleSubs, List<String> newList){
 
         if (index == stringBuilder.length()){
