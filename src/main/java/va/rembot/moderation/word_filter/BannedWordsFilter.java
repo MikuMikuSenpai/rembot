@@ -71,8 +71,8 @@ public class BannedWordsFilter extends ListenerAdapter {
     }
 
     private void deleteMsg(MessageReceivedEvent event, String msg, String bannedWord){
-        log.info("A banned word was spotted in a message: {}", msg);
-        log.info("The banned word was: {}", bannedWord);
+        log.info("[deleteMsg] A banned word was spotted in a message: {}", msg);
+        log.info("[deleteMsg] The banned word was: {}", bannedWord);
         event.getMessage()
                 .getChannel()
                 .sendMessage("You said a banned word." + event.getAuthor().getAsMention())
@@ -86,12 +86,12 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         var whitelistedWords = getWhitelistedWords(combinedWordsList);
 
-        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), substituteMsg: {}", substituteMsg);
-        log.debug("INSIDE loopOverMsgExcludeWhitelist (combined whitelist word), whiteListedWords: {}", whitelistedWords);
+        log.debug("[loopOverMsgExcludeWhitelist] (combined whitelist word) substituteMsg: {}", substituteMsg);
+        log.debug("[loopOverMsgExcludeWhitelist] (combined whitelist word) whiteListedWords: {}", whitelistedWords);
 
         for (String word : substituteMsg){
             if (!whitelistedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
@@ -103,12 +103,12 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// AND if it is a banned word, if yes it calls the delete method
     private void loopOverMsgExcludeWhitelist(String whitelistedWord, List<String> substituteMsg, MessageReceivedEvent event, String msg){
 
-        log.debug("INSIDE loopOverMsgExcludeWhitelist (single whitelist word), substituteMsg: {}", substituteMsg);
-        log.debug("INSIDE loopOverMsgExcludeWhitelist (single whitelist word), whitelistedWord: {}", whitelistedWord);
+        log.debug("[loopOverMsgExcludeWhitelist] (single whitelist word) substituteMsg: {}", substituteMsg);
+        log.debug("[loopOverMsgExcludeWhitelist] (single whitelist word) whitelistedWord: {}", whitelistedWord);
 
         for (String word : substituteMsg){
             if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
@@ -135,16 +135,16 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String combinedWord : combinedWordsList){
             if (whitelistedWords.contains(combinedWord)){
-                log.debug("inside getWhiteListedWords method combined word: {}", Arrays.toString(combinedWord.split(" ")));
+                log.debug("[getWhitelistedWords] combined word: {}", Arrays.toString(combinedWord.split(" ")));
 
                 for (String word : combinedWord.split(" ")){
-                    log.debug("Whitelisted decombined word: {}", word);
+                    log.debug("[getWhitelistedWords] Whitelisted decombined word: {}", word);
                     whitelistedWordsList.add(word);
                 }
             }
         }
 
-        log.debug("returning whitelistedWordsList: {}", whitelistedWordsList);
+        log.debug("[getWhitelistedWords] returning whitelistedWordsList: {}", whitelistedWordsList);
         return whitelistedWordsList;
     }
 
@@ -161,14 +161,14 @@ public class BannedWordsFilter extends ListenerAdapter {
             if (substitutedMsg.size() == 1)
                 break;
 
-            log.debug("Combo word ONE: {}", substitutedMsg.get(comboWordIndexStart));
-            log.debug("Combo word TWO: {}", substitutedMsg.get(comboWordIndexNext));
+            log.debug("[getCombinedWords] Combo word ONE: {}", substitutedMsg.get(comboWordIndexStart));
+            log.debug("[getCombinedWords] Combo word TWO: {}", substitutedMsg.get(comboWordIndexNext));
 
             combinedWord = substitutedMsg.get(comboWordIndexStart) + " " + substitutedMsg.get(comboWordIndexNext);
             combinedWordsList.add(combinedWord);
 
-            log.debug("Combined word: {}", combinedWord);
-            log.debug("Combo word being build: {}", combinedWordsList);
+            log.debug("[getCombinedWords] Combined word: {}", combinedWord);
+            log.debug("[getCombinedWords] Combo word being build: {}", combinedWordsList);
 
             comboWordIndexStart += 1;
             comboWordIndexNext += 1;
@@ -178,7 +178,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                 break;
         }
 
-        log.debug("The list being returned: {}", combinedWordsList);
+        log.debug("[getCombinedWords] The list being returned: {}", combinedWordsList);
         return combinedWordsList;
     }
 
@@ -227,22 +227,21 @@ public class BannedWordsFilter extends ListenerAdapter {
 
                 doubleAntiCensorChecker.setLength(0);
 
-                //print every character
-                log.debug(String.valueOf(chars[i]));
+                log.debug("[substitute] Every character {}", chars[i]);
 
                 // if char is a suspected substitute:
-                log.debug("KEYS of subsForChars: {}", subsForChars.keySet());
+                log.debug("[substitute] KEYS of subsForChars: {}", subsForChars.keySet());
 
                 // example a, b, c, ... (letters)
                 for (var key : subsForChars.keySet()){
-                    log.debug("Each key (subsForChars): {}", key);
+                    log.debug("[substitute] Each key (subsForChars): {}", key);
 
                     // example @, 4, ... (substitute chars/replacements)
                     for (var value : subsForChars.get(key)){
-                        log.debug("Each value (subsForChars): {} for key: {}", value, key);
+                        log.debug("[substitute] Each value (subsForChars): {} for key: {}", value, key);
 
                         if (value.equals(chars[i])){
-                            log.debug("Substitute char found: {} in word: {}", value, word);
+                            log.debug("[substitute] char found: {} in word: {}", value, word);
                             potentialSubs.add(key);
                             indexForSub = i;
                             isSub = true;
@@ -252,9 +251,9 @@ public class BannedWordsFilter extends ListenerAdapter {
 
                 if (isSub)
                     indexForSubs.put(indexForSub, potentialSubs);
-                log.debug("indexForSubs BUILDING IT: {}", indexForSubs);
-                log.debug("potentialSubs: {}", potentialSubs);
-                log.debug("Current index: {}", i);
+                log.debug("[substitute] indexForSubs BUILDING IT: {}", indexForSubs);
+                log.debug("[substitute] potentialSubs: {}", potentialSubs);
+                log.debug("[substitute] Current index: {}", i);
 
 
                 // this is for converting 2 chars into a letter
@@ -263,8 +262,8 @@ public class BannedWordsFilter extends ListenerAdapter {
                     doubleAntiCensorChecker.append(chars[i]);
                     doubleAntiCensorChecker.append(chars[i + 1]);
 
-                    log.debug("First char (checking combined word): {}", doubleAntiCensorChecker);
-                    log.debug("Second char (checking combined word): {}", doubleAntiCensorChecker);
+                    log.debug("[substitute] First char (checking combined word): {}", doubleAntiCensorChecker);
+                    log.debug("[substitute] Second char (checking combined word): {}", doubleAntiCensorChecker);
 
                     // add more if statements for 2 characters that can be converted to a letter
                     if (doubleAntiCensorChecker.toString().equals("()")){
@@ -273,11 +272,11 @@ public class BannedWordsFilter extends ListenerAdapter {
                         continue;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    log.debug(e.getMessage());
+                    log.debug("[substitute] ArrayIndexOutOfBoundsException {}", e.getMessage());
                 }
 
                 newWord += chars[i];
-                log.debug("Current new word (building it): {}", newWord);
+                log.debug("[substitute] Current new word (building it): {}", newWord);
             }
 
             isSub = false;
@@ -285,13 +284,13 @@ public class BannedWordsFilter extends ListenerAdapter {
             StringBuilder stringBuilder = new StringBuilder(newWord);
             replaceSubWithChar(stringBuilder, 0, indexForSubs, newList);
 
-            log.debug("newList: {}", newList);
-            log.debug("FINAL newWord: {}", newWord);
+            log.debug("[substitute] newList: {}", newList);
+            log.debug("[substitute] FINAL newWord: {}", newWord);
 
             newList.add(newWord);
         }
 
-        log.debug("Returning this newList: {}", newList);
+        log.debug("[substitute] Returning this newList: {}", newList);
         return newList;
     }
 
@@ -310,19 +309,19 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         if (index == stringBuilder.length()){
             newList.add(String.valueOf(stringBuilder));
-            log.debug("New array replacing subs with normal chars: {}", newList);
-            log.debug("stringBuilder value at end: {}", stringBuilder);
+            log.debug("[replaceSubWithChar] newList replacing subs with normal chars: {}", newList);
+            log.debug("[replaceSubWithChar] stringBuilder value at end: {}", stringBuilder);
             return;
         }
 
         if (possibleSubs.containsKey(index)){
 
             char originalChar = stringBuilder.charAt(index);
-            log.debug("originalChar: {}", originalChar);
+            log.debug("[replaceSubWithChar] originalChar: {}", originalChar);
 
             for (Character sub : possibleSubs.get(index)){
                 stringBuilder.setCharAt(index, sub);
-                log.debug("sub: {}", sub);
+                log.debug("[replaceSubWithChar] sub: {}", sub);
 
                 replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
             }
