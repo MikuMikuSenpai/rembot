@@ -477,15 +477,15 @@ public class BannedWordsFilter extends ListenerAdapter {
 
     /// returns current subs supported per character
     private static Map<Character, List<Character>> getSubsForChars() {
-        Map<Character, List<Character>> newMap = new HashMap<>();
-        newMap.put('a', List.of('@', '4', '^'));
-        newMap.put('i', List.of('!', '¡', '|'));
-        newMap.put('o', List.of('0', '●', '○', '°', '@'));
+        Map<Character, List<Character>> subsForChars = new HashMap<>();
+        subsForChars.put('a', List.of('@', '4', '^'));
+        subsForChars.put('i', List.of('!', '¡', '|'));
+        subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
-        return newMap;
+        return subsForChars;
     }
 
-    /// returns current subs supported per character
+    /// returns double anti censor candidate chars
     private static Set<Character> getPotentialDoubleAntiCensor() {
         Set<Character> doubleAntiCensorChars = new HashSet<>();
         doubleAntiCensorChars.add('(');
