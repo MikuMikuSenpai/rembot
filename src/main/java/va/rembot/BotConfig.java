@@ -2,7 +2,6 @@ package va.rembot;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
