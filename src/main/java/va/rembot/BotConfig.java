@@ -2,6 +2,7 @@ package va.rembot;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -36,7 +37,6 @@ public class BotConfig extends ListenerAdapter {
     public static String[] BANNED_WORDS_LIST = getBannedWordsArray();
     public static final String WHITELISTED_WORDS = System.getenv("WHITELISTED_WORDS");
     public static final String[] WHITELISTED_WORDS_LIST = WHITELISTED_WORDS.split(",");
-
 
     @Override
     public void onReady(ReadyEvent event) {
@@ -92,46 +92,49 @@ public class BotConfig extends ListenerAdapter {
     /// other plural forms (i.e +es) need to be added by the host in their .env (this can be added later but not urgent)
     private static String[] getBannedWordsArray() {
 
-        List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterwards all the items are added to real list
+        var REPLICATE_AMOUNT_INT = EnvHelper.getREPLICATE_AMOUNT_INT();
+
+        List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterward all the items are added to real list
         StringBuilder newWord = new StringBuilder();
         List<String> bannedWordsList = new ArrayList<>(Arrays.asList(BANNED_WORDS_LIST_TEMP));
-        var amountOfReplicas = 10;
 
-        log.debug("[onReady] Current new bannedWordsList: {}", bannedWordsList);
+        log.debug("[getBannedWordsArray] Current new bannedWordsList: {}", bannedWordsList);
+        log.debug("[getBannedWordsArray] REPLICATE_AMOUNT_INT {}", REPLICATE_AMOUNT_INT);
 
         for (var word : bannedWordsList) {
             newWord.setLength(0);
 
             //amount of time to replicate word which means: word wordword wordwordword wordwordwordword
-            for (int i = 0; i < amountOfReplicas; i++) {
+            for (int i = 0; i < REPLICATE_AMOUNT_INT; i++) {
 
                 newWord.append(word);
                 bannedWordsListTemp.add(newWord.toString());
 
-                log.debug("[onReady] Building word: {}", newWord);
-                log.debug("[onReady] Building list: {}", bannedWordsListTemp);
+                log.debug("[getBannedWordsArray] Building word: {}", newWord);
+                log.debug("[getBannedWordsArray] Building list: {}", bannedWordsListTemp);
 
             }
 
-            //plural form
-            for (int i = 0; i < amountOfReplicas; i++) {
+            //plural form +s
+            for (int i = 0; i < REPLICATE_AMOUNT_INT; i++) {
 
                 newWord.append("s"); //create plural variant by just adding a 's' (ofc, there might be some words where this doesnt make sense this is the responsibility of the bot owner to adjust their .env)
                 bannedWordsListTemp.add(newWord.toString());
-                log.debug("[onReady] Building word plural: {}", newWord);
-                log.debug("[onReady] Building list plural: {}", bannedWordsListTemp);
+
+                log.debug("[getBannedWordsArray] Building word plural: {}", newWord);
+                log.debug("[getBannedWordsArray] Building list plural: {}", bannedWordsListTemp);
 
             }
         }
 
         bannedWordsList.addAll(bannedWordsListTemp);
 
-        log.debug("[onReady] Final built list: {}", bannedWordsListTemp);
-        log.debug("[onReady] Final list with banned words + original from .env: {}", bannedWordsList);
+        log.debug("[getBannedWordsArray] Final built list: {}", bannedWordsListTemp);
+        log.debug("[getBannedWordsArray] Final list with banned words + original from .env: {}", bannedWordsList);
 
         String[] bannedWordsArray = bannedWordsList.toArray(new String[0]);
 
-        log.debug("[onReady] Final bannedWordsArray: {}", (Object) bannedWordsArray);
+        log.debug("[getBannedWordsArray] Final bannedWordsArray: {}", (Object) bannedWordsArray);
 
         return bannedWordsArray;
     }
