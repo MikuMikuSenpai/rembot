@@ -87,23 +87,24 @@ public class BotConfig extends ListenerAdapter {
     /// returns a string with replicas of the banned words including plural form this eases the bot hosting for the hoster
     /// normally they would have to manually type "badword,badwordbadword" etc. for the edge cases where users
     /// send bad words next to each other to avoid censor but this is automated now, including plural form (+s)
-    /// other plural forms (i.e +es) need to be added by the host in their .env (this can be added later but not urgent)
+    /// other plural forms (e.g. +es) need to be added by the host in their .env (this can be added later but not urgent)
     private static String[] getBannedWordsArray() {
 
-        var REPLICATE_AMOUNT_INT = EnvHelper.getREPLICATE_AMOUNT_INT();
+        var replicateAmountInt = EnvHelper.getREPLICATE_AMOUNT_INT();
 
         List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterward all the items are added to real list
         StringBuilder newWord = new StringBuilder();
         List<String> bannedWordsList = new ArrayList<>(Arrays.asList(BANNED_WORDS_ARRAY_TEMP));
 
         log.debug("[getBannedWordsArray] Current new bannedWordsList: {}", bannedWordsList);
-        log.debug("[getBannedWordsArray] REPLICATE_AMOUNT_INT {}", REPLICATE_AMOUNT_INT);
+        log.debug("[getBannedWordsArray] replicateAmountInt {}", replicateAmountInt);
 
         for (var word : bannedWordsList) {
+            
             newWord.setLength(0);
 
             //amount of time to replicate word which means: word wordword wordwordword wordwordwordword
-            for (int i = 0; i < REPLICATE_AMOUNT_INT; i++) {
+            for (int i = 0; i < replicateAmountInt; i++) {
 
                 newWord.append(word);
                 bannedWordsListTemp.add(newWord.toString());
@@ -114,7 +115,7 @@ public class BotConfig extends ListenerAdapter {
             }
 
             //plural form +s
-            for (int i = 0; i < REPLICATE_AMOUNT_INT; i++) {
+            for (int i = 0; i < replicateAmountInt; i++) {
 
                 newWord.append("s"); //create plural variant by just adding a 's' (ofc, there might be some words where this doesnt make sense this is the responsibility of the bot owner to adjust their .env)
                 bannedWordsListTemp.add(newWord.toString());

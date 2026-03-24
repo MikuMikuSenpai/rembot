@@ -101,6 +101,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
             log.debug("[onMessageReceived] word: {}", word);
 
+            //bug need to check that not deleting whitelisted words...
             if (LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 deleteMsg(event, msg, word);
                 log.debug("[onMessageReceived] Word is banned! {}", word);
