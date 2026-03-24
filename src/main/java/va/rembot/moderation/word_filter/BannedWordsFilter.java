@@ -14,6 +14,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final List<String> WHITELISTED_WORDS = Arrays.stream(BotConfig.WHITELISTED_WORDS_ARRAY).toList();
     private static final Map<Character, List<Character>> SUBS_PER_CHAR = getSubsForChars();
     private static final Set<Character> DOUBLE_ANTI_CENSOR_CHARS = getPotentialDoubleAntiCensor();
+    private static final Set<Character> FILTERED_SPECIAL_CHARS = getFilteredSpecialChars();
     private static final Set<Character> SUBSTITUTE_CHARS = new HashSet<>();
 
     @Override
@@ -38,7 +39,15 @@ public class BannedWordsFilter extends ListenerAdapter {
         StringBuilder msgAsArrayAsListString = new StringBuilder();
         msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
 
-        var msgTotal = msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed;
+        var msgTotal = (msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
+
+        // filter out any char that would be in the way of filter such as quotes ""
+        for (var item : FILTERED_SPECIAL_CHARS) {
+            log.debug("[onMessageReceived] Looping over special chars {}", item.toString());
+
+            msgTotal = msgTotal.replace(item.toString(), "");
+        }
+
         var msgTotalArray = msgTotal.split(" ");
         var msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
 
@@ -468,20 +477,31 @@ public class BannedWordsFilter extends ListenerAdapter {
 
     /// returns current subs supported per character
     private static Map<Character, List<Character>> getSubsForChars() {
-        Map<Character, List<Character>> newMap = new HashMap<>();
-        newMap.put('a', List.of('@', '4', '^'));
-        newMap.put('i', List.of('!', '¡', '|'));
-        newMap.put('o', List.of('0', '●', '○', '°', '@'));
+        Map<Character, List<Character>> subsForChars = new HashMap<>();
+        subsForChars.put('a', List.of('@', '4', '^'));
+        subsForChars.put('i', List.of('!', '¡', '|'));
+        subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
-        return newMap;
+        return subsForChars;
     }
 
-    /// returns current subs supported per character
+    /// returns double anti censor candidate chars
     private static Set<Character> getPotentialDoubleAntiCensor() {
         Set<Character> doubleAntiCensorChars = new HashSet<>();
         doubleAntiCensorChars.add('(');
         doubleAntiCensorChars.add(')');
 
         return doubleAntiCensorChars;
+    }
+
+    /// returns special chars that are removed from original msg before filter
+    private static Set<Character> getFilteredSpecialChars() {
+        Set<Character> filteredSpecialChars = new HashSet<>();
+        filteredSpecialChars.add('\"');
+        filteredSpecialChars.add('-');
+        filteredSpecialChars.add('\'');
+        filteredSpecialChars.add('~');
+
+        return filteredSpecialChars;
     }
 }
