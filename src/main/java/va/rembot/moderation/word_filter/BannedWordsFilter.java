@@ -10,10 +10,10 @@ import java.util.*;
 @Slf4j
 public class BannedWordsFilter extends ListenerAdapter {
 
-    private static final List<String> listBannedWords = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
-    private static final List<String> whitelistedWords = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
-    private static final Map<Character, List<Character>> subsPerChar = getSubsForChars();
-    private static final Set<Character> substituteChars = new HashSet<>();
+    private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
+    private static final List<String> WHITELISTED_WORDS = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
+    private static final Map<Character, List<Character>> SUBS_PER_CHAR = getSubsForChars();
+    private static final Set<Character> SUBSTITUTE_CHARS = new HashSet<>();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -48,15 +48,15 @@ public class BannedWordsFilter extends ListenerAdapter {
         //the below two for loops are used to check if there are any substitute chars in current msg
         // if NOT skip checking for banned words since we did that above
         // letters: a, b, c,...
-        for (var key : subsPerChar.keySet()) {
+        for (var key : SUBS_PER_CHAR.keySet()) {
 
             log.debug("[onMessageReceived] letter: {}", key.toString());
 
             // substitute chars: @, 4, !, ...
-            for (var value : subsPerChar.get(key)) {
+            for (var value : SUBS_PER_CHAR.get(key)) {
 
                 log.debug("[onMessageReceived] substitute char: {}", value.toString());
-                substituteChars.add(value);
+                SUBSTITUTE_CHARS.add(value);
 
             }
         }
@@ -71,7 +71,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
                 log.debug("[onMessageReceived] character {}", character);
 
-                if (substituteChars.contains(character)) {
+                if (SUBSTITUTE_CHARS.contains(character)) {
                     log.debug("[onMessageReceived] Substitute char detected");
                     hasSubInMsg = true;
                 }
@@ -87,14 +87,14 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
-        log.debug("[onMessageReceived] listBannedWords: {}", listBannedWords);
+        log.debug("[onMessageReceived] LIST_BANNED_WORDS: {}", LIST_BANNED_WORDS);
 
         //check if there are banned words obfuscated by whitespaces
         for (var word : msgTotalArrayTrimmed) {
 
             log.debug("[onMessageReceived] word: {}", word);
 
-            if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+            if (LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 deleteMsg(event, msg, word);
                 log.debug("[onMessageReceived] Word is banned! {}", word);
                 break;
@@ -123,12 +123,12 @@ public class BannedWordsFilter extends ListenerAdapter {
 
             // check message for a single whitelisted word afterward loop over list
             // excluding the whitelisted word and check again for banned words
-            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))) {
+            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(word))) {
                 loopOverMsgExcludeWhitelist(word, substitutedMsg, event, msg);
                 break;
             }
 
-            if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+            if (LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 deleteMsg(event, msg, word);
                 break;
             }
@@ -153,11 +153,11 @@ public class BannedWordsFilter extends ListenerAdapter {
                 return loopOverMsgExcludeWhitelistBoolean(combinedWords, msgTotalList, event, originalMsgRaw);
             }
 
-            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))) {
+            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(word))) {
                 return loopOverMsgExcludeWhitelistBoolean(word, msgTotalList, event, originalMsgRaw);
             }
 
-            if (listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+            if (LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 deleteMsg(event, originalMsgRaw, word);
                 return true;
             }
@@ -188,7 +188,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[loopOverMsgExcludeWhitelistBoolean] (combined whitelist word) whiteListedWords: {}", whitelistedWords);
 
         for (String word : msgTotalList){
-            if (!whitelistedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+            if (!whitelistedWords.contains(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
@@ -208,7 +208,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[loopOverMsgExcludeWhitelistBoolean] (single whitelist word) whitelistedWord: {}", whitelistedWord);
 
         for (String word : msgTotalList){
-            if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+            if (!whitelistedWord.equals(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
@@ -229,7 +229,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[loopOverMsgExcludeWhitelist] (combined whitelist word) whiteListedWords: {}", whitelistedWords);
 
         for (String word : substituteMsg){
-            if (!whitelistedWords.contains(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+            if (!whitelistedWords.contains(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
@@ -246,7 +246,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[loopOverMsgExcludeWhitelist] (single whitelist word) whitelistedWord: {}", whitelistedWord);
 
         for (String word : substituteMsg){
-            if (!whitelistedWord.equals(word) && listBannedWords.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+            if (!whitelistedWord.equals(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
                 log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
 
                 deleteMsg(event, msg, word);
@@ -259,7 +259,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private boolean hasWhitelistedCombinedWords(List<String> combinedWordsList){
 
         for (String word : combinedWordsList){
-            if (whitelistedWords.stream().anyMatch(s -> s.equals(word))){
+            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(word))){
                 return true;
             }
         }
@@ -273,7 +273,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         List<String> whitelistedWordsList = new ArrayList<>();
 
         for (String combinedWord : combinedWordsList){
-            if (whitelistedWords.contains(combinedWord)){
+            if (WHITELISTED_WORDS.contains(combinedWord)){
                 log.debug("[getWhitelistedWords] combined word: {}", Arrays.toString(combinedWord.split(" ")));
 
                 for (String word : combinedWord.split(" ")){
@@ -332,7 +332,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         List<String> newList = new ArrayList<>();
 
         // keep these alphabetically sorted (on keys [letters]) for ease
-        Map<Character, List<Character>> subsForChars = subsPerChar;
+        Map<Character, List<Character>> subsForChars = SUBS_PER_CHAR;
 
         // per index can be multiple subs
         Map<Integer, Set<Character>> indexForSubs = new HashMap<>();
