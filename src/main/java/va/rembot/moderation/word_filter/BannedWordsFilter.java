@@ -324,8 +324,10 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// 1. take an array of strings
     /// 2. loop over each word
     /// 3. loop over each char of the words and rebuild each word
-    /// 4. if there is a potential substitute character replace it (e.g. @ becomes a)
-    /// 5. put rebuild words in a new array and return it
+    /// 4. if there is a potential substitute character put it in a Map
+    /// with Integer and List Character (substitutes that are possible per index of word)
+    /// 5. Send each word to replaceSubWithChar() with the Map and make all variants
+    /// of the word with their normal characters
     private List<String> substitute(String[] inputList){
 
         String newWord;
@@ -431,6 +433,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         return newList;
     }
 
+    /// THIS HAPPENS WORD PER WORD FROM SUBSTITUTE()
     /// This method is essential part of substitute and does the main work it uses backtracking to make each variant
     /// 1. check if index is string's length = we checked every character
     /// 2. Check if current index (starts with 0) has any substitute characters by using the possibleSubs map
