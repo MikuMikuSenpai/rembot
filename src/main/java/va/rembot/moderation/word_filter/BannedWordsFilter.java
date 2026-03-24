@@ -13,6 +13,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
     private static final List<String> WHITELISTED_WORDS = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
     private static final Map<Character, List<Character>> SUBS_PER_CHAR = getSubsForChars();
+    private static final Set<Character> DOUBLE_ANTI_CENSOR_CHARS = getPotentialDoubleAntiCensor();
     private static final Set<Character> SUBSTITUTE_CHARS = new HashSet<>();
 
     @Override
@@ -62,6 +63,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
 
         var hasSubInMsg = false;
+        var hasDoubleAntiCensorChar = false;
         for (var word : msgTotalArray) {
 
             var charArray = word.toCharArray();
@@ -74,6 +76,11 @@ public class BannedWordsFilter extends ListenerAdapter {
                 if (SUBSTITUTE_CHARS.contains(character)) {
                     log.debug("[onMessageReceived] Substitute char detected");
                     hasSubInMsg = true;
+                }
+
+                if (DOUBLE_ANTI_CENSOR_CHARS.contains(character)) {
+                    log.debug("[onMessageReceived] (potential) Anti double char detected");
+                    hasDoubleAntiCensorChar = true;
                 }
             }
         }
@@ -101,7 +108,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             }
         }
 
-        if (!hasSubInMsg)
+        if (!hasSubInMsg && !hasDoubleAntiCensorChar)
             return;
 
         var substitutedMsg = substitute(msgTotalArrayTrimmed);
@@ -479,5 +486,14 @@ public class BannedWordsFilter extends ListenerAdapter {
         newMap.put('o', List.of('0', '●', '○', '°', '@'));
 
         return newMap;
+    }
+
+    /// returns current subs supported per character
+    private static Set<Character> getPotentialDoubleAntiCensor() {
+        Set<Character> doubleAntiCensorChars = new HashSet<>();
+        doubleAntiCensorChars.add('(');
+        doubleAntiCensorChars.add(')');
+
+        return doubleAntiCensorChars;
     }
 }
