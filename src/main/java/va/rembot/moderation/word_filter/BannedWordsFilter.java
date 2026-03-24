@@ -410,7 +410,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                         continue;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    log.debug("[substitute] ArrayIndexOutOfBoundsException {}", e.getMessage());
+                    log.error("[substitute] ArrayIndexOutOfBoundsException {}", e.getMessage());
                 }
 
                 newWord += chars[i];
