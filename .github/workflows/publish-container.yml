@@ -1,9 +1,12 @@
 # https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images#publishing-images-to-github-packages
+# https://docs.docker.com/build/ci/github-actions/manage-tags-labels/
 name: Create and publish docker image
 
 on:
   push:
     branches: ['main']
+    tags:
+      - "v*.*.*" #if tags get pushed create rembot image for that specific tag
 
 env:
   REGISTRY: ghcr.io
@@ -35,8 +38,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha
             type=semver,pattern={{version}}
+            type=sha
 
       - name: Build and push Docker image SPECIFIC TAG
         id: push
