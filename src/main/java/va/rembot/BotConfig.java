@@ -82,7 +82,6 @@ public class BotConfig extends ListenerAdapter {
             bot.shutdown();
 
         }
-
     }
 
     /// returns a string with replicas of the banned words including plural form this eases the bot hosting for the hoster
