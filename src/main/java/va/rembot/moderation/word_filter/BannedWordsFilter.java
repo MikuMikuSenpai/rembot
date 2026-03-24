@@ -379,7 +379,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                         log.debug("[substitute] Each value (subsForChars): {} for key: {}", value, key);
 
                         if (value.equals(chars[i])){
-                            log.debug("[substitute] char found: {} in word: {}", value, word);
+                            log.debug("[substitute] Substitute char found: {} in word: {}", value, word);
                             potentialSubs.add(key);
                             indexForSub = i;
                             isSub = true;
