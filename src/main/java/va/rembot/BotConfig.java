@@ -32,8 +32,8 @@ public class BotConfig extends ListenerAdapter {
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
     public static final String DARWIN_CHANNEL_ID = System.getenv("DARWIN_CHANNEL_ID");
     public static final String BANNED_WORDS = System.getenv("BANNED_WORDS");
-    public static String[] BANNED_WORDS_LIST_TEMP = BANNED_WORDS.split(",");
-    public static String[] BANNED_WORDS_LIST = getBannedWordsArray();
+    public static final String[] BANNED_WORDS_LIST_TEMP = BANNED_WORDS.split(",");
+    public static final String[] BANNED_WORDS_LIST = getBannedWordsArray();
     public static final String WHITELISTED_WORDS = System.getenv("WHITELISTED_WORDS");
     public static final String[] WHITELISTED_WORDS_LIST = WHITELISTED_WORDS.split(",");
 
