@@ -43,7 +43,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         // filter out any char that would be in the way of filter such as quotes ""
         for (var item : FILTERED_SPECIAL_CHARS) {
-            log.info("[onMessageReceived] Looping over special chars {}", item.toString());
+            log.debug("[onMessageReceived] Looping over special chars {}", item.toString());
 
             msgTotal = msgTotal.replace(item.toString(), "");
         }
