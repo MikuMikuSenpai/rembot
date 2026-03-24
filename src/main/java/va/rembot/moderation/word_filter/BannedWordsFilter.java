@@ -425,7 +425,6 @@ public class BannedWordsFilter extends ListenerAdapter {
             log.debug("[substitute] newList: {}", newList);
             log.debug("[substitute] FINAL newWord: {}", newWord);
 
-            newList.add(newWord);
         }
 
         log.debug("[substitute] Returning this newList: {}", newList);
