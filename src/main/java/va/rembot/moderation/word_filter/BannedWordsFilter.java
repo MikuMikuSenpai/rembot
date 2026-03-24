@@ -333,7 +333,6 @@ public class BannedWordsFilter extends ListenerAdapter {
         String newWord;
         List<String> newList = new ArrayList<>();
 
-        // keep these alphabetically sorted (on keys [letters]) for ease
         Map<Character, List<Character>> subsForChars = SUBS_PER_CHAR;
 
         // per index can be multiple subs
