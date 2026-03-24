@@ -51,7 +51,7 @@ This will be removed when all done, here for organization.
     - [x] backend
     - [ ] frontend
 - [ ] Moderation:
-  - [ ] Banned words filter
+  - [x] Banned words filter
   - [ ] Anti-spam filter
 - [x] Docker
   - [x] Dockerfile
