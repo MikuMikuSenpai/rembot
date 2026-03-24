@@ -189,7 +189,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String word : msgTotalList){
             if (!whitelistedWords.contains(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST BANNED WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 return true;
@@ -209,7 +209,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String word : msgTotalList){
             if (!whitelistedWord.equals(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST BANNED WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 return true;
@@ -230,7 +230,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String word : substituteMsg){
             if (!whitelistedWords.contains(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST BANNED WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
@@ -247,7 +247,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         for (String word : substituteMsg){
             if (!whitelistedWord.equals(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST WORD: {}", word);
+                log.debug("[loopOverMsgExcludeWhitelist] NON-WHITELIST BANNED WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 break;
