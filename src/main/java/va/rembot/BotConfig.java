@@ -93,34 +93,36 @@ public class BotConfig extends ListenerAdapter {
         var replicateAmountInt = EnvHelper.getREPLICATE_AMOUNT_INT();
 
         List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterward all the items are added to real list
-        StringBuilder newWord = new StringBuilder();
         List<String> bannedWordsList = new ArrayList<>(Arrays.asList(BANNED_WORDS_ARRAY_TEMP));
 
         log.debug("[getBannedWordsArray] Current new bannedWordsList: {}", bannedWordsList);
         log.debug("[getBannedWordsArray] replicateAmountInt {}", replicateAmountInt);
 
         for (var word : bannedWordsList) {
-            
-            newWord.setLength(0);
+            var newBannedWord = "";
 
             //amount of time to replicate word which means: word wordword wordwordword wordwordwordword
-            for (int i = 0; i < replicateAmountInt; i++) {
+            for (int i = 1; i <= replicateAmountInt; i++) {
 
-                newWord.append(word);
-                bannedWordsListTemp.add(newWord.toString());
+                newBannedWord = word.repeat(i);
+                bannedWordsListTemp.add(newBannedWord);
 
-                log.debug("[getBannedWordsArray] Building word: {}", newWord);
+                log.debug("[getBannedWordsArray] Building word: {}", newBannedWord);
                 log.debug("[getBannedWordsArray] Building list: {}", bannedWordsListTemp);
 
             }
+        }
+
+        for (var word : bannedWordsList) {
+            var newBannedWord = "";
 
             //plural form +s
-            for (int i = 0; i < replicateAmountInt; i++) {
+            for (int i = 1; i <= replicateAmountInt; i++) {
 
-                newWord.append("s"); //create plural variant by just adding a 's' (ofc, there might be some words where this doesnt make sense this is the responsibility of the bot owner to adjust their .env)
-                bannedWordsListTemp.add(newWord.toString());
+                newBannedWord = word.repeat(i) + "s";
+                bannedWordsListTemp.add(newBannedWord);
 
-                log.debug("[getBannedWordsArray] Building word plural: {}", newWord);
+                log.debug("[getBannedWordsArray] Building word plural: {}", newBannedWord);
                 log.debug("[getBannedWordsArray] Building list plural: {}", bannedWordsListTemp);
 
             }
