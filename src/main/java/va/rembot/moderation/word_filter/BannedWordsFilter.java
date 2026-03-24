@@ -29,7 +29,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         var msg = event.getMessage().getContentRaw();
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
-        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", ""); // its not possible to handle all cases as the input will be highly variable (e.g. a edge case now would be that "w ord w ord" is turned into "wordword") i will implement a method in botconfig that multiplies words for an x amount (x=not yet decided)
+        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
         var msgAsArray = msg.split(" ");
         var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
         var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).toList();
