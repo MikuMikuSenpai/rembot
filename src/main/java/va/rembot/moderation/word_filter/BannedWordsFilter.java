@@ -347,7 +347,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         for (String word : inputList) {
 
             char[] chars = word.toCharArray();
-            newWord = "";
+            newWord = ""; //not really new word unless double anti censor keep var name unless better found
             indexForSubs.clear();
             potentialSubs.clear();
 
