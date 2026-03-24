@@ -294,7 +294,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         int comboWordIndexStart = 0;
         int comboWordIndexNext = 1;
 
-        for (int i = 0; i< substitutedMsg.size(); i++){
+        for (int i = 0; i < substitutedMsg.size(); i++){
 
             // combined word cant be one word
             if (substitutedMsg.size() == 1)
