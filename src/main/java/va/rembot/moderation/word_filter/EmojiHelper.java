@@ -56,7 +56,6 @@ public class EmojiHelper {
         emojiForChar.put("\uD83C\uDDFD", 'x');
         emojiForChar.put("\uD83C\uDDFE", 'y');
         emojiForChar.put("\uD83C\uDDFF", 'z');
-        emojiForChar.put("\uD83D\uDE2D", 'z');
 
         return emojiForChar;
     }
