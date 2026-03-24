@@ -139,8 +139,8 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// this results in significantly faster deleting of the message
     private boolean checkMsgBeforeSubstituting(String[] msgTotal, MessageReceivedEvent event, String originalMsgRaw) {
 
-        var combinedWords = getCombinedWords(Arrays.stream(msgTotal).toList());
         var msgTotalList = Arrays.stream(msgTotal).toList();
+        var combinedWords = getCombinedWords(msgTotalList);
 
         log.debug("[checkMsgBeforeSubstituting] msgTotal {}", (Object) msgTotal);
         log.debug("[checkMsgBeforeSubstituting] combinedWords {}", combinedWords);
