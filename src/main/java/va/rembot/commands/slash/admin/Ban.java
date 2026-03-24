@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -43,19 +44,14 @@ public class Ban extends ListenerAdapter {
 
     private MessageEmbed buildEmbed(User targetUser, String reason){
         EmbedBuilder embed = new EmbedBuilder();
-        //TODO if you want embed message make it here do same for other classes if we repeat a lot in diff classes
-        // we can make one generic method for this in BotConfig
-        embed.addField("TestField", "TestValue", true); // cant create empty embed so this some filler (delete when u start)
-        /*
-        heres a guide on what u can change: https://raw.githubusercontent.com/discord-jda/JDA/assets/assets/docs/embeds/01-Overview.png
-        use below as example:
-        embed.setColor(0xbb0a1e); //hexadecimal color needs to start w "0x"
+
         embed.setTitle("Someone got banned");
         embed.addField("User", targetUser.getAsMention(), true);
         embed.addField("Reason", reason, false);
         embed.setFooter("rekt xd");
+        embed.setColor(0xbb0a1e);
         embed.setTimestamp(Instant.now());
-         */
+
         return embed.build();
     }
 
@@ -64,10 +60,8 @@ public class Ban extends ListenerAdapter {
                 .ban(usrSnowflake, 0, TimeUnit.MINUTES)
                 .reason(reason)
                 .queue(success -> {
-                    //TODO add your frontend logic here
                     event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessage("[DARWIN CHANNEL] Some dumbass got banned lulz heres his name: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
-                            .and(event.getGuildChannel().sendMessageEmbeds(embed))
+                            .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
                 }, new ErrorHandler()
