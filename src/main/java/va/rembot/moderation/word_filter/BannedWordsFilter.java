@@ -21,7 +21,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         var member = event.getMember();
-        var modRole = event.getJDA().getRoleById(BotConfig.getMOD_ROLE_ID_LONG());
+        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
 
         if (member.getUnsortedRoles().contains(modRole)) {
             log.debug("[onMessageReceived] This user is mod, banned words filter not applied.");

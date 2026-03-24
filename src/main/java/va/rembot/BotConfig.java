@@ -28,7 +28,7 @@ public class BotConfig extends ListenerAdapter {
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
     public static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
     @Getter
-    private static Long MOD_ROLE_ID_LONG = 0L;
+    private static Long modRoleIdLong = 0L;
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
     public static final String DARWIN_CHANNEL_ID = System.getenv("DARWIN_CHANNEL_ID");
     public static final String BANNED_WORDS = System.getenv("BANNED_WORDS");
@@ -73,7 +73,7 @@ public class BotConfig extends ListenerAdapter {
                 .queue(success -> log.info("Successfully loaded all slash commands."));
 
         try {
-            MOD_ROLE_ID_LONG = Long.parseLong(MOD_ROLE_ID);
+            modRoleIdLong = Long.parseLong(MOD_ROLE_ID);
         } catch (NumberFormatException e) {
 
             log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
