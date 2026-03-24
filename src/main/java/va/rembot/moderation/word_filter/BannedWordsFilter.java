@@ -398,9 +398,9 @@ public class BannedWordsFilter extends ListenerAdapter {
                 try {
 
                     doubleAntiCensorChecker.append(chars[i]);
-                    doubleAntiCensorChecker.append(chars[i + 1]);
-
                     log.debug("[substitute] First char (checking combined word): {}", doubleAntiCensorChecker);
+
+                    doubleAntiCensorChecker.append(chars[i + 1]);
                     log.debug("[substitute] Second char (checking combined word): {}", doubleAntiCensorChecker);
 
                     // add more if statements for 2 characters that can be converted to a letter
