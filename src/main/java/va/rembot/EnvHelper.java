@@ -9,7 +9,7 @@ public class EnvHelper {
 
     private static final String REPLICATE_AMOUNT = System.getenv("REPLICATE_AMOUNT");
     @Getter
-    public static int REPLICATE_AMOUNT_INT = getInt();
+    public static final int REPLICATE_AMOUNT_INT = getInt();
 
     private static int getInt() {
 

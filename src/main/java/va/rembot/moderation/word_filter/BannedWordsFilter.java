@@ -10,8 +10,8 @@ import java.util.*;
 @Slf4j
 public class BannedWordsFilter extends ListenerAdapter {
 
-    private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_LIST).toList();
-    private static final List<String> WHITELISTED_WORDS = Arrays.stream(BotConfig.WHITELISTED_WORDS_LIST).toList();
+    private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_ARRAY).toList();
+    private static final List<String> WHITELISTED_WORDS = Arrays.stream(BotConfig.WHITELISTED_WORDS_ARRAY).toList();
     private static final Map<Character, List<Character>> SUBS_PER_CHAR = getSubsForChars();
     private static final Set<Character> DOUBLE_ANTI_CENSOR_CHARS = getPotentialDoubleAntiCensor();
     private static final Set<Character> SUBSTITUTE_CHARS = new HashSet<>();
