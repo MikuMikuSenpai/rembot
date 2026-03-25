@@ -40,22 +40,24 @@ public class Mute extends ListenerAdapter {
                 var hours = event.getOption("hours").getAsInt();
                 var hoursToMinutes = hours * 60;
                 var totalMuteTime = minutes + hoursToMinutes;
-                var embedMsg = buildEmbed(target, reason, slashCommandUser);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser, totalMuteTime);
                 mute(event, usrSnowflake, reason, totalMuteTime, slashCommandUser, target, embedMsg);
             } catch (NullPointerException e) {
-                var embedMsg = buildEmbed(target, reason, slashCommandUser);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser, minutes);
                 mute(event, usrSnowflake, reason, minutes, slashCommandUser, target, embedMsg);
             }
         }
     }
 
-    private MessageEmbed buildEmbed(User targetUser, String reason, User moderatorUser){
+    private MessageEmbed buildEmbed(User targetUser, String reason, User moderatorUser, int muteTimeMinutes){
         EmbedBuilder embed = new EmbedBuilder();
 
         embed.setTitle("Someone got muted");
-        embed.addField("User", targetUser.getAsMention(), false);
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Mod", moderatorUser.getAsMention(), true);
+        embed.addField("Minutes", String.valueOf(muteTimeMinutes), true);
         embed.addField("Reason", reason, false);
-        embed.addField("Mod", moderatorUser.getAsMention(), false);
+
         embed.setColor(0xbb0a1e);
         embed.setTimestamp(Instant.now());
 

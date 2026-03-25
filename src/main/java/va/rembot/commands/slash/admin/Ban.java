@@ -46,9 +46,9 @@ public class Ban extends ListenerAdapter {
         EmbedBuilder embed = new EmbedBuilder();
 
         embed.setTitle("Someone got banned");
-        embed.addField("User", targetUser.getAsMention(), false);
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Mod", moderatorUser.getAsMention(), true);
         embed.addField("Reason", reason, false);
-        embed.addField("Mod", moderatorUser.getAsMention(), false);
         embed.setColor(0xbb0a1e);
         embed.setTimestamp(Instant.now());
 
