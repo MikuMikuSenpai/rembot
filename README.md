@@ -44,7 +44,7 @@ This will be removed when all done, here for organization.
   - [x] Unban
     - [x] backend
     - [x] frontend
-  - [ ] Kick
+  - [x] Kick
     - [x] backend
     - [x] frontend
   - [x] Mute
