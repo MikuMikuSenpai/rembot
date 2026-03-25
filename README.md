@@ -37,19 +37,19 @@ Remastered mbot get it mbot rembot yeah my bad
 Only for core features other stuff will be worked on after v1.0.0 release of rembot.
 This will be removed when all done, here for organization.
 
-- [ ] Admin Features:
-  - [ ] Ban
+- [x] Admin Features:
+  - [x] Ban
     - [x] backend
-    - [ ] frontend
-  - [ ] Unban
+    - [x] frontend
+  - [x] Unban
     - [x] backend
-    - [ ] frontend
+    - [x] frontend
   - [ ] Kick
     - [x] backend
-    - [ ] frontend
-  - [ ] Mute
+    - [x] frontend
+  - [x] Mute
     - [x] backend
-    - [ ] frontend
+    - [x] frontend
 - [ ] Moderation:
   - [x] Banned words filter
   - [ ] Anti-spam filter

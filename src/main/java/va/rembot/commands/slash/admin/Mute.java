@@ -1,6 +1,8 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -11,6 +13,7 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
 import java.time.Duration;
+import java.time.Instant;
 
 @Slf4j
 public class Mute extends ListenerAdapter {
@@ -37,21 +40,37 @@ public class Mute extends ListenerAdapter {
                 var hours = event.getOption("hours").getAsInt();
                 var hoursToMinutes = hours * 60;
                 var totalMuteTime = minutes + hoursToMinutes;
-                mute(event, usrSnowflake, reason, totalMuteTime, slashCommandUser, target);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser, totalMuteTime);
+                mute(event, usrSnowflake, reason, totalMuteTime, slashCommandUser, target, embedMsg);
             } catch (NullPointerException e) {
-                mute(event, usrSnowflake, reason, minutes, slashCommandUser, target);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser, minutes);
+                mute(event, usrSnowflake, reason, minutes, slashCommandUser, target, embedMsg);
             }
         }
     }
 
-    private void mute(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, int muteTimeTotalMinutes, User slashCommandUser, User targetUser) {
+    private MessageEmbed buildEmbed(User targetUser, String reason, User moderatorUser, int muteTimeMinutes){
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setTitle("Someone got muted");
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Mod", moderatorUser.getAsMention(), true);
+        embed.addField("Minutes", String.valueOf(muteTimeMinutes), true);
+        embed.addField("Reason", reason, false);
+
+        embed.setColor(0xbb0a1e);
+        embed.setTimestamp(Instant.now());
+
+        return embed.build();
+    }
+
+    private void mute(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, int muteTimeTotalMinutes, User slashCommandUser, User targetUser, MessageEmbed embed) {
         event.getGuild()
                 .timeoutFor(usrSnowflake, Duration.ofMinutes(muteTimeTotalMinutes))
                 .reason(reason)
                 .queue(success -> {
-                    //TODO add your frontend logic here
                     event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessage("[DARWIN CHANNEL] Some dumbass got muted lulz heres his name: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
+                            .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
                 }, new ErrorHandler()
