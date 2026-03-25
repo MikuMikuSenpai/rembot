@@ -32,23 +32,23 @@ public class Ban extends ListenerAdapter {
             // "reason" is an optional input, could be null so handle it:
             try {
                 var reason = event.getOption("reason").getAsString();
-                var embedMsg = buildEmbed(target, reason);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser);
                 ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
             } catch (NullPointerException e) {
                 var reason = "No reason provided.";
-                var embedMsg = buildEmbed(target, reason);
+                var embedMsg = buildEmbed(target, reason, slashCommandUser);
                 ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
             }
         }
     }
 
-    private MessageEmbed buildEmbed(User targetUser, String reason){
+    private MessageEmbed buildEmbed(User targetUser, String reason, User moderatorUser){
         EmbedBuilder embed = new EmbedBuilder();
 
         embed.setTitle("Someone got banned");
-        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("User", targetUser.getAsMention(), false);
         embed.addField("Reason", reason, false);
-        embed.setFooter("rekt xd");
+        embed.addField("Mod", moderatorUser.getAsMention(), false);
         embed.setColor(0xbb0a1e);
         embed.setTimestamp(Instant.now());
 
