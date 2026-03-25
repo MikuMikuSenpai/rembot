@@ -38,9 +38,8 @@ public class Kick extends ListenerAdapter {
                .kick(usrSnowflake)
                .reason(reason)
                .queue(success -> {
-                   //TODO add your frontend logic here
-                   event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                           .sendMessage("[DARWIN CHANNEL] Some dumbass got kicked lulz heres his name: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
+                   event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
+                           .sendMessage("**[USER KICK]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
                            .and(event.getHook().deleteOriginal())
                            .queue();
                }, new ErrorHandler()

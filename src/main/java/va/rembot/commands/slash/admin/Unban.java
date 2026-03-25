@@ -38,9 +38,8 @@ public class Unban extends ListenerAdapter {
                 .unban(usrSnowflake)
                 .reason(reason)
                 .queue(success -> {
-                    //TODO add your frontend logic here
-                    event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessage("[DARWIN CHANNEL] someone got unbanned: " + usrSnowflake.getAsMention() + " and the reason: " + reason)
+                    event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
+                            .sendMessage("**[USER UNBAN]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
                             .and(event.getHook().deleteOriginal())
                             .queue();
                 }, new ErrorHandler()
