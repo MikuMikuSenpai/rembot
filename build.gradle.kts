@@ -20,6 +20,8 @@ dependencies {
         exclude(module = "tink") // for encrypting and decrypting audio, dont need this
     }
 
+    implementation("com.mysql:mysql-connector-j:9.6.0")//mysql database jdbc
+
     implementation("ch.qos.logback:logback-classic:1.5.32") // needed for logging (https://jda.wiki/setup/logging/)
 
     compileOnly("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code

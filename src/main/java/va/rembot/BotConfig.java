@@ -13,6 +13,7 @@ import va.rembot.commands.slash.admin.Ban;
 import va.rembot.commands.slash.admin.Kick;
 import va.rembot.commands.slash.admin.Mute;
 import va.rembot.commands.slash.admin.Unban;
+import va.rembot.moderation.AntiSpamFilter;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class BotConfig extends ListenerAdapter {
     public static final String[] BANNED_WORDS_ARRAY = getBannedWordsArray();
     public static final String WHITELISTED_WORDS = System.getenv("WHITELISTED_WORDS");
     public static final String[] WHITELISTED_WORDS_ARRAY = WHITELISTED_WORDS.split(",");
+    public static final String MYSQL_ROOT_PASSWORD = System.getenv("MYSQL_ROOT_PASSWORD");
+    public static final String MYSQL_DATABASE = System.getenv("MYSQL_DATABASE");
 
     @Override
     public void onReady(ReadyEvent event) {
@@ -48,6 +51,7 @@ public class BotConfig extends ListenerAdapter {
                 new Kick(),
                 new Mute(),
                 new BannedWordsFilter(),
+                new AntiSpamFilter(),
                 new PingPong());
 
         bot.updateCommands()
