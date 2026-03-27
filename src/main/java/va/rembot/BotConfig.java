@@ -39,11 +39,65 @@ public class BotConfig extends ListenerAdapter {
     public static final String[] WHITELISTED_WORDS_ARRAY = WHITELISTED_WORDS.split(",");
     public static final String MYSQL_ROOT_PASSWORD = System.getenv("MYSQL_ROOT_PASSWORD");
     public static final String MYSQL_DATABASE = System.getenv("MYSQL_DATABASE");
+    public static final String ANTI_SPAM_WORDS_AMOUNT = System.getenv("ANTI_SPAM_WORDS_AMOUNT");
+    public static final String ANTI_SPAM_TIME_AMOUNT = System.getenv("ANTI_SPAM_TIME_AMOUNT");
+    @Getter
+    private static int antiSpamTimeAmountInt = 0;
+    public static final String ANTI_SPAM_MUTE_AMOUNT = System.getenv("ANTI_SPAM_MUTE_AMOUNT");
+    @Getter
+    private static int antiSpamMuteAmountInt = 0;
+    public static final String ANTI_SPAM_STRIKE_AMOUNT = System.getenv("ANTI_SPAM_STRIKE_AMOUNT");
+    @Getter
+    private static int antiSpamStrikeAmountInt = 0;
 
     @Override
     public void onReady(ReadyEvent event) {
 
         var bot = event.getJDA();
+
+        try {
+            modRoleIdLong = Long.parseLong(MOD_ROLE_ID);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
+        try {
+            antiSpamTimeAmountInt = Integer.parseInt(ANTI_SPAM_TIME_AMOUNT);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
+        try {
+            antiSpamMuteAmountInt = Integer.parseInt(ANTI_SPAM_MUTE_AMOUNT);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
+        try {
+            antiSpamStrikeAmountInt = Integer.parseInt(ANTI_SPAM_STRIKE_AMOUNT);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
 
         bot.addEventListener(
                 new Ban(),
@@ -76,16 +130,7 @@ public class BotConfig extends ListenerAdapter {
                                 .addOption(OptionType.INTEGER, "hours", "The amount of hours to be muted for.", false))
                 .queue(success -> log.info("Successfully loaded all slash commands."));
 
-        try {
-            modRoleIdLong = Long.parseLong(MOD_ROLE_ID);
-        } catch (NumberFormatException e) {
 
-            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
-            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING The bot cannot start until this is fixed.");
-            log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING error: {}", e.getMessage());
-            bot.shutdown();
-
-        }
     }
 
     /// returns a string with replicas of the banned words including plural form this eases the bot hosting for the hoster

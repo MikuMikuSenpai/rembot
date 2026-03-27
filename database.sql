@@ -6,17 +6,23 @@
 --  syntax to create event: https://dev.mysql.com/doc/refman/8.4/en/create-event.html
 
 CREATE TABLE users(
-    discord_user_id BIGINT,
+    discord_user_id BIGINT NOT NULL UNIQUE,
 
     PRIMARY KEY(discord_user_id)
 );
 
 CREATE TABLE messages_spam(
-    discord_message_id BIGINT,
-    user_id BIGINT,
+    discord_message_id BIGINT NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
     time_created TIMESTAMP NOT NULL,
 
     PRIMARY KEY(discord_message_id),
     CONSTRAINT FK_users FOREIGN KEY (user_id)
         REFERENCES users(discord_user_id)
+);
+
+CREATE TABLE strikes_spam(
+    discord_user_id BIGINT NOT NULL UNIQUE,
+    amount TINYINT NOT NULL,
+    most_recent_given TIMESTAMP NOT NULL
 );
