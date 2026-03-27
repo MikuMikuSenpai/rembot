@@ -11,6 +11,7 @@ import va.rembot.BotConfig;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class AntiSpamFilter extends ListenerAdapter {
@@ -27,6 +28,8 @@ public class AntiSpamFilter extends ListenerAdapter {
         try {
 
             //TODO TEMP LIKE THIS WILL PROB DO DAO DESIGN PATTERN CUS THIS IS FRANKENSTEIN AF (AND THIS IS A SIMPLE QUERY)
+            // also use try w resources and other things oracle advises but first create the frankenstein we have but working
+            // https://docs.oracle.com/javase/tutorial/jdbc/basics/index.html
 
             var msgCreated = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
             var user = event.getMember();
@@ -111,6 +114,9 @@ public class AntiSpamFilter extends ListenerAdapter {
             // mute them for spamming
             if (timeLastMsgCreatedSeconds - timeFirstMsgCreatedSeconds <= ANTI_SPAM_TIME_AMOUNT && timeLastMsgCreatedSeconds != timeFirstMsgCreatedSeconds){
 
+                // to prevent the bot spam muting: check that the difference between the time now and
+                // the last time a strike was given is at least greater than 5 secs
+                // we could make this (5 secs diff) an env var but i dont see the point atm.
                 if (new Timestamp(msgCreated).toInstant().getEpochSecond() - lastTimeStrikeGiven.toInstant().getEpochSecond() > 5) {
                     strikes++;
 
@@ -129,25 +135,45 @@ public class AntiSpamFilter extends ListenerAdapter {
                     embed.setColor(0xbb0a1e);
                     embed.setTimestamp(Instant.now());
 
-                    int finalStrikes = strikes;
-                    event.getGuild()
-                            .timeoutFor(usrSnowflake, Duration.ofMinutes(ANTI_SPAM_MUTE_AMOUNT))
-                            .reason("Spamming")
-                            .queue(success -> {
-                                event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                                        .sendMessageEmbeds(embed.build())
-                                        .and(event.getMessage().reply("Stop spamming strike: " + finalStrikes + "/" + ANTI_SPAM_STRIKE_AMOUNT + " 3 strikes = ban."))
-                                        .queue();
-                            });
+                    // if strikes below or equal to allowed strikes send warning msg and give strike other wise
+                    // ban them and set strikes to 0 for future (if they ever get unbanned)
+                    if (strikes <= ANTI_SPAM_STRIKE_AMOUNT) {
+                        int strikesCopy = strikes; //need to make this to be able to use in lambda below (intellij) said
+                        event.getGuild()
+                                .timeoutFor(usrSnowflake, Duration.ofMinutes(ANTI_SPAM_MUTE_AMOUNT))
+                                .reason("Spamming")
+                                .queue(success -> {
+                                    event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
+                                            .sendMessageEmbeds(embed.build())
+                                            .and(event.getMessage().reply("Stop spamming strike: " + strikesCopy + "/" + ANTI_SPAM_STRIKE_AMOUNT + " 3 strikes = ban."))
+                                            .queue();
+                                });
+                    } else {
 
-                    //TODO create an if that checks if strikes >3 if so
-                    // BAN->also clear their strikes in the case they get unbanend all of this is repeated correctly
+                        EmbedBuilder embedForBan = new EmbedBuilder();
 
-                    if (strikes > 3) {
-                        event.getMessage().reply("pretend i banned u u have over 3 strikes").queue();
+                        embedForBan.setTitle("Someone got banned");
+                        embedForBan.addField("User", user.getAsMention(), true);
+                        embedForBan.addField("Reason", "Spamming", true);
+                        embedForBan.setColor(0xbb0a1e);
+                        embedForBan.setTimestamp(Instant.now());
+
+                        event.getGuild()
+                                .ban(usrSnowflake, 0, TimeUnit.MINUTES)
+                                .reason("Spamming")
+                                .queue(success -> {
+                                            event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
+                                                    .sendMessageEmbeds(embedForBan.build())
+                                                    .queue();
+                                        });
+
+                        //alternatively we could delete the entry from the table, ill keep this in mind for later
+                        //but keep it to 0 for simplicity for now
+                        updateAmountStrikesToZero.setLong(1, discordId);
+                        updateAmountStrikesToZero.executeUpdate();
+                        updateAmountStrikesToZero.close();
                     }
                 }
-
             }
 
             insertUsrStmt.close();
