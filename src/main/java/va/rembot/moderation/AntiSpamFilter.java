@@ -13,6 +13,8 @@ import va.rembot.database.dao.UserDao;
 import va.rembot.database.models.MessageSpam;
 import va.rembot.database.models.StrikeSpam;
 import va.rembot.database.models.User;
+import va.rembot.exceptions.MessageSpamNotFoundException;
+import va.rembot.exceptions.StrikeSpamNotFoundException;
 
 import java.sql.*;
 import java.time.Duration;
@@ -49,15 +51,23 @@ public class AntiSpamFilter extends ListenerAdapter {
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
         messageSpamDao.create(new MessageSpam(discordMsgId, discordId, new Timestamp(msgCreated)));
 
-        timeFirstMsgCreated = messageSpamDao.getFirst(discordId).get().getTimeCreated();//TODO use custom exception with orElseThrow(ExampleException::new)
-        timeLastMsgCreated = messageSpamDao.getLatest(discordId).get().getTimeCreated();//TODO use custom exception with orElseThrow(ExampleException::new)
+        timeFirstMsgCreated = messageSpamDao
+                .getFirst(discordId)
+                .orElseThrow(() -> new MessageSpamNotFoundException("messageSpamDao could not find first entry for user with discord id: " + discordId)).getTimeCreated();
+        timeLastMsgCreated = messageSpamDao
+                .getLatest(discordId)
+                .orElseThrow(() -> new MessageSpamNotFoundException("messageSpamDao could not find latest entry for user with discord id: " + discordId)).getTimeCreated();
 
         var strikes = 0;
 
         Timestamp lastTimeStrikeGiven;
 
-        strikes = strikeSpamDao.getAmount(discordId).get().getAmount();//TODO should be custom exception with orelsethrow!
-        lastTimeStrikeGiven = strikeSpamDao.getAmount(discordId).get().getMostRecentStrike();//TODO should be custom exception with orelsethrow!
+        strikes = strikeSpamDao
+                .getAmount(discordId)
+                .orElseThrow(() -> new StrikeSpamNotFoundException("strikeSpamDao could not find amount for user with discord id: " + discordId)).getAmount();
+        lastTimeStrikeGiven = strikeSpamDao
+                .getAmount(discordId)
+                .orElseThrow(() -> new StrikeSpamNotFoundException("strikeSpamDao could not find lastTimeStrikeGiven for user with discord id: " + discordId)).getMostRecentStrike();
 
         var timeFirstMsgCreatedSeconds = timeFirstMsgCreated.toInstant().getEpochSecond();
         var timeLastMsgCreatedSeconds = timeLastMsgCreated.toInstant().getEpochSecond();
