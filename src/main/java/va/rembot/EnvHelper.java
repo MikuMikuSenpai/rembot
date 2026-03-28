@@ -15,7 +15,6 @@ public class EnvHelper {
 
         try {
 
-            log.debug("[getInt] REPLICATE_AMOUNT_INT {} and REPLICATE_AMOUNT {}", REPLICATE_AMOUNT_INT, REPLICATE_AMOUNT);
             return Integer.parseInt(REPLICATE_AMOUNT);
 
         } catch (NumberFormatException e) {
