@@ -127,7 +127,7 @@ public class AntiSpamFilter extends ListenerAdapter {
 
                     //alternatively we could delete the entry from the table, ill keep this in mind for later
                     //but keep it to 0 for simplicity for now
-                    strikeSpamDao.update(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));//TODO make an actual updateToZeroAmount() reads better
+                    strikeSpamDao.updateAmountToZero(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
                 }
             }
         }

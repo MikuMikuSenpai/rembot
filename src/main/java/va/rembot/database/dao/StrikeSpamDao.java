@@ -88,6 +88,23 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         }
     }
 
+    public void updateAmountToZero(StrikeSpam strikeSpam) {
+
+        String query = "UPDATE strikes_spam SET amount = 0, most_recent_given = ? WHERE discord_user_id = ?";
+
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)){
+
+            ps.setTimestamp(1, strikeSpam.getMostRecentStrike());
+            ps.setLong(2, strikeSpam.getDiscordId());
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void delete(StrikeSpam strikeSpam) {
 
