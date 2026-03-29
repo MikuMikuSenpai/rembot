@@ -14,7 +14,7 @@ public class UserDao implements Dao<User>{
     @Override
     public void create(User user) {
 
-        var id = user.getDiscordId();
+        var id = user.discordId();
         String query = "INSERT IGNORE INTO users (discord_user_id) VALUES (?)";
 
         try (Connection conn = DataSource.getConnection();

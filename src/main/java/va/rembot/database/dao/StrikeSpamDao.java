@@ -20,8 +20,8 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
 
-            pStmt.setLong(1, strikeSpam.getDiscordId());
-            pStmt.setTimestamp(2, strikeSpam.getMostRecentStrike());
+            pStmt.setLong(1, strikeSpam.discordId());
+            pStmt.setTimestamp(2, strikeSpam.mostRecentStrike());
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -77,9 +77,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         try (Connection conn = DataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)){
 
-            ps.setInt(1, strikeSpam.getAmount());
-            ps.setTimestamp(2, strikeSpam.getMostRecentStrike());
-            ps.setLong(3, strikeSpam.getDiscordId());
+            ps.setInt(1, strikeSpam.amount());
+            ps.setTimestamp(2, strikeSpam.mostRecentStrike());
+            ps.setLong(3, strikeSpam.discordId());
 
             ps.executeUpdate();
 
@@ -95,8 +95,8 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         try (Connection conn = DataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)){
 
-            ps.setTimestamp(1, strikeSpam.getMostRecentStrike());
-            ps.setLong(2, strikeSpam.getDiscordId());
+            ps.setTimestamp(1, strikeSpam.mostRecentStrike());
+            ps.setLong(2, strikeSpam.discordId());
 
             ps.executeUpdate();
 
