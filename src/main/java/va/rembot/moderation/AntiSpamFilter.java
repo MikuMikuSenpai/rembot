@@ -7,10 +7,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
-import va.rembot.database.dao.MessageSpamDao;
+import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StrikeSpamDao;
 import va.rembot.database.dao.UserDao;
-import va.rembot.database.models.MessageSpam;
+import va.rembot.database.models.Message;
 import va.rembot.database.models.StrikeSpam;
 import va.rembot.database.models.User;
 import va.rembot.exceptions.MessageSpamNotFoundException;
@@ -37,7 +37,7 @@ public class AntiSpamFilter extends ListenerAdapter {
 
         var usrDao = new UserDao();
         var strikeSpamDao = new StrikeSpamDao();
-        var messageSpamDao = new MessageSpamDao();
+        var messageDao = new MessageDao();
 
         var msgCreated = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
         var user = event.getMember();
@@ -49,14 +49,14 @@ public class AntiSpamFilter extends ListenerAdapter {
 
         usrDao.create(new User(discordId));
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
-        messageSpamDao.create(new MessageSpam(discordMsgId, discordId, new Timestamp(msgCreated)));
+        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated)));
 
-        timeFirstMsgCreated = messageSpamDao
+        timeFirstMsgCreated = messageDao
                 .getFirst(discordId)
-                .orElseThrow(() -> new MessageSpamNotFoundException("messageSpamDao could not find first entry for user with discord id: " + discordId)).getTimeCreated();
-        timeLastMsgCreated = messageSpamDao
+                .orElseThrow(() -> new MessageSpamNotFoundException("messageDao could not find first entry for user with discord id: " + discordId)).timeCreated();
+        timeLastMsgCreated = messageDao
                 .getLatest(discordId)
-                .orElseThrow(() -> new MessageSpamNotFoundException("messageSpamDao could not find latest entry for user with discord id: " + discordId)).getTimeCreated();
+                .orElseThrow(() -> new MessageSpamNotFoundException("messageDao could not find latest entry for user with discord id: " + discordId)).timeCreated();
 
         var strikes = 0;
 
