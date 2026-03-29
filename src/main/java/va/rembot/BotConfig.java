@@ -27,7 +27,7 @@ import java.util.List;
 public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
-    public static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
+    private static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
     @Getter
     private static Long modRoleIdLong = 0L;
     public static final String LOG_CHANNEL_ID = System.getenv("LOG_CHANNEL_ID");
@@ -40,13 +40,13 @@ public class BotConfig extends ListenerAdapter {
     public static final String MYSQL_ROOT_PASSWORD = System.getenv("MYSQL_ROOT_PASSWORD");
     public static final String MYSQL_DATABASE = System.getenv("MYSQL_DATABASE");
     public static final String ANTI_SPAM_WORDS_AMOUNT = System.getenv("ANTI_SPAM_WORDS_AMOUNT");
-    public static final String ANTI_SPAM_TIME_AMOUNT = System.getenv("ANTI_SPAM_TIME_AMOUNT");
+    private static final String ANTI_SPAM_TIME_AMOUNT = System.getenv("ANTI_SPAM_TIME_AMOUNT");
     @Getter
     private static int antiSpamTimeAmountInt = 0;
-    public static final String ANTI_SPAM_MUTE_AMOUNT = System.getenv("ANTI_SPAM_MUTE_AMOUNT");
+    private static final String ANTI_SPAM_MUTE_AMOUNT = System.getenv("ANTI_SPAM_MUTE_AMOUNT");
     @Getter
     private static int antiSpamMuteAmountInt = 0;
-    public static final String ANTI_SPAM_STRIKE_AMOUNT = System.getenv("ANTI_SPAM_STRIKE_AMOUNT");
+    private static final String ANTI_SPAM_STRIKE_AMOUNT = System.getenv("ANTI_SPAM_STRIKE_AMOUNT");
     @Getter
     private static int antiSpamStrikeAmountInt = 0;
 
