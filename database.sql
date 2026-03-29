@@ -22,7 +22,9 @@ CREATE TABLE messages(
 CREATE TABLE strikes_spam(
     discord_user_id BIGINT NOT NULL UNIQUE,
     amount TINYINT NOT NULL,
-    most_recent_given TIMESTAMP NOT NULL
+    most_recent_given TIMESTAMP NOT NULL,
+
+    PRIMARY KEY(discord_user_id)
 );
 
 -- check every 12 hours if there are messages younger than 1 week (could extend test this for now) delete those to clean DB
