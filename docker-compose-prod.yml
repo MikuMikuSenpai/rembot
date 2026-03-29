@@ -2,6 +2,9 @@ services:
   rembot:
     image: ghcr.io/mikumikusenpai/rembot:${IMAGE_TAG}
     container_name: rembot
+    depends_on:
+      db:
+        condition: service_healthy
     env_file:
       - .env
 
