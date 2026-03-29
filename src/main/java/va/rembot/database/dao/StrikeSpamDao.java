@@ -1,5 +1,6 @@
 package va.rembot.database.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import va.rembot.database.DataSource;
 import va.rembot.database.models.StrikeSpam;
 
@@ -10,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class StrikeSpamDao implements Dao<StrikeSpam> {
 
     @Override
@@ -25,7 +27,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not insert new StrikeSpam in DB.");
+            log.error("Details: discordId {}, mostRecentStrike{}", strikeSpam.discordId(), strikeSpam.mostRecentStrike());
+            log.error("Error: {}", e.getMessage());
         }
 
     }
@@ -42,7 +46,7 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
 
     public Optional<StrikeSpam> getAmount(long discordId) {
 
-        StrikeSpam strikeSpam;
+        StrikeSpam strikeSpam = null;
 
         String query = "SELECT * FROM strikes_spam WHERE discord_user_id = ?";
 
@@ -63,7 +67,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
             strikeSpam = new StrikeSpam(discordId, amount, mostRecentGiven);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not get strike amount for spam detection.");
+            log.error("Discord id of user: {}", discordId);
+            log.error("Error: {}", e.getMessage());
         }
 
         return Optional.of(strikeSpam);
@@ -84,7 +90,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not update strikeSpam with new amount and timestamp for spam detection.");
+            log.error("StrikeSpam details: amount {}, mostRecentStrike {}, discordId {}", strikeSpam.amount(), strikeSpam.mostRecentStrike(), strikeSpam.discordId());
+            log.error("Error: {}", e.getMessage());
         }
     }
 
@@ -101,7 +109,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not update strikeSpam to amount 0 and timestamp for spam detection.");
+            log.error("StrikeSpam details: amount {}, mostRecentStrike {}, discordId {}", strikeSpam.amount(), strikeSpam.mostRecentStrike(), strikeSpam.discordId());
+            log.error("Error: {}", e.getMessage());
         }
     }
 

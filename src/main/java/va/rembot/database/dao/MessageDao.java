@@ -1,5 +1,6 @@
 package va.rembot.database.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import va.rembot.BotConfig;
 import va.rembot.database.DataSource;
 import va.rembot.database.models.Message;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class MessageDao implements Dao<Message>{
 
     @Override
@@ -27,7 +29,9 @@ public class MessageDao implements Dao<Message>{
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not insert Message in DB.");
+            log.error("Message details: discordMessageId {}, discordId {}, timeCreated {}", message.discordMessageId(), message.discordId(), message.timeCreated());
+            log.error("Error: {}", e.getMessage());;
         }
 
     }
@@ -44,7 +48,7 @@ public class MessageDao implements Dao<Message>{
 
     public Optional<Message> getFirst(long discordId) {
 
-        Message msgSpam;
+        Message msgSpam = null;
 
         String query =
                 "SELECT * FROM " +
@@ -69,7 +73,9 @@ public class MessageDao implements Dao<Message>{
             msgSpam = new Message(discordMsgId, discordId, timeCreated);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not get first message for spam detection.");
+            log.error("Discord id of user: {}", discordId);
+            log.error("Error: {}", e.getMessage());
         }
 
         return Optional.of(msgSpam);
@@ -77,7 +83,7 @@ public class MessageDao implements Dao<Message>{
 
     public Optional<Message> getLatest(long discordId) {
 
-        Message msgSpam;
+        Message msgSpam = null;
 
         String query =
                 "SELECT * FROM " +
@@ -102,7 +108,9 @@ public class MessageDao implements Dao<Message>{
             msgSpam = new Message(discordMsgId, discordId, timeCreated);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Could not get latest message for spam detection.");
+            log.error("Discord id of user: {}", discordId);
+            log.error("Error: {}", e.getMessage());
         }
 
         return Optional.of(msgSpam);
