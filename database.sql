@@ -27,7 +27,7 @@ CREATE TABLE strikes_spam(
 
 -- check every 12 hours if there are messages younger than 1 week (could extend test this for now) delete those to clean DB
 CREATE EVENT clean_messages
-       ON SCHEDULE
-       EVERY 12 HOUR
-       DO
-       DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
+   ON SCHEDULE
+   EVERY 12 HOUR
+   DO
+   DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
