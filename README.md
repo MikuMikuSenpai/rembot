@@ -50,9 +50,9 @@ This will be removed when all done, here for organization.
   - [x] Mute
     - [x] backend
     - [x] frontend
-- [ ] Moderation:
+- [x] Moderation:
   - [x] Banned words filter
-  - [ ] Anti-spam filter
+  - [x] Anti-spam filter
 - [x] Docker
   - [x] Dockerfile
     - [x] Being automatically build by GH Actions?
