@@ -4,3 +4,17 @@ services:
     container_name: rembot
     env_file:
       - .env
+
+  db:
+    image: mysql
+    container_name: db
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 20s
+      retries: 10
+    restart: on-failure
+    env_file:
+      - .env
+    volumes:
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
