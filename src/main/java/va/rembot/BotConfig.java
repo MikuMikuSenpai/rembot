@@ -106,6 +106,7 @@ public class BotConfig extends ListenerAdapter {
                 new Mute(),
                 new BannedWordsFilter(),
                 new AntiSpamFilter(),
+                // non slash
                 new PingPong());
 
         bot.updateCommands()
