@@ -72,13 +72,11 @@ public class AntiSpamFilter extends ListenerAdapter {
         var timeFirstMsgCreatedSeconds = timeFirstMsgCreated.toInstant().getEpochSecond();
         var timeLastMsgCreatedSeconds = timeLastMsgCreated.toInstant().getEpochSecond();
 
-        // if the time the most recent msg was created minus the first one is smaller than what the threshhold is
-        // mute them for spamming
+        // If the time between the latest msg and the first msg of the bunch (set by the user, defaults to 5). Is less
+        // than our threshold we count that as spam.
         if (timeLastMsgCreatedSeconds - timeFirstMsgCreatedSeconds <= ANTI_SPAM_TIME_AMOUNT && timeLastMsgCreatedSeconds != timeFirstMsgCreatedSeconds){
 
-            // to prevent the bot spam muting: check that the difference between the time now and
-            // the last time a strike was given is at least greater than 5 secs
-            // we could make this (5 secs diff) an env var but i dont see the point atm.
+            // Prevent bot spam muting user by leaving at least 5 secs between now and last time strike was given.
             if (new Timestamp(msgCreated).toInstant().getEpochSecond() - lastTimeStrikeGiven.toInstant().getEpochSecond() > 5) {
                 strikes++;
 
@@ -93,8 +91,8 @@ public class AntiSpamFilter extends ListenerAdapter {
                 embed.setColor(0xbb0a1e);
                 embed.setTimestamp(Instant.now());
 
-                // if strikes below or equal to allowed strikes send warning msg and give strike other wise
-                // ban them and set strikes to 0 for future (if they ever get unbanned)
+                // If strikes are below/equal our accepted value give strike, else ban. Set strikes to 0 if they ever
+                // get unbanned that this procedure would still work with them.
                 if (strikes <= ANTI_SPAM_STRIKE_AMOUNT) {
                     int strikesCopy = strikes; //need to make this to be able to use in lambda below (intellij) said
                     event.getGuild()
@@ -124,9 +122,8 @@ public class AntiSpamFilter extends ListenerAdapter {
                                                 .sendMessageEmbeds(embedForBan.build())
                                                 .queue();
                                     });
-
-                    //alternatively we could delete the entry from the table, ill keep this in mind for later
-                    //but keep it to 0 for simplicity for now
+                    
+                    // Set strikes to 0 after banning, could delete too but chose this route.
                     strikeSpamDao.updateAmountToZero(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
                 }
             }
