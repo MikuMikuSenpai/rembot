@@ -1,6 +1,7 @@
 package va.rembot.moderation.word_filter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
@@ -112,7 +113,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (!hasSubInMsg && !hasDoubleAntiCensorChar)
             return;
 
-        var substitutedMsg = substitute(msgTotalArrayTrimmed);
+        var substitutedMsg = substitute(msgTotalArrayTrimmed, event);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
@@ -336,7 +337,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// with Integer and List Character (substitutes that are possible per index of word)
     /// 5. Send each word to replaceSubWithChar() with the Map and make all variants
     /// of the word with their normal characters
-    private List<String> substitute(String[] inputList){
+    private List<String> substitute(String[] inputList, MessageReceivedEvent event){
 
         int amountOfSubWords = 0;
         String newWord;
@@ -438,8 +439,18 @@ public class BannedWordsFilter extends ListenerAdapter {
             log.debug("[substitute] FINAL newWord: {}", newWord);
 
             // we can change amountOfSubWords to any number but higher = less performant
-            if (isSub && amountOfSubWords == 2) {
+            // we do + 1 because we also include a concatenated message of the original
+            // for example original message "badword badword2" would become "badword" "badword2" "badwordbadword2"
+            if (isSub && amountOfSubWords > 2 + 1) {
                 log.debug("[substitute] At least one word found with substitute char, only checking this word.");
+
+                //we should put this in lib/extracted method see issue #35 and #40
+                var user = event.getAuthor().getAsMention();
+                var msgRaw = event.getMessage().getContentRaw();
+
+                event.getJDA().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
+                        .sendMessage("**[POTENTIAL BANNED WORD]** " + user + " <M: " + msgRaw + ">").queue();
+
                 break;
             }
             isSub = false;
