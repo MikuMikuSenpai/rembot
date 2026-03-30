@@ -34,7 +34,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
         var msgAsArray = msg.split(" ");
         var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
-        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).toList();
+        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
 
         StringBuilder msgAsArrayAsListString = new StringBuilder();
         msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
@@ -48,7 +48,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             msgTotal = msgTotal.replace(item.toString(), "");
         }
 
-        var msgTotalArray = msgTotal.split(" ");
+        var msgTotalArray = Arrays.stream(msgTotal.split(" ")).distinct().toList().toArray(new String[0]);
         var msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
 
         // skip the heavy (slow) substitute method if possible
