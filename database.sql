@@ -27,9 +27,17 @@ CREATE TABLE strikes_spam(
     PRIMARY KEY(discord_user_id)
 );
 
--- check every 12 hours if there are messages younger than 1 week (could extend test this for now) delete those to clean DB
+-- check every 12 hours if there are messages younger than 1 week delete those to clean DB.
+-- We are checking these frequently cus could build up fast compared to other data.
 CREATE EVENT clean_messages
-   ON SCHEDULE
-   EVERY 12 HOUR
-   DO
-   DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
+    ON SCHEDULE
+    EVERY 12 HOUR
+    DO
+    DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
+
+-- checks every day if a strike is a week old = delete
+CREATE EVENT clean_strikes_spam
+    ON SCHEDULE
+    EVERY 1 DAY
+    DO
+    DELETE FROM strikes_spam WHERE DATE_ADD(most_recent_given, INTERVAL 1 WEEK) < NOW();
