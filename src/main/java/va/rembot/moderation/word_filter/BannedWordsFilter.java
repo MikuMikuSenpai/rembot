@@ -441,7 +441,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             // we can change amountOfSubWords to any number but higher = less performant
             // we do + 1 because we also include a concatenated message of the original
             // for example original message "badword badword2" would become "badword" "badword2" "badwordbadword2"
-            if (isSub && amountOfSubWords > 2 + 1) {
+            if (isSub && amountOfSubWords > BotConfig.getSubstituteBannedWordCheckAmountInt() + 1) {
                 log.debug("[substitute] At least one word found with substitute char, only checking this word.");
 
                 //we should put this in lib/extracted method see issue #35 and #40
