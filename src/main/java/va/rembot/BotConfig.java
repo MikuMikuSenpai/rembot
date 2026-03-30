@@ -49,6 +49,9 @@ public class BotConfig extends ListenerAdapter {
     private static final String ANTI_SPAM_STRIKE_AMOUNT = System.getenv("ANTI_SPAM_STRIKE_AMOUNT");
     @Getter
     private static int antiSpamStrikeAmountInt = 0;
+    private static final String SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT = System.getenv("SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT");
+    @Getter
+    private static int substituteBannedWordCheckAmountInt = 0;
 
     @Override
     public void onReady(ReadyEvent event) {
@@ -95,6 +98,17 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
+        try {
+            substituteBannedWordCheckAmountInt = Integer.parseInt(SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
         }

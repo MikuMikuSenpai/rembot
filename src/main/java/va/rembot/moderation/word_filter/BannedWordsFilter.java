@@ -1,6 +1,7 @@
 package va.rembot.moderation.word_filter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
@@ -32,14 +33,17 @@ public class BannedWordsFilter extends ListenerAdapter {
         var msg = event.getMessage().getContentRaw();
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
-        var msgAsArray = msg.split(" ");
-        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
-        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
+        //keep this for now commented, the below was just the normal msg without the EmojiHelper
+        //but since EmojiHelper also just sends the msg we would have duplicates so im p sure we can remove this
+        //im keeping this in case it breaks but this will be removed post v1 probably
+//        var msgAsArray = msg.split(" ");
+//        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
+//        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
 
-        StringBuilder msgAsArrayAsListString = new StringBuilder();
-        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
+//        StringBuilder msgAsArrayAsListString = new StringBuilder();
+//        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
 
-        var msgTotal = (msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
+        var msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
 
         // filter out any char that would be in the way of filter such as quotes ""
         for (var item : FILTERED_SPECIAL_CHARS) {
@@ -97,9 +101,10 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
         log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
-        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
-        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
-        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
+//        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
+//        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
+//        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
+//        log.debug("[onMessageReceived] msgAsArrayAsListString: {}", msgAsArrayAsListString);
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
@@ -108,7 +113,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (!hasSubInMsg && !hasDoubleAntiCensorChar)
             return;
 
-        var substitutedMsg = substitute(msgTotalArrayTrimmed);
+        var substitutedMsg = substitute(msgTotalArrayTrimmed, event);
         var combinedWordsList = getCombinedWords(substitutedMsg);
 
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
@@ -332,8 +337,9 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// with Integer and List Character (substitutes that are possible per index of word)
     /// 5. Send each word to replaceSubWithChar() with the Map and make all variants
     /// of the word with their normal characters
-    private List<String> substitute(String[] inputList){
+    private List<String> substitute(String[] inputList, MessageReceivedEvent event){
 
+        int amountOfSubWords = 0;
         String newWord;
         List<String> newList = new ArrayList<>();
 
@@ -391,8 +397,9 @@ public class BannedWordsFilter extends ListenerAdapter {
                     }
                 }
 
-                if (isSub)
+                if (isSub) {
                     indexForSubs.put(indexForSub, potentialSubs);
+                }
                 log.debug("[substitute] indexForSubs BUILDING IT: {}", indexForSubs);
                 log.debug("[substitute] potentialSubs: {}", potentialSubs);
                 log.debug("[substitute] Current index: {}", i);
@@ -422,7 +429,8 @@ public class BannedWordsFilter extends ListenerAdapter {
                 log.debug("[substitute] Current new word (building it): {}", newWord);
             }
 
-            isSub = false;
+            if (isSub)
+                amountOfSubWords++;
 
             StringBuilder stringBuilder = new StringBuilder(newWord);
             replaceSubWithChar(stringBuilder, 0, indexForSubs, newList);
@@ -430,6 +438,22 @@ public class BannedWordsFilter extends ListenerAdapter {
             log.debug("[substitute] newList: {}", newList);
             log.debug("[substitute] FINAL newWord: {}", newWord);
 
+            // we can change amountOfSubWords to any number but higher = less performant
+            // we do + 1 because we also include a concatenated message of the original
+            // for example original message "badword badword2" would become "badword" "badword2" "badwordbadword2"
+            if (isSub && amountOfSubWords > BotConfig.getSubstituteBannedWordCheckAmountInt() + 1) {
+                log.debug("[substitute] At least one word found with substitute char, only checking this word.");
+
+                //we should put this in lib/extracted method see issue #35 and #40
+                var user = event.getAuthor().getAsMention();
+                var msgRaw = event.getMessage().getContentRaw();
+
+                event.getJDA().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
+                        .sendMessage("**[POTENTIAL BANNED WORD]** " + user + " <M: " + msgRaw + ">").queue();
+
+                break;
+            }
+            isSub = false;
         }
 
         log.debug("[substitute] Returning this newList: {}", newList);
