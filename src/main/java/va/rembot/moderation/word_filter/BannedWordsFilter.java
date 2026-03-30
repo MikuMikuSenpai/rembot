@@ -334,6 +334,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     /// of the word with their normal characters
     private List<String> substitute(String[] inputList){
 
+        boolean moreThanOneSub = false;
         String newWord;
         List<String> newList = new ArrayList<>();
 
@@ -391,8 +392,10 @@ public class BannedWordsFilter extends ListenerAdapter {
                     }
                 }
 
-                if (isSub)
+                if (isSub) {
                     indexForSubs.put(indexForSub, potentialSubs);
+                    moreThanOneSub = true;
+                }
                 log.debug("[substitute] indexForSubs BUILDING IT: {}", indexForSubs);
                 log.debug("[substitute] potentialSubs: {}", potentialSubs);
                 log.debug("[substitute] Current index: {}", i);
@@ -430,6 +433,10 @@ public class BannedWordsFilter extends ListenerAdapter {
             log.debug("[substitute] newList: {}", newList);
             log.debug("[substitute] FINAL newWord: {}", newWord);
 
+            if (moreThanOneSub) {
+                log.debug("[substitute] At least one word found with substitute char, only checking this word.");
+                break;
+            }
         }
 
         log.debug("[substitute] Returning this newList: {}", newList);
