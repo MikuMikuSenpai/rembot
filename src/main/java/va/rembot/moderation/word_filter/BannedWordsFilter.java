@@ -32,14 +32,17 @@ public class BannedWordsFilter extends ListenerAdapter {
         var msg = event.getMessage().getContentRaw();
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
-        var msgAsArray = msg.split(" ");
-        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
-        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
+        //keep this for now commented, the below was just the normal msg without the EmojiHelper
+        //but since EmojiHelper also just sends the msg we would have duplicates so im p sure we can remove this
+        //im keeping this in case it breaks but this will be removed post v1 probably
+//        var msgAsArray = msg.split(" ");
+//        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
+//        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
 
-        StringBuilder msgAsArrayAsListString = new StringBuilder();
-        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
+//        StringBuilder msgAsArrayAsListString = new StringBuilder();
+//        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
 
-        var msgTotal = (msgAsArrayAsListString + " " + msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
+        var msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
 
         // filter out any char that would be in the way of filter such as quotes ""
         for (var item : FILTERED_SPECIAL_CHARS) {
@@ -97,9 +100,10 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
         log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
-        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
-        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
-        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
+//        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
+//        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
+//        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
+//        log.debug("[onMessageReceived] msgAsArrayAsListString: {}", msgAsArrayAsListString);
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
