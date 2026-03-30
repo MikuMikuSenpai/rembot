@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 @Slf4j
 /// ONLY starts the bot nothing else.
@@ -20,6 +21,11 @@ public class Bot {
                     BOT_TOKEN,
                     GatewayIntent.GUILD_MESSAGES,
                     GatewayIntent.MESSAGE_CONTENT)
+                    .disableCache( // this is to ignore the jda warnings, might need to enable these in the future
+                            CacheFlag.VOICE_STATE,
+                            CacheFlag.EMOJI,
+                            CacheFlag.STICKER,
+                            CacheFlag.SCHEDULED_EVENTS)
                     .build();
             printLogo();
         } catch (InvalidTokenException e) {
