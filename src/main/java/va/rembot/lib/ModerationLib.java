@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ModerationLib {
 
+    private static final int EMBED_MESSAGE_COLOR = 0xbb0a1e;
+    private static final String EMBED_MESSAGE_TITLE_BANNED = "Someone got banned";
+
     public static void banUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
 
         var embed = buildEmbedForBan(targetUser, reason, slashCommandUser);
@@ -65,11 +68,11 @@ public class ModerationLib {
     private static MessageEmbed buildEmbedForBan(User targetUser, String reason, User moderatorUser){
         EmbedBuilder embed = new EmbedBuilder();
 
-        embed.setTitle("Someone got banned");
+        embed.setTitle(EMBED_MESSAGE_TITLE_BANNED);
         embed.addField("User", targetUser.getAsMention(), true);
         embed.addField("Mod", moderatorUser.getAsMention(), true);
         embed.addField("Reason", reason, false);
-        embed.setColor(0xbb0a1e);
+        embed.setColor(EMBED_MESSAGE_COLOR);
         embed.setTimestamp(Instant.now());
 
         return embed.build();
@@ -78,10 +81,10 @@ public class ModerationLib {
     private static MessageEmbed buildEmbedForBanGeneric(User targetUser, String reason){
         EmbedBuilder embed = new EmbedBuilder();
 
-        embed.setTitle("Someone got banned");
+        embed.setTitle(EMBED_MESSAGE_TITLE_BANNED);
         embed.addField("User", targetUser.getAsMention(), true);
         embed.addField("Reason", reason, true);
-        embed.setColor(0xbb0a1e);
+        embed.setColor(EMBED_MESSAGE_COLOR);
         embed.setTimestamp(Instant.now());
 
         return embed.build();
