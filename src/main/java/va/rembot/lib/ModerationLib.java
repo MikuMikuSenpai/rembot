@@ -178,7 +178,7 @@ public class ModerationLib {
     public static void unmuteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
 
         event.getGuild()
-                .getMember(usrSnowflake)
+                .getMemberById(targetUser.getId())
                 .removeTimeout()
                 .queue(success -> {
                     event.getGuild().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
