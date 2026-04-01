@@ -156,19 +156,19 @@ public class ModerationLib {
                             .queue();
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            unbanErrorSlashCommand("Bot doesn't have enough permissions to unban the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
+                            logUnbanErrorSlashCommand("Bot doesn't have enough permissions to unban the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("Failed to unban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_BAN, e -> {
-                            unbanErrorSlashCommand("Couldn't unban that user because the ban is unknown (possibly not banned?).", slashCommandUser, targetUser);
+                            logUnbanErrorSlashCommand("Couldn't unban that user because the ban is unknown (possibly not banned?).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_USER, e -> {
-                            unbanErrorSlashCommand("Dont know who the target user is (Unknown user).", slashCommandUser, targetUser);
+                            logUnbanErrorSlashCommand("Dont know who the target user is (Unknown user).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("I can't find the person you are trying to unban (unknown user)." + slashCommandUser.getAsMention())
                                     .queue();
@@ -251,7 +251,7 @@ public class ModerationLib {
         log.error(error);
     }
 
-    private static void unbanErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
+    private static void logUnbanErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
         log.error(error);
         log.error("{} tried to unban {}", slashCommandUser, targetUser);
     }
