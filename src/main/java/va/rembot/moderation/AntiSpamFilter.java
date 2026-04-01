@@ -83,28 +83,11 @@ public class AntiSpamFilter extends ListenerAdapter {
 
                 strikeSpamDao.update(new StrikeSpam(discordId, strikes, new Timestamp(msgCreated)));
 
-                EmbedBuilder embed = new EmbedBuilder();
-
-                embed.setTitle("Someone got muted for spamming");
-                embed.addField("User", user.getAsMention(), true);
-                embed.addField("Minutes", String.valueOf(ANTI_SPAM_MUTE_AMOUNT), true);
-
-                embed.setColor(0xbb0a1e);
-                embed.setTimestamp(Instant.now());
-
                 // If strikes are below/equal our accepted value give strike, else ban. Set strikes to 0 if they ever
                 // get unbanned that this procedure would still work with them.
                 if (strikes <= ANTI_SPAM_STRIKE_AMOUNT) {
-                    int strikesCopy = strikes; //need to make this to be able to use in lambda below (intellij) said
-                    event.getGuild()
-                            .timeoutFor(usrSnowflake, Duration.ofMinutes(ANTI_SPAM_MUTE_AMOUNT))
-                            .reason("Spamming")
-                            .queue(success -> {
-                                event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                                        .sendMessageEmbeds(embed.build())
-                                        .and(event.getMessage().reply("Stop spamming strike: " + strikesCopy + "/" + ANTI_SPAM_STRIKE_AMOUNT + " 3 strikes = ban."))
-                                        .queue();
-                            });
+
+                    ModerationLib.muteSpam(event, usrSnowflake, "Spamming", strikes, user.getUser());
                 } else {
 
                     ModerationLib.banGeneric(event, usrSnowflake, "Spamming", user.getUser());

@@ -17,10 +17,12 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+/// Central class for accessing moderation methods, also to customize them (for example the embed messages).
 public class ModerationLib {
 
     private static final int EMBED_MESSAGE_COLOR = 0xbb0a1e;
     private static final String EMBED_MESSAGE_TITLE_BANNED = "Someone got banned";
+    private static final String EMBED_MESSAGE_TITLE_MUTED = "Someone got muted";
 
     public static void banUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
 
@@ -30,7 +32,7 @@ public class ModerationLib {
                 .ban(usrSnowflake, 0, TimeUnit.MINUTES)
                 .reason(reason)
                 .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
+                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
@@ -57,7 +59,7 @@ public class ModerationLib {
                 .ban(usrSnowflake, 0, TimeUnit.MINUTES)
                 .reason(reason)
                 .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
+                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
                             .queue(null, new ErrorHandler()
                                     .handle(ErrorResponse.UNKNOWN_CHANNEL, e -> {
@@ -74,7 +76,7 @@ public class ModerationLib {
                 .timeoutFor(usrSnowflake, Duration.ofMinutes(muteTimeTotalMinutes))
                 .reason(reason)
                 .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
+                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
@@ -91,6 +93,21 @@ public class ModerationLib {
                                     .editOriginal("The user you tried to mute was already removed from this server." + slashCommandUser.getAsMention())
                                     .queue();
                         }));
+    }
+
+    public static void muteSpam(MessageReceivedEvent event, UserSnowflake usrSnowflake, String reason, int strikes, User targetUsr) {
+
+        var embed = buildEmbedForMuteSpam(targetUsr, BotConfig.getAntiSpamMuteAmountInt());
+
+        event.getGuild()
+                .timeoutFor(usrSnowflake, Duration.ofMinutes(BotConfig.getAntiSpamMuteAmountInt()))
+                .reason(reason)
+                .queue(success -> {
+                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
+                            .sendMessageEmbeds(embed)
+                            .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " 3 strikes = ban."))
+                            .queue();
+                });
     }
 
     private static MessageEmbed buildEmbedForBan(User targetUser, String reason, User moderatorUser){
@@ -121,11 +138,24 @@ public class ModerationLib {
     private static MessageEmbed buildEmbedForMute(User targetUser, String reason, User moderatorUser, int muteTimeMinutes){
         EmbedBuilder embed = new EmbedBuilder();
 
-        embed.setTitle(EMBED_MESSAGE_TITLE_BANNED);
+        embed.setTitle(EMBED_MESSAGE_TITLE_MUTED);
         embed.addField("User", targetUser.getAsMention(), true);
         embed.addField("Mod", moderatorUser.getAsMention(), true);
         embed.addField("Minutes", String.valueOf(muteTimeMinutes), true);
         embed.addField("Reason", reason, false);
+
+        embed.setColor(EMBED_MESSAGE_COLOR);
+        embed.setTimestamp(Instant.now());
+
+        return embed.build();
+    }
+
+    private static MessageEmbed buildEmbedForMuteSpam(User targetUser, int muteTimeMinutes){
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setTitle("Someone got muted for spamming");
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Minutes", String.valueOf(muteTimeMinutes), true);
 
         embed.setColor(EMBED_MESSAGE_COLOR);
         embed.setTimestamp(Instant.now());
