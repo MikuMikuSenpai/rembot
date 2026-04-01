@@ -65,7 +65,13 @@ public class ModerationLib {
                                     .handle(ErrorResponse.UNKNOWN_CHANNEL, e -> {
                                         logBanErrorGeneric("Failed to find darwin channel, it was deleted.");
                                     }));
-                });
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            logBanErrorGeneric("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
+                        })
+                        .handle(ErrorResponse.UNKNOWN_USER, e -> {
+                            logBanErrorGeneric("Dont know who the target user is (Unknown user).");
+                        }));
     }
 
     public static void kickUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
@@ -80,15 +86,13 @@ public class ModerationLib {
                             .queue();
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            log.error("Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
-                            log.error("{} tried to kick {}", slashCommandUser, targetUser);
+                            logKickErrorSlashCommand("Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("Failed to kick that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
-                            log.error("The member that was being kicked was already removed from this server before finishing the kicking task.");
-                            log.error("{} tried to kick {}", slashCommandUser, targetUser);
+                            logKickErrorSlashCommand("The member that was being kicked was already removed from this server before finishing the kicking task.", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("The user you tried to kick was already removed from this server." + slashCommandUser.getAsMention())
                                     .queue();
@@ -134,7 +138,13 @@ public class ModerationLib {
                             .sendMessageEmbeds(embed)
                             .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " 3 strikes = ban."))
                             .queue();
-                });
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            logMuteErrorGeneric("Bot doesn't have enough permissions to mute the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
+                        })
+                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                            logMuteErrorGeneric("The member that was being muted was already removed from this server before finishing the muting task.");
+                        }));
     }
 
     public static void unbanUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
@@ -149,22 +159,19 @@ public class ModerationLib {
                             .queue();
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            log.error("Bot doesn't have enough permissions to unban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
-                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            unbanErrorSlashCommand("Bot doesn't have enough permissions to unban the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("Failed to unban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_BAN, e -> {
-                            log.error("Couldn't unban that user because the ban is unknown (possibly not banned?).");
-                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            unbanErrorSlashCommand("Couldn't unban that user because the ban is unknown (possibly not banned?).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_USER, e -> {
-                            log.error("Dont know who the target user is (Unknown user).");
-                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            unbanErrorSlashCommand("Dont know who the target user is (Unknown user).", slashCommandUser, targetUser);
                             event.getHook()
                                     .editOriginal("I can't find the person you are trying to unban (unknown user)." + slashCommandUser.getAsMention())
                                     .queue();
@@ -233,9 +240,23 @@ public class ModerationLib {
         log.error(error);
     }
 
+    private static void logKickErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
+        log.error(error);
+        log.error("{} tried to kick {}", slashCommandUser, targetUser);
+    }
+
     private static void logMuteErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
         log.error(error);
         log.error("{} tried to mute {}", slashCommandUser, targetUser);
+    }
+
+    private static void logMuteErrorGeneric(String error) {
+        log.error(error);
+    }
+
+    private static void unbanErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
+        log.error(error);
+        log.error("{} tried to unban {}", slashCommandUser, targetUser);
     }
 
 }
