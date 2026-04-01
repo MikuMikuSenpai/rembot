@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
@@ -65,6 +66,33 @@ public class ModerationLib {
                 });
     }
 
+    public static void muteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, int muteTimeTotalMinutes, User slashCommandUser, User targetUser) {
+
+        var embed = buildEmbedForMute(targetUser, reason, slashCommandUser, muteTimeTotalMinutes);
+
+        event.getGuild()
+                .timeoutFor(usrSnowflake, Duration.ofMinutes(muteTimeTotalMinutes))
+                .reason(reason)
+                .queue(success -> {
+                    event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
+                            .sendMessageEmbeds(embed)
+                            .and(event.getHook().deleteOriginal())
+                            .queue();
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            logMuteErrorSlashCommand("Bot doesn't have enough permissions to mute the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to muted that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        })
+                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                            logMuteErrorSlashCommand("The member that was being muted was already removed from this server before finishing the muting task.", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("The user you tried to mute was already removed from this server." + slashCommandUser.getAsMention())
+                                    .queue();
+                        }));
+    }
+
     private static MessageEmbed buildEmbedForBan(User targetUser, String reason, User moderatorUser){
         EmbedBuilder embed = new EmbedBuilder();
 
@@ -90,6 +118,21 @@ public class ModerationLib {
         return embed.build();
     }
 
+    private static MessageEmbed buildEmbedForMute(User targetUser, String reason, User moderatorUser, int muteTimeMinutes){
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setTitle(EMBED_MESSAGE_TITLE_BANNED);
+        embed.addField("User", targetUser.getAsMention(), true);
+        embed.addField("Mod", moderatorUser.getAsMention(), true);
+        embed.addField("Minutes", String.valueOf(muteTimeMinutes), true);
+        embed.addField("Reason", reason, false);
+
+        embed.setColor(EMBED_MESSAGE_COLOR);
+        embed.setTimestamp(Instant.now());
+
+        return embed.build();
+    }
+
     private static void logBanErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
         log.error(error);
         log.error("{} tried to ban {}", slashCommandUser, targetUser);
@@ -97,6 +140,11 @@ public class ModerationLib {
 
     private static void logBanErrorGeneric(String error) {
         log.error(error);
+    }
+
+    private static void logMuteErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
+        log.error(error);
+        log.error("{} tried to mute {}", slashCommandUser, targetUser);
     }
 
 }
