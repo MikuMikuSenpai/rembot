@@ -15,6 +15,7 @@ import va.rembot.database.models.StrikeSpam;
 import va.rembot.database.models.User;
 import va.rembot.exceptions.MessageSpamNotFoundException;
 import va.rembot.exceptions.StrikeSpamNotFoundException;
+import va.rembot.lib.ModerationLib;
 
 import java.sql.*;
 import java.time.Duration;
@@ -106,22 +107,7 @@ public class AntiSpamFilter extends ListenerAdapter {
                             });
                 } else {
 
-                    EmbedBuilder embedForBan = new EmbedBuilder();
-
-                    embedForBan.setTitle("Someone got banned");
-                    embedForBan.addField("User", user.getAsMention(), true);
-                    embedForBan.addField("Reason", "Spamming", true);
-                    embedForBan.setColor(0xbb0a1e);
-                    embedForBan.setTimestamp(Instant.now());
-
-                    event.getGuild()
-                            .ban(usrSnowflake, 0, TimeUnit.MINUTES)
-                            .reason("Spamming")
-                            .queue(success -> {
-                                        event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
-                                                .sendMessageEmbeds(embedForBan.build())
-                                                .queue();
-                                    });
+                    ModerationLib.banGeneric(event, usrSnowflake, "Spamming", user.getUser());
                     
                     // Set strikes to 0 after banning, could delete too but chose this route.
                     strikeSpamDao.updateAmountToZero(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
