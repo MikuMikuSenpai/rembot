@@ -25,7 +25,8 @@ public class Bot {
                             CacheFlag.VOICE_STATE,
                             CacheFlag.EMOJI,
                             CacheFlag.STICKER,
-                            CacheFlag.SCHEDULED_EVENTS)
+                            CacheFlag.SCHEDULED_EVENTS,
+                            CacheFlag.SOUNDBOARD_SOUNDS)
                     .build();
             printLogo();
         } catch (InvalidTokenException e) {
