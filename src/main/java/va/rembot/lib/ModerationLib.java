@@ -175,6 +175,31 @@ public class ModerationLib {
                         }));
     }
 
+    public static void unmuteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
+
+        event.getGuild()
+                .getMember(usrSnowflake)
+                .removeTimeout()
+                .queue(success -> {
+                    event.getGuild().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
+                            .sendMessage("**[USER UNMUTE]**: " + targetUser.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
+                            .and(event.getHook().deleteOriginal())
+                            .queue();
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            logUnmuteErrorSlashCommand("Bot doesn't have enough permissions to unmute the target user. (Bot probably has a lower or same discord role hierarchy as the target).", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to unmute that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        })
+                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                            logUnmuteErrorSlashCommand("The target user was removed from the guild before bot could unmute them.", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to unmute that user because they were removed from the guild before the unmuting task finished." + slashCommandUser.getAsMention())
+                                    .queue();
+                        }));
+    }
+
     private static MessageEmbed buildEmbedForBan(User targetUser, String reason, User moderatorUser){
         EmbedBuilder embed = new EmbedBuilder();
 
@@ -254,6 +279,11 @@ public class ModerationLib {
     private static void logUnbanErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
         log.error(error);
         log.error("{} tried to unban {}", slashCommandUser, targetUser);
+    }
+
+    private static void logUnmuteErrorSlashCommand(String error, User slashCommandUser, User targetUser) {
+        log.error(error);
+        log.error("{} tried to unmute {}", slashCommandUser, targetUser);
     }
 
 }

@@ -9,10 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import va.rembot.commands.non_slash.PingPong;
-import va.rembot.commands.slash.admin.Ban;
-import va.rembot.commands.slash.admin.Kick;
-import va.rembot.commands.slash.admin.Mute;
-import va.rembot.commands.slash.admin.Unban;
+import va.rembot.commands.slash.admin.*;
 import va.rembot.moderation.AntiSpamFilter;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 
@@ -121,6 +118,7 @@ public class BotConfig extends ListenerAdapter {
                 new Unban(),
                 new Kick(),
                 new Mute(),
+                new Unmute(),
                 new BannedWordsFilter(),
                 new AntiSpamFilter(),
                 // non slash
@@ -145,7 +143,11 @@ public class BotConfig extends ListenerAdapter {
                                 .addOption(OptionType.USER, "username", "The user to be muted.", true)
                                 .addOption(OptionType.INTEGER, "minutes", "The amount of minutes to be muted for.", true)
                                 .addOption(OptionType.STRING, "reason", "Reason for mute.", false)
-                                .addOption(OptionType.INTEGER, "hours", "The amount of hours to be muted for.", false))
+                                .addOption(OptionType.INTEGER, "hours", "The amount of hours to be muted for.", false),
+                        Commands.slash("unmute", "Unmute someone.")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
+                                .addOption(OptionType.USER, "username", "The user to be unmuted.", true)
+                                .addOption(OptionType.STRING, "reason", "Reason for unmute.", false))
                 .queue(success -> log.info("Successfully loaded all slash commands."));
 
 
