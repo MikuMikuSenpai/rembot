@@ -68,6 +68,33 @@ public class ModerationLib {
                 });
     }
 
+    public static void kickUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
+
+        event.getGuild()
+                .kick(usrSnowflake)
+                .reason(reason)
+                .queue(success -> {
+                    event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
+                            .sendMessage("**[USER KICK]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
+                            .and(event.getHook().deleteOriginal())
+                            .queue();
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            log.error("Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
+                            log.error("{} tried to kick {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to kick that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        })
+                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                            log.error("The member that was being kicked was already removed from this server before finishing the kicking task.");
+                            log.error("{} tried to kick {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("The user you tried to kick was already removed from this server." + slashCommandUser.getAsMention())
+                                    .queue();
+                        }));
+    }
+
     public static void muteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, int muteTimeTotalMinutes, User slashCommandUser, User targetUser) {
 
         var embed = buildEmbedForMute(targetUser, reason, slashCommandUser, muteTimeTotalMinutes);
