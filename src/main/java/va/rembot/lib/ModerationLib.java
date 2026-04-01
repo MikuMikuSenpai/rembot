@@ -61,10 +61,7 @@ public class ModerationLib {
                 .queue(success -> {
                     event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
-                            .queue(null, new ErrorHandler()
-                                    .handle(ErrorResponse.UNKNOWN_CHANNEL, e -> {
-                                        logBanErrorGeneric("Failed to find darwin channel, it was deleted.");
-                                    }));
+                            .queue();
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logBanErrorGeneric("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");

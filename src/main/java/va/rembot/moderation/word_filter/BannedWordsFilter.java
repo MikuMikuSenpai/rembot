@@ -9,6 +9,9 @@ import va.rembot.BotConfig;
 import java.util.*;
 
 @Slf4j
+///banned words get auto deleted, we dont do any moderation (ban/kick...) atm.
+///first we check if we can find the banned word normally in the string (best case scenario/fastest)
+///afterwards we substitute characters to again find the banned word (only if there is a sub char in original msg)
 public class BannedWordsFilter extends ListenerAdapter {
 
     private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_ARRAY).toList();

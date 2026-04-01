@@ -1,9 +1,7 @@
 package va.rembot.moderation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
@@ -18,16 +16,13 @@ import va.rembot.exceptions.StrikeSpamNotFoundException;
 import va.rembot.lib.ModerationLib;
 
 import java.sql.*;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
+/// a user gets 3 strikes in total for spamming after third they get banned, ALL strikes expire after a week of last strike.
 public class AntiSpamFilter extends ListenerAdapter {
 
     private final int ANTI_SPAM_TIME_AMOUNT = BotConfig.getAntiSpamTimeAmountInt();
     private final int ANTI_SPAM_STRIKE_AMOUNT = BotConfig.getAntiSpamStrikeAmountInt();
-    private final int ANTI_SPAM_MUTE_AMOUNT = BotConfig.getAntiSpamMuteAmountInt();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
