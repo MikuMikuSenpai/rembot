@@ -1,14 +1,9 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.ErrorResponse;
-import va.rembot.BotConfig;
 import va.rembot.lib.ModerationLib;
 
 @Slf4j

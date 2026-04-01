@@ -137,6 +137,40 @@ public class ModerationLib {
                 });
     }
 
+    public static void unbanUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
+
+        event.getGuild()
+                .unban(usrSnowflake)
+                .reason(reason)
+                .queue(success -> {
+                    event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
+                            .sendMessage("**[USER UNBAN]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
+                            .and(event.getHook().deleteOriginal())
+                            .queue();
+                }, new ErrorHandler()
+                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                            log.error("Bot doesn't have enough permissions to unban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
+                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to unban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        })
+                        .handle(ErrorResponse.UNKNOWN_BAN, e -> {
+                            log.error("Couldn't unban that user because the ban is unknown (possibly not banned?).");
+                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        })
+                        .handle(ErrorResponse.UNKNOWN_USER, e -> {
+                            log.error("Dont know who the target user is (Unknown user).");
+                            log.error("{} tried to unban {}", slashCommandUser, targetUser);
+                            event.getHook()
+                                    .editOriginal("I can't find the person you are trying to unban (unknown user)." + slashCommandUser.getAsMention())
+                                    .queue();
+                        }));
+    }
+
     private static MessageEmbed buildEmbedForBan(User targetUser, String reason, User moderatorUser){
         EmbedBuilder embed = new EmbedBuilder();
 
