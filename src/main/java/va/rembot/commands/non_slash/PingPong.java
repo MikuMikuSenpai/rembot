@@ -2,6 +2,7 @@ package va.rembot.commands.non_slash;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import va.rembot.BotConfig;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
@@ -25,7 +26,9 @@ public class PingPong extends ListenerAdapter {
             var timeTookInMs = (double) timeTook / 1_000_000;
             var df = new DecimalFormat("#.##"); // only print 2 decimals
 
-            event.getMessage().reply("pong (took " + df.format(timeTookInMs) + " ms)" ).queue();
+            event.getMessage()
+                    .reply("pong (took " + df.format(timeTookInMs) + " ms) [version: " + BotConfig.IMAGE_TAG + "]")
+                    .queue();
         }
     }
 }
