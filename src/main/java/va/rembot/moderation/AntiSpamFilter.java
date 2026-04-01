@@ -1,9 +1,7 @@
 package va.rembot.moderation;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
@@ -15,18 +13,16 @@ import va.rembot.database.models.StrikeSpam;
 import va.rembot.database.models.User;
 import va.rembot.exceptions.MessageSpamNotFoundException;
 import va.rembot.exceptions.StrikeSpamNotFoundException;
+import va.rembot.lib.ModerationLib;
 
 import java.sql.*;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
+/// a user gets 3 strikes in total for spamming after third they get banned, ALL strikes expire after a week of last strike.
 public class AntiSpamFilter extends ListenerAdapter {
 
     private final int ANTI_SPAM_TIME_AMOUNT = BotConfig.getAntiSpamTimeAmountInt();
     private final int ANTI_SPAM_STRIKE_AMOUNT = BotConfig.getAntiSpamStrikeAmountInt();
-    private final int ANTI_SPAM_MUTE_AMOUNT = BotConfig.getAntiSpamMuteAmountInt();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -82,46 +78,14 @@ public class AntiSpamFilter extends ListenerAdapter {
 
                 strikeSpamDao.update(new StrikeSpam(discordId, strikes, new Timestamp(msgCreated)));
 
-                EmbedBuilder embed = new EmbedBuilder();
-
-                embed.setTitle("Someone got muted for spamming");
-                embed.addField("User", user.getAsMention(), true);
-                embed.addField("Minutes", String.valueOf(ANTI_SPAM_MUTE_AMOUNT), true);
-
-                embed.setColor(0xbb0a1e);
-                embed.setTimestamp(Instant.now());
-
                 // If strikes are below/equal our accepted value give strike, else ban. Set strikes to 0 if they ever
                 // get unbanned that this procedure would still work with them.
                 if (strikes <= ANTI_SPAM_STRIKE_AMOUNT) {
-                    int strikesCopy = strikes; //need to make this to be able to use in lambda below (intellij) said
-                    event.getGuild()
-                            .timeoutFor(usrSnowflake, Duration.ofMinutes(ANTI_SPAM_MUTE_AMOUNT))
-                            .reason("Spamming")
-                            .queue(success -> {
-                                event.getGuild().getChannelById(TextChannel.class , BotConfig.DARWIN_CHANNEL_ID)
-                                        .sendMessageEmbeds(embed.build())
-                                        .and(event.getMessage().reply("Stop spamming strike: " + strikesCopy + "/" + ANTI_SPAM_STRIKE_AMOUNT + " 3 strikes = ban."))
-                                        .queue();
-                            });
+
+                    ModerationLib.muteSpam(event, usrSnowflake, "Spamming", strikes, user.getUser());
                 } else {
 
-                    EmbedBuilder embedForBan = new EmbedBuilder();
-
-                    embedForBan.setTitle("Someone got banned");
-                    embedForBan.addField("User", user.getAsMention(), true);
-                    embedForBan.addField("Reason", "Spamming", true);
-                    embedForBan.setColor(0xbb0a1e);
-                    embedForBan.setTimestamp(Instant.now());
-
-                    event.getGuild()
-                            .ban(usrSnowflake, 0, TimeUnit.MINUTES)
-                            .reason("Spamming")
-                            .queue(success -> {
-                                        event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
-                                                .sendMessageEmbeds(embedForBan.build())
-                                                .queue();
-                                    });
+                    ModerationLib.banGeneric(event, usrSnowflake, "Spamming", user.getUser());
                     
                     // Set strikes to 0 after banning, could delete too but chose this route.
                     strikeSpamDao.updateAmountToZero(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));

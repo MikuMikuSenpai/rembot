@@ -1,20 +1,10 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.ErrorResponse;
-import va.rembot.BotConfig;
-
-import java.awt.*;
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
+import va.rembot.lib.ModerationLib;
 
 @Slf4j
 public class Ban extends ListenerAdapter {
@@ -32,52 +22,11 @@ public class Ban extends ListenerAdapter {
             // "reason" is an optional input, could be null so handle it:
             try {
                 var reason = event.getOption("reason").getAsString();
-                var embedMsg = buildEmbed(target, reason, slashCommandUser);
-                ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
+                ModerationLib.banUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
             } catch (NullPointerException e) {
                 var reason = "No reason provided.";
-                var embedMsg = buildEmbed(target, reason, slashCommandUser);
-                ban(event, usrSnowflake, reason, slashCommandUser, target, embedMsg);
+                ModerationLib.banUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
             }
         }
-    }
-
-    private MessageEmbed buildEmbed(User targetUser, String reason, User moderatorUser){
-        EmbedBuilder embed = new EmbedBuilder();
-
-        embed.setTitle("Someone got banned");
-        embed.addField("User", targetUser.getAsMention(), true);
-        embed.addField("Mod", moderatorUser.getAsMention(), true);
-        embed.addField("Reason", reason, false);
-        embed.setColor(0xbb0a1e);
-        embed.setTimestamp(Instant.now());
-
-        return embed.build();
-    }
-
-    private void ban(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser, MessageEmbed embed){
-        event.getGuild()
-                .ban(usrSnowflake, 0, TimeUnit.MINUTES)
-                .reason(reason)
-                .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class ,BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessageEmbeds(embed)
-                            .and(event.getHook().deleteOriginal())
-                            .queue();
-                }, new ErrorHandler()
-                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            log.error("Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).");
-                            log.error("{} tried to ban {}", slashCommandUser, targetUser);
-                            event.getHook()
-                                    .editOriginal("Failed to ban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
-                                    .queue();
-                                })
-                        .handle(ErrorResponse.UNKNOWN_USER, e -> {
-                            log.error("Dont know who the target user is (Unknown user).");
-                            log.error("{} tried to ban {}", slashCommandUser, targetUser);
-                            event.getHook()
-                                    .editOriginal("I can't find the person you are trying to ban (unknown user)." + slashCommandUser.getAsMention())
-                                    .queue();
-                        }));
     }
 }

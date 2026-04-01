@@ -27,6 +27,7 @@ import java.util.List;
 public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
+    public static final String IMAGE_TAG = System.getenv("IMAGE_TAG");
     private static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
     @Getter
     private static Long modRoleIdLong = 0L;
@@ -54,6 +55,8 @@ public class BotConfig extends ListenerAdapter {
     private static int substituteBannedWordCheckAmountInt = 0;
 
     @Override
+    //we assign the ENV vars first to be sure that they are the correct values
+    // before using them in all the other files
     public void onReady(ReadyEvent event) {
 
         var bot = event.getJDA();
