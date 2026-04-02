@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 @Slf4j
@@ -20,13 +21,20 @@ public class Bot {
             bot = JDABuilder.createDefault(
                     BOT_TOKEN,
                     GatewayIntent.GUILD_MESSAGES,
-                    GatewayIntent.MESSAGE_CONTENT)
+                    GatewayIntent.MESSAGE_CONTENT,
+                    GatewayIntent.GUILD_MEMBERS)//DO NOT delete this intent, this will make sure cache is updated if
+                    // members leave cus currently its on ALL (MemberCachePolicy.ALL)
+                    // and users would stay infinitely in cache but this intent prevents that
+                    // (removes them if they leave guild)
                     .disableCache( // this is to ignore the jda warnings, might need to enable these in the future
                             CacheFlag.VOICE_STATE,
                             CacheFlag.EMOJI,
                             CacheFlag.STICKER,
                             CacheFlag.SCHEDULED_EVENTS,
                             CacheFlag.SOUNDBOARD_SOUNDS)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)//this could be bad in the future if dead server
+                    // would become huge but for now this is fine and the easiest need
+                    // to cache members for example for unmuting
                     .build();
             printLogo();
         } catch (InvalidTokenException e) {
