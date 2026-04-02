@@ -2,7 +2,7 @@
 
 plugins {
     application
-    id("com.gradleup.shadow") version "9.4.0" // need this for generating .jar
+    id("com.gradleup.shadow") version "9.4.1" // need this for generating .jar
 }
 
 repositories {
@@ -15,10 +15,13 @@ application {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:6.3.2") {
+    implementation("net.dv8tion:JDA:6.4.0") {
         exclude(module = "opus-java") // for audio stuff dont need this
         exclude(module = "tink") // for encrypting and decrypting audio, dont need this
     }
+
+    implementation("com.mysql:mysql-connector-j:9.6.0")//mysql database jdbc
+    implementation("com.zaxxer:HikariCP:7.0.2")//for connection pooling = performance
 
     implementation("ch.qos.logback:logback-classic:1.5.32") // needed for logging (https://jda.wiki/setup/logging/)
 

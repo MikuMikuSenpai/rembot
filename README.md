@@ -31,30 +31,3 @@ Remastered mbot get it mbot rembot yeah my bad
 2. Copy [.env.example](.env.example) and create your own .env variant
 3. ```docker compose up --build```
    1. Each time you make a change to rembot you will need to rebuild it using the --build option.
-
-## TODO:
-
-Only for core features other stuff will be worked on after v1.0.0 release of rembot.
-This will be removed when all done, here for organization.
-
-- [x] Admin Features:
-  - [x] Ban
-    - [x] backend
-    - [x] frontend
-  - [x] Unban
-    - [x] backend
-    - [x] frontend
-  - [x] Kick
-    - [x] backend
-    - [x] frontend
-  - [x] Mute
-    - [x] backend
-    - [x] frontend
-- [ ] Moderation:
-  - [x] Banned words filter
-  - [ ] Anti-spam filter
-- [x] Docker
-  - [x] Dockerfile
-    - [x] Being automatically build by GH Actions?
-  - [x] docker-compose (for development)
-  - [x] docker-compose (for production)
