@@ -13,8 +13,14 @@ public class Unmute extends ListenerAdapter {
 
             event.deferReply(true).queue();
 
-            var reason = "No reason provided";
             var target = event.getOption("username").getAsUser();
+
+            if (!event.getGuild().getMemberById(target.getId()).isTimedOut()) { //if user != timedout dont unmute
+                event.getHook().editOriginal("This user is not muted, can't unmute them.").queue();
+                return;
+            }
+
+            var reason = "No reason provided";
             var usrSnowflake = UserSnowflake.fromId(target.getId());
             var slashCommandUser = event.getUser();
 
