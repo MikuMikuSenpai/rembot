@@ -40,12 +40,14 @@ public class AntiSpamFilter extends ListenerAdapter {
         var discordId = event.getMember().getIdLong();
         var usrSnowflake = UserSnowflake.fromId(discordId);
         var discordMsgId = event.getMessageIdLong();
+        var msgContent = event.getMessage().getContentRaw();
+
         Timestamp timeFirstMsgCreated;
         Timestamp timeLastMsgCreated;
 
         usrDao.create(new User(discordId));
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
-        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated)));
+        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent));
 
         timeFirstMsgCreated = messageDao
                 .getFirst(discordId)

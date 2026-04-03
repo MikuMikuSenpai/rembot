@@ -1,6 +1,5 @@
 -- THIS IS THE INIT SCRIPT FOR BUILDING OUR MYSQL DATABASE LAYOUT
 -- IF WORKING ON THIS MAKE SURE TO DELETE VOLUMES ETC CUS OLD LAYOUT COULD STILL BE HERE FORCE DOCKER TO REBUILD IT
-
 SET GLOBAL event_scheduler = ON;
 
 CREATE TABLE users(
@@ -13,10 +12,19 @@ CREATE TABLE messages(
     discord_message_id BIGINT NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
     time_created TIMESTAMP NOT NULL,
+    message_content VARCHAR(2000) NOT NULL,
 
     PRIMARY KEY(discord_message_id),
     CONSTRAINT FK_users FOREIGN KEY (user_id)
         REFERENCES users(discord_user_id)
+);
+
+CREATE TABLE starred_messages(
+    discord_message_id BIGINT NOT NULL UNIQUE,
+    star_amount TINYINT NOT NULL,
+    is_sent BOOLEAN NOT NULL,
+
+    PRIMARY KEY(discord_message_id)
 );
 
 CREATE TABLE strikes_spam(

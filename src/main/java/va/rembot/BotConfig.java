@@ -12,6 +12,7 @@ import va.rembot.commands.non_slash.PingPong;
 import va.rembot.commands.slash.admin.*;
 import va.rembot.moderation.AntiSpamFilter;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
+import va.rembot.other.highlight.HighlightedMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,9 @@ public class BotConfig extends ListenerAdapter {
     private static final String SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT = System.getenv("SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT");
     @Getter
     private static int substituteBannedWordCheckAmountInt = 0;
-
+    private static final String HIGHLIGHT_STAR_THRESHOLD = System.getenv("HIGHLIGHT_STAR_THRESHOLD");
+    @Getter
+    private static int highlightStarThresholdInt = 0;
     @Override
     //we assign the ENV vars first to be sure that they are the correct values
     // before using them in all the other files
@@ -113,6 +116,17 @@ public class BotConfig extends ListenerAdapter {
 
         }
 
+        try {
+            highlightStarThresholdInt = Integer.parseInt(HIGHLIGHT_STAR_THRESHOLD);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
         bot.addEventListener(
                 new Ban(),
                 new Unban(),
@@ -121,6 +135,7 @@ public class BotConfig extends ListenerAdapter {
                 new Unmute(),
                 new BannedWordsFilter(),
                 new AntiSpamFilter(),
+                new HighlightedMessage(),
                 // non slash
                 new PingPong());
 
