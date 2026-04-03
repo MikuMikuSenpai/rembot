@@ -22,6 +22,7 @@ public class Bot {
                     BOT_TOKEN,
                     GatewayIntent.GUILD_MESSAGES,
                     GatewayIntent.MESSAGE_CONTENT,
+                    GatewayIntent.GUILD_MESSAGE_REACTIONS,//need this for star bs thing
                     GatewayIntent.GUILD_MEMBERS)//DO NOT delete this intent, this will make sure cache is updated if
                     // members leave cus currently its on ALL (MemberCachePolicy.ALL)
                     // and users would stay infinitely in cache but this intent prevents that
