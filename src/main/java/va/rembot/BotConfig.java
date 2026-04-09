@@ -50,6 +50,9 @@ public class BotConfig extends ListenerAdapter {
     private static final String SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT = System.getenv("SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT");
     @Getter
     private static int substituteBannedWordCheckAmountInt = 0;
+    private static final String ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE = System.getenv("ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE");
+    @Getter
+    private static int allowedAmountSubstituteCharactersPerMessage = 0;
 
     @Override
     //we assign the ENV vars first to be sure that they are the correct values
@@ -109,6 +112,17 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+
+        }
+
+        try {
+            allowedAmountSubstituteCharactersPerMessage = Integer.parseInt(ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
         }
