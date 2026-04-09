@@ -3,6 +3,7 @@ package va.rembot.other.highlight;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -10,11 +11,15 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StarMessageDao;
+import va.rembot.database.dao.UserDao;
+import va.rembot.database.models.Message;
 import va.rembot.database.models.StarMessage;
+import va.rembot.database.models.User;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
@@ -132,5 +137,28 @@ public class HighlightedMessage extends ListenerAdapter {
 
             starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent));
         }
+    }
+
+    @Override
+    //TODO we log every message including mod's for them to be able to be msg highlighted
+    // (this is normally done by other listeners atm too but redundancy is good)
+    // we could do same with bots discuss w miku
+    public void onMessageReceived(MessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) return;
+
+        var msgDao = new MessageDao();
+        var userDao = new UserDao();
+
+        //TODO fix name collision prob easier to rename our "Message"
+        // model not sure to what tho cus its logical its called msg
+        // we can keep this below but its ugly, depends on how i feel ig
+        net.dv8tion.jda.api.entities.Message msg = event.getMessage();
+        String msgContent = msg.getContentRaw();
+        long discordMsgId = event.getMessageIdLong();
+        long discordId = event.getAuthor().getIdLong();
+        long msgTimeCreated = msg.getTimeCreated().toInstant().toEpochMilli();
+
+        userDao.create(new User(discordId));
+        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent));
     }
 }
