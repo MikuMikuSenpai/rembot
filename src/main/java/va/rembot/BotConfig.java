@@ -54,6 +54,10 @@ public class BotConfig extends ListenerAdapter {
     private static final String HIGHLIGHT_STAR_THRESHOLD = System.getenv("HIGHLIGHT_STAR_THRESHOLD");
     @Getter
     private static int highlightStarThresholdInt = 0;
+    private static final String ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE = System.getenv("ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE");
+    @Getter
+    private static int allowedAmountSubstituteCharactersPerMessage = 0;
+
     @Override
     //we assign the ENV vars first to be sure that they are the correct values
     // before using them in all the other files
@@ -123,6 +127,16 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING error: {}", e.getMessage());
+            bot.shutdown();
+        }
+        
+        try {
+            allowedAmountSubstituteCharactersPerMessage = Integer.parseInt(ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE);
+        } catch (NumberFormatException e) {
+
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING The bot cannot start until this is fixed.");
+            log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
         }
