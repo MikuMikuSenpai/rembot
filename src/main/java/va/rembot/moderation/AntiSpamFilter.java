@@ -28,9 +28,6 @@ public class AntiSpamFilter extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
-        if (event.getMember().getUnsortedRoles().contains(modRole)) return;
-
         var usrDao = new UserDao();
         var strikeSpamDao = new StrikeSpamDao();
         var messageDao = new MessageDao();
@@ -46,8 +43,12 @@ public class AntiSpamFilter extends ListenerAdapter {
         Timestamp timeLastMsgCreated;
 
         usrDao.create(new User(discordId));
-        strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
         messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent));
+
+        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
+        if (event.getMember().getUnsortedRoles().contains(modRole)) return;
+
+        strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
 
         timeFirstMsgCreated = messageDao
                 .getFirst(discordId)
