@@ -80,6 +80,8 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         var hasSubInMsg = false;
         var hasDoubleAntiCensorChar = false;
+        var countSubChars = 0;
+        var tooManySubCharsInMessage = false;
         for (var word : msgTotalArray) {
 
             var charArray = word.toCharArray();
@@ -92,6 +94,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                 if (SUBSTITUTE_CHARS.contains(character)) {
                     log.debug("[onMessageReceived] Substitute char detected");
                     hasSubInMsg = true;
+                    countSubChars++;
                 }
 
                 if (DOUBLE_ANTI_CENSOR_CHARS.contains(character)) {
@@ -100,6 +103,13 @@ public class BannedWordsFilter extends ListenerAdapter {
                 }
             }
         }
+
+        //we could check this per word (currently we take the total amount of the message)
+        // and still substitute if words have less than X sub chars
+        // but I believe this is the better approach as it could technically still
+        // overwhelm the heap memory if someone spams e.g. one sub char in many words
+        if (countSubChars > BotConfig.getAllowedAmountSubstituteCharactersPerMessage())
+            tooManySubCharsInMessage = true;
 
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
@@ -112,9 +122,22 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
         log.debug("[onMessageReceived] LIST_BANNED_WORDS: {}", LIST_BANNED_WORDS);
+        log.debug("[onMessageReceived] tooManySubCharsInMessage: {}", tooManySubCharsInMessage);
 
-        if (!hasSubInMsg && !hasDoubleAntiCensorChar)
+        if (!hasSubInMsg && !hasDoubleAntiCensorChar || tooManySubCharsInMessage) {
+
+            if (tooManySubCharsInMessage) {
+
+                var user = event.getAuthor().getAsMention();
+                var msgRaw = event.getMessage().getContentRaw();
+
+                event.getJDA().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
+                        .sendMessage("**[POTENTIAL BANNED WORD]** " + user + " <M: " + msgRaw + ">").queue();
+                return;
+            }
+
             return;
+        }
 
         var substitutedMsg = substitute(msgTotalArrayTrimmed, event);
         var combinedWordsList = getCombinedWords(substitutedMsg);
