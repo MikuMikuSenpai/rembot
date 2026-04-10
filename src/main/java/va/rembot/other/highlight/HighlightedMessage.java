@@ -25,8 +25,7 @@ import java.sql.Timestamp;
 public class HighlightedMessage extends ListenerAdapter {
 
     //TODO make exceptions and add them at the orelsethrow, cba atm
-    //TODO its possible to edit the msghighlight bs
-    // if we also give the amount of stars using MessageChannel. editEmbedmsg (sum like this) we prob wont do this?ask miku
+    //TODO there is some repeated code extract those to a method (e.g. embedbuilder)
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
 
@@ -38,19 +37,23 @@ public class HighlightedMessage extends ListenerAdapter {
             var msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
             var msgDao = new MessageDao();
-            starMsgDao.create(new StarMessage(msgId, 0, false));//init the bs thing
+            starMsgDao.create(new StarMessage(msgId, 0, false, 0));//init the bs thing
 
             var starAmount = 0;
             starAmount = starMsgDao.get(msgId)
                     .orElseThrow()
                     .starAmount();
 
+            var embedMsgId = starMsgDao.get(msgId)
+                    .orElseThrow()
+                    .embedMessageId();
+
             var isSent = starMsgDao.get(msgId).orElseThrow().isSent();
 
             var newStarAmount = starAmount + 1;
 
             // update w new star amoutn
-            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent));
+            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
             var msgContent = msgDao.get(msgId)
                    .orElseThrow()
@@ -65,53 +68,95 @@ public class HighlightedMessage extends ListenerAdapter {
             //notttgointolie no fucking idea why we have to check the msgcontent
             // for it to not be empty forgot how i stumbled onto this ig keep it since it doesnt hurt,
             // issent is to prevent dupes/duplicate msg highlights in darwin
-            if (newStarAmount >= BotConfig.getHighlightStarThresholdInt() && !msgContent.isEmpty() && !isSent){
+            if (newStarAmount >= BotConfig.getHighlightStarThresholdInt() && !msgContent.isEmpty()){
 
-                isSent = true;
-                //TODO we should make a dedicated method for setting isSent to true cus this is sloppy:
-                // after some consideration it isnt that bad ill think more about it in the real PR
-                starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent));
+                if (!isSent) {
 
-                //TODO ask miku how he wants the frontend
-                EmbedBuilder embedHighlight = new EmbedBuilder();
-                embedHighlight.setTitle("⭐ message highlight ⭐");
-                embedHighlight.addField("user", user.getAsMention(), false);
-                embedHighlight.setColor(0xffcd3c);
+                    isSent = true;
 
-                var darwinChannel = event.getGuild()
-                        .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
+                    String stars = Integer.valueOf(newStarAmount).toString();
 
-                if (!(msgContent.length() > 1024)) {
+                    EmbedBuilder embedHighlight = new EmbedBuilder();
+                    embedHighlight.setTitle("⭐ message highlight ⭐");
+                    embedHighlight.addField("user", user.getAsMention(), true);
+                    embedHighlight.addField("stars", stars, true);
+                    embedHighlight.setColor(0xffcd3c);
 
-                    embedHighlight.addField("msg", msgContent, false);
-                    darwinChannel
-                            .sendMessageEmbeds(embedHighlight.build())
-                            .queue();
+                    var darwinChannel = event.getGuild()
+                            .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
+
+                    if (!(msgContent.length() > 1024)) {
+
+                        embedHighlight.addField("msg", msgContent, false);
+                        boolean finalIsSent = isSent;
+                        darwinChannel
+                                .sendMessageEmbeds(embedHighlight.build())
+                                .queue(message -> {
+                                    var newEmbedMsgId = message.getIdLong();
+                                    starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
+                                });
+                    } else {
+
+                        embedHighlight.addField("msg", "Message was too long check attached file for content", false);
+
+                        try {
+                            var myFile = new File("long_message.txt");
+                            if (myFile.createNewFile()) {
+
+                                FileWriter fw = new FileWriter(myFile);
+                                fw.write(msgContent);
+                                fw.flush();
+                                fw.close();
+
+                                boolean finalIsSent1 = isSent;
+                                //so for some reason using FileUpload with sendFiles
+                                // makes the text file above the embed which is ugly as fk,
+                                //so we do it manual way but this makes it so that
+                                // if we ever want to be able to delete msghihglight + attachments
+                                // we'll have to store EACH attachement msg id
+                                // i think we r fine tho since wont need this
+                                darwinChannel
+                                        .sendMessageEmbeds(embedHighlight.build())
+                                        .queue(message -> {
+                                            var newEmbedMsgId = message.getIdLong();
+                                            starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent1, newEmbedMsgId));
+                                        });
+
+                                darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
+                                myFile.delete();//ignore the warning, we want to delete this
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    //if message was already sent (we edit to update stars amount instead of sending a new embed):
                 } else {
 
-                    embedHighlight.addField("msg", "Message was too long check attached file for content", false);
+                    String stars = Integer.valueOf(newStarAmount).toString();
 
-                    try {
-                        var myFile = new File("long_message.txt");
-                        if (myFile.createNewFile()) {
+                    EmbedBuilder embedHighlight = new EmbedBuilder();
+                    embedHighlight.setTitle("⭐ message highlight ⭐");
+                    embedHighlight.addField("user", user.getAsMention(), true);
+                    embedHighlight.addField("stars", stars, true);
+                    embedHighlight.setColor(0xffcd3c);
 
-                            FileWriter fw = new FileWriter(myFile);
-                            fw.write(msgContent);
-                            fw.flush();
-                            fw.close();
+                    var darwinChannel = event
+                            .getGuild()
+                            .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
-                            FileUpload.fromData(myFile);
+                    if (!(msgContent.length() > 1024)) {
 
-                            darwinChannel
-                                    .sendMessageEmbeds(embedHighlight.build())
-                                    .queue();
+                        embedHighlight.addField("msg", msgContent, false);
+                        darwinChannel
+                                .editMessageEmbedsById(embedMsgId, embedHighlight.build())
+                                .queue();
+                    } else {
 
-                            darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-
-                            myFile.delete();//ignore the warning, we want to delete this
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        embedHighlight.addField("msg", "Message was too long check attached file for content", false);
+                        darwinChannel
+                                .editMessageEmbedsById(embedMsgId, embedHighlight.build())
+                                .queue();
                     }
                 }
            }
@@ -123,19 +168,50 @@ public class HighlightedMessage extends ListenerAdapter {
 
         var emoji = event.getEmoji().asUnicode();
 
-        //TODO we could remove original highlight msgembed if it falls under the threshold->
-        // ask miku if he wants this feat, if so shit would prob happen in here after we do -1 star amount
-
         //star emoji unicode
         if (emoji.getAsCodepoints().equalsIgnoreCase("U+2B50")) {
 
             var msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
+            var msgDao = new MessageDao();
             var starAmount = starMsgDao.get(msgId).orElseThrow().starAmount();
             var isSent = starMsgDao.get(msgId).orElseThrow().isSent();
             var newStarAmount = starAmount - 1;
+            var msgContent = msgDao.get(msgId).orElseThrow().messageContent();
 
-            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent));
+            String stars = Integer.valueOf(newStarAmount).toString();
+
+            var msgAuthorId = msgDao.get(msgId)
+                    .orElseThrow()
+                    .discordId();
+
+            var user = event.getJDA().getUserById(msgAuthorId);
+
+            EmbedBuilder embedHighlight = new EmbedBuilder();
+            embedHighlight.setTitle("⭐ message highlight ⭐");
+            embedHighlight.addField("user", user.getAsMention(), true);
+            embedHighlight.addField("stars", stars, true);
+            embedHighlight.setColor(0xffcd3c);
+
+            var embedMsgId = starMsgDao.get(msgId).orElseThrow().embedMessageId();
+
+            var darwinChannel = event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
+
+            if (!(msgContent.length() > 1024)) {
+
+                embedHighlight.addField("msg", msgContent, false);
+                darwinChannel
+                        .editMessageEmbedsById(embedMsgId, embedHighlight.build())
+                        .queue();
+            } else {
+
+                embedHighlight.addField("msg", "Message was too long check attached file for content", false);
+                darwinChannel
+                        .editMessageEmbedsById(embedMsgId, embedHighlight.build())
+                        .queue();
+            }
+
+            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
         }
     }
 
@@ -149,10 +225,7 @@ public class HighlightedMessage extends ListenerAdapter {
         var msgDao = new MessageDao();
         var userDao = new UserDao();
 
-        //TODO fix name collision prob easier to rename our "Message"
-        // model not sure to what tho cus its logical its called msg
-        // we can keep this below but its ugly, depends on how i feel ig
-        net.dv8tion.jda.api.entities.Message msg = event.getMessage();
+        var msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         long discordMsgId = event.getMessageIdLong();
         long discordId = event.getAuthor().getIdLong();

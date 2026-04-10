@@ -44,14 +44,16 @@ public class StarMessageDao implements Dao<StarMessage>{
             var discordMsgId = 0L;
             var starAmount = 0;
             var isSent = false;
+            var embedMsgId = 0L;
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
                 starAmount = result.getInt(2);
                 isSent = result.getBoolean(3);
+                embedMsgId = result.getLong(4);
             }
 
-            starMsg = new StarMessage(discordMsgId, starAmount, isSent);
+            starMsg = new StarMessage(discordMsgId, starAmount, isSent, embedMsgId);
 
         } catch (SQLException e) {
             log.error("Could not query star message based on discord message id.");
@@ -69,14 +71,15 @@ public class StarMessageDao implements Dao<StarMessage>{
 
     @Override
     public void update(StarMessage starMessage) {
-        String query = "UPDATE starred_messages SET star_amount = ?, is_sent = ? WHERE discord_message_id = ?";
+        String query = "UPDATE starred_messages SET star_amount = ?, is_sent = ?, embed_message_id = ? WHERE discord_message_id = ?";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
 
-            pStmt.setLong(3, starMessage.discordMsgId());
+            pStmt.setLong(4, starMessage.discordMsgId());
             pStmt.setInt(1, starMessage.starAmount());
             pStmt.setBoolean(2, starMessage.isSent());
+            pStmt.setLong(3, starMessage.embedMessageId());
 
             pStmt.executeUpdate();
 

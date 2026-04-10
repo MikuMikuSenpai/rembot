@@ -23,6 +23,7 @@ CREATE TABLE starred_messages(
     discord_message_id BIGINT NOT NULL UNIQUE,
     star_amount TINYINT NOT NULL,
     is_sent BOOLEAN NOT NULL,
+    embed_message_id BIGINT NOT NULL,
 
     PRIMARY KEY(discord_message_id)
 );
