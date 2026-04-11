@@ -63,12 +63,23 @@ public class HighlightedMessage extends ListenerAdapter {
                     .orElseThrow()
                     .discordId();
 
+            var attachmentLinks = msgDao.get(msgId)
+                    .orElseThrow()
+                    .attachmentsLinks();
+
+            boolean hasAttachments;
+            if (!attachmentLinks.isEmpty())
+                hasAttachments = true;
+            else {
+                hasAttachments = false;
+            }
+
             var user = event.getJDA().getUserById(msgAuthorId);
 
             //notttgointolie no fucking idea why we have to check the msgcontent
             // for it to not be empty forgot how i stumbled onto this ig keep it since it doesnt hurt,
             // issent is to prevent dupes/duplicate msg highlights in darwin
-            if (newStarAmount >= BotConfig.getHighlightStarThresholdInt() && !msgContent.isEmpty()){
+            if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
 
                 if (!isSent) {
 
@@ -87,13 +98,22 @@ public class HighlightedMessage extends ListenerAdapter {
 
                     if (!(msgContent.length() > 1024)) {
 
-                        embedHighlight.addField("msg", msgContent, false);
+                        if (!msgContent.isEmpty()) {
+                            embedHighlight.addField("msg", msgContent, false);
+                        } else {
+                            embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
+                        }
+
                         boolean finalIsSent = isSent;
                         darwinChannel
                                 .sendMessageEmbeds(embedHighlight.build())
                                 .queue(message -> {
                                     var newEmbedMsgId = message.getIdLong();
                                     starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
+
+                                    if (hasAttachments)
+                                        darwinChannel.sendMessage("Attachments: " + attachmentLinks).queue();
+
                                 });
                     } else {
 
@@ -120,6 +140,9 @@ public class HighlightedMessage extends ListenerAdapter {
                                         .queue(message -> {
                                             var newEmbedMsgId = message.getIdLong();
                                             starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent1, newEmbedMsgId));
+
+                                            if (hasAttachments)
+                                                darwinChannel.sendMessage("Attachments: " + attachmentLinks).queue();
                                         });
 
                                 darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
@@ -147,7 +170,12 @@ public class HighlightedMessage extends ListenerAdapter {
 
                     if (!(msgContent.length() > 1024)) {
 
-                        embedHighlight.addField("msg", msgContent, false);
+                        if (!msgContent.isEmpty()) {
+                            embedHighlight.addField("msg", msgContent, false);
+                        } else {
+                            embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
+                        }
+
                         darwinChannel
                                 .editMessageEmbedsById(embedMsgId, embedHighlight.build())
                                 .queue();
@@ -199,7 +227,12 @@ public class HighlightedMessage extends ListenerAdapter {
 
             if (!(msgContent.length() > 1024)) {
 
-                embedHighlight.addField("msg", msgContent, false);
+                if (!msgContent.isEmpty()) {
+                    embedHighlight.addField("msg", msgContent, false);
+                } else {
+                    embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
+                }
+                
                 darwinChannel
                         .editMessageEmbedsById(embedMsgId, embedHighlight.build())
                         .queue();
@@ -231,7 +264,13 @@ public class HighlightedMessage extends ListenerAdapter {
         long discordId = event.getAuthor().getIdLong();
         long msgTimeCreated = msg.getTimeCreated().toInstant().toEpochMilli();
 
+        String messageWithLinks = "";
+
+        for (var file : msg.getAttachments()) {
+            messageWithLinks += file.getUrl() + " ";
+        }
+
         userDao.create(new User(discordId));
-        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent));
+        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, messageWithLinks));
     }
 }

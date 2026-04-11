@@ -32,18 +32,25 @@ public class AntiSpamFilter extends ListenerAdapter {
         var strikeSpamDao = new StrikeSpamDao();
         var messageDao = new MessageDao();
 
-        var msgCreated = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
+        var msg = event.getMessage();
+        var msgCreated = msg.getTimeCreated().toInstant().toEpochMilli();
         var user = event.getMember();
         var discordId = event.getMember().getIdLong();
         var usrSnowflake = UserSnowflake.fromId(discordId);
         var discordMsgId = event.getMessageIdLong();
-        var msgContent = event.getMessage().getContentRaw();
+        var msgContent = msg.getContentRaw();
 
         Timestamp timeFirstMsgCreated;
         Timestamp timeLastMsgCreated;
 
+        String messageWithLinks = "";
+
+        for (var file : msg.getAttachments()) {
+            messageWithLinks += file.getUrl() + " ";
+        }
+
         usrDao.create(new User(discordId));
-        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent));
+        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, messageWithLinks));
 
         var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
         if (event.getMember().getUnsortedRoles().contains(modRole)) return;
