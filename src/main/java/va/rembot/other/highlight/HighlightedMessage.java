@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
@@ -58,6 +60,38 @@ public class HighlightedMessage extends ListenerAdapter {
             var msgContent = msgDao.get(msgId)
                    .orElseThrow()
                    .messageContent();
+
+            //https://stackoverflow.com/a/237068
+            //i made the regex, if anyone knows how to optimize, feel free but i think this is p good,
+            //we grab any URL that ends w specific file extension like .gif,... we include optional
+            // query bs and fragment from the url since discord's cdn likes too spam those
+            //another note i feel like case_insensitive is bandage fix but we should be fine
+            // (we need this in case a file format would be written in uppercase)
+            // we accept:
+            //   video: MP4, MOV, MKV, AVI, WEBM
+            //   picture: JPEG, PNG, GIF, HEIC, WEBP
+            Pattern pattern = Pattern.compile("https?\\S+" +
+                    "(\\.avi|" +
+                    "\\.gif|" +
+                    "\\.heic|" +
+                    "\\.jpe?g|" +
+                    "\\.mkv|" +
+                    "\\.mov|" +
+                    "\\.mp4|" +
+                    "\\.png|" +
+                    "\\.webm|" +
+                    "\\.webp)(\\S+|)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(msgContent);
+            String mediaUrl;
+
+            boolean hasMediaLink;
+            if (matcher.find()) {
+               hasMediaLink = true;
+               mediaUrl = matcher.group();
+            } else {
+                mediaUrl = "";
+                hasMediaLink = false;
+            }
 
             var msgAuthorId = msgDao.get(msgId)
                     .orElseThrow()
@@ -111,8 +145,8 @@ public class HighlightedMessage extends ListenerAdapter {
                                     var newEmbedMsgId = message.getIdLong();
                                     starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
 
-                                    if (hasAttachments)
-                                        darwinChannel.sendMessage("Attachments: " + attachmentLinks).queue();
+                                    if (hasAttachments || hasMediaLink)
+                                        darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
 
                                 });
                     } else {
@@ -232,7 +266,7 @@ public class HighlightedMessage extends ListenerAdapter {
                 } else {
                     embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
                 }
-                
+
                 darwinChannel
                         .editMessageEmbedsById(embedMsgId, embedHighlight.build())
                         .queue();
