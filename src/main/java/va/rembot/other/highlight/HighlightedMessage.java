@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -17,11 +16,14 @@ import va.rembot.database.dao.UserDao;
 import va.rembot.database.models.Message;
 import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
+import va.rembot.exceptions.MessageNotFoundException;
+import va.rembot.exceptions.StarMessageNotFoundException;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +32,6 @@ public class HighlightedMessage extends ListenerAdapter {
 
     private static String starEmojiUnicode = "U+2B50";
 
-    //TODO make exceptions and add them at the orelsethrow, cba atm
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
 
@@ -44,18 +45,33 @@ public class HighlightedMessage extends ListenerAdapter {
             long msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
             var msgDao = new MessageDao();
+
+            long msgAuthorId = msgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .discordId();
+
+            var user = event.getJDA().getUserById(msgAuthorId);
+            if (Objects.isNull(user)) {
+                log.error("[onMessageReactionAdd] user object is NULL, they are not stored in the database. Cannot highlight any of their messages.");
+                return;
+            }
+
             starMsgDao.create(new StarMessage(msgId, 0, false, 0));//init the bs thing
 
-            int starAmount = starMsgDao.get(msgId)
-                    .orElseThrow()
+            int starAmount = starMsgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .starAmount();
 
-            long embedMsgId = starMsgDao.get(msgId)
-                    .orElseThrow()
+            long embedMsgId = starMsgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .embedMessageId();
 
-            boolean isSent = starMsgDao.get(msgId)
-                    .orElseThrow()
+            boolean isSent = starMsgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .isSent();
 
             int newStarAmount = starAmount + 1;
@@ -63,9 +79,10 @@ public class HighlightedMessage extends ListenerAdapter {
             // update w new star amount
             starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
-            String msgContent = msgDao.get(msgId)
-                   .orElseThrow()
-                   .messageContent();
+            String msgContent = msgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .messageContent();
 
             //extract media URL from message
             Pattern pattern = Pattern.compile("https?\\S+" +
@@ -84,19 +101,16 @@ public class HighlightedMessage extends ListenerAdapter {
 
             boolean hasMediaLink;
             if (matcher.find()) {
-               hasMediaLink = true;
-               mediaUrl = matcher.group();
+                hasMediaLink = true;
+                mediaUrl = matcher.group();
             } else {
                 mediaUrl = "";
                 hasMediaLink = false;
             }
 
-            long msgAuthorId = msgDao.get(msgId)
-                    .orElseThrow()
-                    .discordId();
-
-            String attachmentLinks = msgDao.get(msgId)
-                    .orElseThrow()
+            String attachmentLinks = msgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .attachmentsLinks();
 
             boolean hasAttachments;
@@ -106,12 +120,10 @@ public class HighlightedMessage extends ListenerAdapter {
                 hasAttachments = false;
             }
 
-            var user = event.getJDA().getUserById(msgAuthorId);
-
             if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
 
                 String stars = Integer.valueOf(newStarAmount).toString();
-                EmbedBuilder embedHighlight =  getBaseEmbedMessage(user, stars, msgContent);
+                EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
                 TextChannel darwinChannel = event.getGuild()
                         .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
@@ -193,24 +205,35 @@ public class HighlightedMessage extends ListenerAdapter {
             long msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
             var msgDao = new MessageDao();
-            int starAmount = starMsgDao.get(msgId)
-                    .orElseThrow()
+
+            long msgAuthorId = msgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .discordId();
+
+            User user = event.getJDA().getUserById(msgAuthorId);
+            if (Objects.isNull(user)) {
+                log.error("[onMessageReactionRemove] user object is NULL, they are not stored in the database. Cannot highlight any of their messages.");
+                return;
+            }
+
+            int starAmount = starMsgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .starAmount();
-            boolean isSent = starMsgDao.get(msgId)
-                    .orElseThrow()
+
+            boolean isSent = starMsgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .isSent();
+
             int newStarAmount = starAmount - 1;
-            String msgContent = msgDao.get(msgId)
-                    .orElseThrow()
+            String msgContent = msgDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .messageContent();
 
             String stars = Integer.valueOf(newStarAmount).toString();
-
-            long msgAuthorId = msgDao.get(msgId)
-                    .orElseThrow()
-                    .discordId();
-
-            var user = event.getJDA().getUserById(msgAuthorId);
 
             EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
 
@@ -256,9 +279,6 @@ public class HighlightedMessage extends ListenerAdapter {
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {
 
-        //TODO check that user isnt NULL, e.g. since we dont store bots atm at least their ID isnt in our DB,
-        // when we call the bulshit below itll throw nullpointer exception,
-        // rembot doesnt crash but the error is not being handled, host could get confused if they spot the error in terminal
         EmbedBuilder embedHighlight = new EmbedBuilder();
         embedHighlight.setTitle("⭐ message highlight ⭐");
         embedHighlight.addField("user", user.getAsMention(), true);
