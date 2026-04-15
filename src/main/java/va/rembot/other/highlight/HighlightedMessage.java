@@ -26,15 +26,19 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
 
+    private static String starEmojiUnicode = "U+2B50";
+
     //TODO make exceptions and add them at the orelsethrow, cba atm
     //TODO there is some repeated code extract those to a method (e.g. embedbuilder)
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
 
-        var emoji = event.getEmoji().asUnicode();
+        String emojiAsUnicode = event
+                .getEmoji()
+                .asUnicode()
+                .getAsCodepoints();
 
-        //only do our bs if its an actual star
-        if (emoji.getAsCodepoints().equalsIgnoreCase("U+2B50")) {
+        if (emojiAsUnicode.equalsIgnoreCase(starEmojiUnicode)) {
 
             var msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
@@ -228,10 +232,12 @@ public class HighlightedMessage extends ListenerAdapter {
     @Override
     public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
 
-        var emoji = event.getEmoji().asUnicode();
+        String emojiAsUnicode = event
+                .getEmoji()
+                .asUnicode()
+                .getAsCodepoints();
 
-        //star emoji unicode
-        if (emoji.getAsCodepoints().equalsIgnoreCase("U+2B50")) {
+        if (emojiAsUnicode.equalsIgnoreCase(starEmojiUnicode)) {
 
             var msgId = event.getMessageIdLong();
             var starMsgDao = new StarMessageDao();
