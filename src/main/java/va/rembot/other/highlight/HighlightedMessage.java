@@ -2,6 +2,7 @@ package va.rembot.other.highlight;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
@@ -15,7 +16,7 @@ import va.rembot.database.dao.StarMessageDao;
 import va.rembot.database.dao.UserDao;
 import va.rembot.database.models.Message;
 import va.rembot.database.models.StarMessage;
-import va.rembot.database.models.User;
+import va.rembot.database.models.DiscordUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -110,7 +111,7 @@ public class HighlightedMessage extends ListenerAdapter {
             if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
 
                 String stars = Integer.valueOf(newStarAmount).toString();
-                EmbedBuilder embedHighlight =  getBaseEmbedMessage(user, stars, msgContent, event);
+                EmbedBuilder embedHighlight =  getBaseEmbedMessage(user, stars, msgContent);
                 TextChannel darwinChannel = event.getGuild()
                         .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
@@ -211,7 +212,7 @@ public class HighlightedMessage extends ListenerAdapter {
 
             var user = event.getJDA().getUserById(msgAuthorId);
 
-            EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent, event);
+            EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
 
             long embedMsgId = starMsgDao
                     .get(msgId)
@@ -249,13 +250,11 @@ public class HighlightedMessage extends ListenerAdapter {
             messageWithLinks += file.getUrl() + " ";
         }
 
-        userDao.create(new User(discordId));
+        userDao.create(new DiscordUser(discordId));
         msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, messageWithLinks));
     }
 
-    //TODO fix name collision change our model's name User to something else;
-    // clashes with jda's User class
-    private static EmbedBuilder getBaseEmbedMessage(net.dv8tion.jda.api.entities.User user, String stars, String messageContent, GenericMessageReactionEvent event) {
+    private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {
 
         //TODO check that user isnt NULL, e.g. since we dont store bots atm at least their ID isnt in our DB,
         // when we call the bulshit below itll throw nullpointer exception,

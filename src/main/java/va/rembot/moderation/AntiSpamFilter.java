@@ -8,9 +8,9 @@ import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StrikeSpamDao;
 import va.rembot.database.dao.UserDao;
+import va.rembot.database.models.DiscordUser;
 import va.rembot.database.models.Message;
 import va.rembot.database.models.StrikeSpam;
-import va.rembot.database.models.User;
 import va.rembot.exceptions.MessageSpamNotFoundException;
 import va.rembot.exceptions.StrikeSpamNotFoundException;
 import va.rembot.lib.ModerationLib;
@@ -49,7 +49,7 @@ public class AntiSpamFilter extends ListenerAdapter {
             messageWithLinks += file.getUrl() + " ";
         }
 
-        usrDao.create(new User(discordId));
+        usrDao.create(new DiscordUser(discordId));
         messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, messageWithLinks));
 
         var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());

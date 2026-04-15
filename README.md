@@ -17,11 +17,6 @@ Remastered mbot get it mbot rembot yeah my bad
 
 ### Development:
 
-> [!NOTE]  
-> Note to devs: you are constantly rebuilding the rembot image, 
-> make sure to clean your system at regular periods
-> ```docker system prune -a```. 
-
 1. Invite bot with these permissions in [OAuth2](https://discord.com/developers/home) tab:
    * Kick Members
    * Ban Members
@@ -30,4 +25,4 @@ Remastered mbot get it mbot rembot yeah my bad
    * Manage Messages
 2. Copy [.env.example](.env.example) and create your own .env variant
 3. ```docker compose up --build```
-   1. Each time you make a change to rembot you will need to rebuild it using the --build option.
+   1. Each time you make a change to rembot, you will need to rebuild it using the --build option.
