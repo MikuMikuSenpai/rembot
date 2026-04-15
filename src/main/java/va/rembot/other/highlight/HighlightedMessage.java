@@ -51,6 +51,11 @@ public class HighlightedMessage extends ListenerAdapter {
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .discordId();
 
+            //this currently returns null if used on bots since we dont store their ID in DB,
+            // this is currently our expected behavior if we want to support bots
+            // we'd just have to store their messages in DB
+            // currently cus msg doesnt exist we return a default Message object with defaults: userid as 0 which
+            // obv doesnt exist so results in null below
             var user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
                 log.error("[onMessageReactionAdd] user object is NULL, they are not stored in the database. Cannot highlight any of their messages.");
@@ -252,9 +257,6 @@ public class HighlightedMessage extends ListenerAdapter {
     }
 
     @Override
-    //TODO we log every message including mod's for them to be able to be msg highlighted
-    // (this is normally done by other listeners atm too but redundancy is good)
-    // we could do same with bots discuss w miku
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 

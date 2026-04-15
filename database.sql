@@ -46,6 +46,16 @@ CREATE EVENT clean_messages
     DO
     DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
 
+-- clean starred messages that have discord_message_id that is NOT in messages table (message is not stored in DB)
+CREATE EVENT clean_starred_messages
+    ON SCHEDULE
+    EVERY 12 HOUR
+    DO
+    DELETE FROM starred_messages WHERE discord_message_id NOT IN (
+        SELECT discord_message_id
+        FROM messages
+    );
+
 -- checks every day if a strike is a week old = delete
 CREATE EVENT clean_strikes_spam
     ON SCHEDULE
