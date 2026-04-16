@@ -12,7 +12,7 @@ CREATE TABLE messages(
     discord_message_id BIGINT NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
     time_created TIMESTAMP NOT NULL,
-    message_content VARCHAR(2000) NOT NULL,
+    message_content VARCHAR(4000) NOT NULL,
     -- 5000 chars should be plenti i think? these max would be 10 links in total including whitespaces between them
     attachments_links VARCHAR(5000) NOT NULL,
 
