@@ -43,14 +43,14 @@ public class AntiSpamFilter extends ListenerAdapter {
         Timestamp timeFirstMsgCreated;
         Timestamp timeLastMsgCreated;
 
-        String messageWithLinks = "";
+        String attachmentLinks = "";
 
         for (var file : msg.getAttachments()) {
-            messageWithLinks += file.getUrl() + " ";
+             attachmentLinks += file.getUrl() + " ";
         }
 
         usrDao.create(new DiscordUser(discordId));
-        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, messageWithLinks));
+        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent,  attachmentLinks));
 
         var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
         if (event.getMember().getUnsortedRoles().contains(modRole)) return;
