@@ -118,10 +118,10 @@ public class HighlightedMessage extends ListenerAdapter {
             }
 
             boolean hasAttachments;
-            if (!attachmentLinks.isEmpty())
-                hasAttachments = true;
-            else {
+            if (attachmentLinks.isEmpty())
                 hasAttachments = false;
+            else {
+                hasAttachments = true;
             }
 
             if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
@@ -136,7 +136,7 @@ public class HighlightedMessage extends ListenerAdapter {
 
                     isSent = true;
 
-                    if (!(msgContent.length() > 1024)) {
+                    if (msgContent.length() <= 1024) {
 
                         boolean finalIsSent = isSent;
                         darwinChannel
