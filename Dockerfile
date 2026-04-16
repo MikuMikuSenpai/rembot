@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine AS BUILD
+FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /bot
 
@@ -12,6 +12,6 @@ RUN ./gradlew clean shadowJar
 
 FROM eclipse-temurin:21-jre-alpine
 
-COPY --from=BUILD /bot/build/libs/*.jar /bot/bot.jar
+COPY --from=build /bot/build/libs/*.jar /bot/bot.jar
 
 ENTRYPOINT ["java", "-jar" , "/bot/bot.jar"]

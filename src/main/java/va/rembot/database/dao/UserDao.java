@@ -66,12 +66,12 @@ public class UserDao implements Dao<DiscordUser>{
     }
 
     @Override
-    public void update(DiscordUser discordUser) {
+    public void update(DiscordUser user) {
 
     }
 
     @Override
-    public void delete(DiscordUser discordUser) {
+    public void delete(DiscordUser user) {
 
     }
 }

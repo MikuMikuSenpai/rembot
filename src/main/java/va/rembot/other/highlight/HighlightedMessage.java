@@ -181,7 +181,8 @@ public class HighlightedMessage extends ListenerAdapter {
                                 myFile.delete();//ignore the warning, we want to delete this
                             }
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            log.error("[onMessageReactionAdd] Something went wrong while trying to create and upload text file to discord.");
+                            log.error(e.getMessage());
                         }
                     }
 
@@ -287,12 +288,12 @@ public class HighlightedMessage extends ListenerAdapter {
         embedHighlight.addField("stars", stars, true);
         embedHighlight.setColor(0xffcd3c);
 
-        if (!(messageContent.length() > 1024)) {
+        if (messageContent.length() <= 1024) {
 
-            if (!messageContent.isEmpty()) {
-                embedHighlight.addField("msg", messageContent, false);
-            } else {
+            if (messageContent.isEmpty()) {
                 embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
+            } else {
+                embedHighlight.addField("msg", messageContent, false);
             }
 
         } else {

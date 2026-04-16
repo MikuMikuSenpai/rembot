@@ -76,10 +76,10 @@ public class StarMessageDao implements Dao<StarMessage>{
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
 
-            pStmt.setLong(4, starMessage.discordMsgId());
             pStmt.setInt(1, starMessage.starAmount());
             pStmt.setBoolean(2, starMessage.isSent());
             pStmt.setLong(3, starMessage.embedMessageId());
+            pStmt.setLong(4, starMessage.discordMsgId());
 
             pStmt.executeUpdate();
 
