@@ -46,8 +46,9 @@ public class HighlightedMessage extends ListenerAdapter {
             var starMsgDao = new StarMessageDao();
             var msgDao = new MessageDao();
 
-            long msgAuthorId = msgDao
-                    .get(msgId)
+            var msgObject = msgDao.get(msgId);
+
+            long msgAuthorId = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .discordId();
 
@@ -64,30 +65,33 @@ public class HighlightedMessage extends ListenerAdapter {
 
             starMsgDao.create(new StarMessage(msgId, 0, false, 0));//init the bs thing
 
-            int starAmount = starMsgDao
-                    .get(msgId)
+            // we query this one later as perf improvement in case the user is null above
+            var starMsgObject = starMsgDao.get(msgId);
+
+            int starAmount = starMsgObject
                     .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .starAmount();
 
-            long embedMsgId = starMsgDao
-                    .get(msgId)
+            boolean isSent = starMsgObject
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .isSent();
+
+            long embedMsgId = starMsgObject
                     .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .embedMessageId();
 
-            boolean isSent = starMsgDao
-                    .get(msgId)
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
-                    .isSent();
+            String msgContent = msgObject
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .messageContent();
+
+            String attachmentLinks = msgObject
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .attachmentsLinks();
 
             int newStarAmount = starAmount + 1;
 
             // update w new star amount
             starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
-
-            String msgContent = msgDao
-                    .get(msgId)
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
-                    .messageContent();
 
             //extract media URL from message
             Pattern pattern = Pattern.compile("https?\\S+" +
@@ -109,14 +113,9 @@ public class HighlightedMessage extends ListenerAdapter {
                 hasMediaLink = true;
                 mediaUrl = matcher.group();
             } else {
-                mediaUrl = "";
                 hasMediaLink = false;
+                mediaUrl = "";
             }
-
-            String attachmentLinks = msgDao
-                    .get(msgId)
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
-                    .attachmentsLinks();
 
             boolean hasAttachments;
             if (!attachmentLinks.isEmpty())
@@ -211,8 +210,9 @@ public class HighlightedMessage extends ListenerAdapter {
             var starMsgDao = new StarMessageDao();
             var msgDao = new MessageDao();
 
-            long msgAuthorId = msgDao
-                    .get(msgId)
+            var msgObject = msgDao.get(msgId);
+
+            long msgAuthorId = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .discordId();
 
@@ -222,30 +222,30 @@ public class HighlightedMessage extends ListenerAdapter {
                 return;
             }
 
-            int starAmount = starMsgDao
-                    .get(msgId)
+            var starMsgObject = starMsgDao.get(msgId);
+
+            int starAmount = starMsgObject
                     .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .starAmount();
 
-            boolean isSent = starMsgDao
-                    .get(msgId)
+            boolean isSent = starMsgObject
                     .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
                     .isSent();
 
-            int newStarAmount = starAmount - 1;
-            String msgContent = msgDao
-                    .get(msgId)
+            long embedMsgId = starMsgObject
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .embedMessageId();
+
+            String msgContent = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .messageContent();
+
+            int newStarAmount = starAmount - 1;
 
             String stars = Integer.valueOf(newStarAmount).toString();
 
             EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
 
-            long embedMsgId = starMsgDao
-                    .get(msgId)
-                    .orElseThrow()
-                    .embedMessageId();
             TextChannel darwinChannel = event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
             darwinChannel
@@ -269,14 +269,14 @@ public class HighlightedMessage extends ListenerAdapter {
         long discordId = event.getAuthor().getIdLong();
         long msgTimeCreated = msg.getTimeCreated().toInstant().toEpochMilli();
 
-        String messageWithLinks = "";
+        String attachmentLinks = "";
 
         for (var file : msg.getAttachments()) {
-            messageWithLinks += file.getUrl() + " ";
+            attachmentLinks += file.getUrl() + " ";
         }
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, messageWithLinks));
+        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {
