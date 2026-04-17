@@ -160,7 +160,7 @@ public class HighlightedMessage extends ListenerAdapter {
                                 fw.flush();
                                 fw.close();
 
-                                boolean finalIsSent1 = isSent;
+                                boolean finalIsSent = isSent;
                                 //so for some reason using FileUpload with sendFiles
                                 // makes the text file above the embed which is ugly as fk,
                                 //so we do it manual way but this makes it so that
@@ -171,7 +171,7 @@ public class HighlightedMessage extends ListenerAdapter {
                                         .sendMessageEmbeds(embedHighlight.build())
                                         .queue(message -> {
                                             var newEmbedMsgId = message.getIdLong();
-                                            starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent1, newEmbedMsgId));
+                                            starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
 
                                             if (hasAttachments)
                                                 darwinChannel.sendMessage("Attachments: " + attachmentLinks).queue();
