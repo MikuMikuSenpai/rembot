@@ -173,8 +173,8 @@ public class HighlightedMessage extends ListenerAdapter {
                                             var newEmbedMsgId = message.getIdLong();
                                             starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
 
-                                            if (hasAttachments)
-                                                darwinChannel.sendMessage("Attachments: " + attachmentLinks).queue();
+                                            if (hasAttachments || hasMediaLink)
+                                                darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
                                         });
 
                                 darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
