@@ -34,6 +34,9 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
 
         var msg = event.getMessage().getContentRaw();
+        //we exclude any URLs/links, they do not need to be checked and
+        // would report false positives if they had any sub chars in them (they likely do)
+        msg = msg.replaceAll("https?:\\/\\/\\S+", "");
         var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
         var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
         //keep this for now commented, the below was just the normal msg without the EmojiHelper
@@ -529,6 +532,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static Map<Character, List<Character>> getSubsForChars() {
         Map<Character, List<Character>> subsForChars = new HashMap<>();
         subsForChars.put('a', List.of('@', '4', '^'));
+        subsForChars.put('e', List.of('3', '€'));
         subsForChars.put('i', List.of('!', '¡', '|'));
         subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
