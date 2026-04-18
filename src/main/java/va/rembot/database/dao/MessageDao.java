@@ -18,7 +18,7 @@ public class MessageDao implements Dao<Message>{
     @Override
     public void create(Message message) {
 
-        String query = "INSERT IGNORE INTO messages (discord_message_id, user_id, time_created) VALUES (?, ?, ?)";
+        String query = "INSERT IGNORE INTO messages (discord_message_id, user_id, time_created, message_content, attachments_links) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
@@ -26,19 +26,54 @@ public class MessageDao implements Dao<Message>{
             pStmt.setLong(1, message.discordMessageId());
             pStmt.setLong(2, message.discordId());
             pStmt.setTimestamp(3, message.timeCreated());
+            pStmt.setString(4, message.messageContent());
+            pStmt.setString(5, message.attachmentsLinks());
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
             log.error("Could not insert Message in DB.");
-            log.error("Message details: discordMessageId {}, discordId {}, timeCreated {}", message.discordMessageId(), message.discordId(), message.timeCreated());
+            log.error("Message details: discordMessageId {}, discordId {}, timeCreated {}, messageContent {}, attachmentsLinks {}",
+                    message.discordMessageId(), message.discordId(), message.timeCreated(), message.messageContent(), message.attachmentsLinks());
             log.error("Error: {}", e.getMessage());;
         }
 
     }
 
     @Override
-    public Optional<Message> get(long id) {
-        return Optional.empty();
+    public Optional<Message> get(long discordMsgId) {
+
+        Message msg = null;
+
+        String query = "SELECT * FROM messages WHERE discord_message_id = ?";
+
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)){
+
+            ps.setLong(1, discordMsgId);
+
+            var result = ps.executeQuery();
+            var discordUserId = 0L;
+            Timestamp timeCreated = null;
+            var messageContent = "";
+            var attachmentLinks = "";
+
+            while (result.next()) {
+                discordUserId = result.getLong(2);
+                timeCreated = result.getTimestamp(3);
+                messageContent = result.getString(4);
+                attachmentLinks = result.getString(5);
+            }
+
+            msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
+
+        } catch (SQLException e) {
+            log.error("Could not get message.");
+            log.error("Discord message id: {}", discordMsgId);
+            log.error("Error: {}", e.getMessage());
+        }
+
+        return Optional.of(msg);
+
     }
 
     @Override
@@ -63,14 +98,18 @@ public class MessageDao implements Dao<Message>{
             var result = ps.executeQuery();
             var discordMsgId = 0L;
             Timestamp timeCreated = null;
+            var messageContent = "";
+            var attachmentLinks = "";
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
                 discordId = result.getLong(2);
                 timeCreated = result.getTimestamp(3);
+                messageContent = result.getString(4);
+                attachmentLinks = result.getString(5);
             }
 
-            msgSpam = new Message(discordMsgId, discordId, timeCreated);
+            msgSpam = new Message(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get first message for spam detection.");
@@ -98,14 +137,18 @@ public class MessageDao implements Dao<Message>{
             var result = ps.executeQuery();
             var discordMsgId = 0L;
             Timestamp timeCreated = null;
+            String messageContent = "";
+            String attachmentLinks = "";
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
                 discordId = result.getLong(2);
                 timeCreated = result.getTimestamp(3);
+                messageContent = result.getString(4);
+                attachmentLinks = result.getString(5);
             }
 
-            msgSpam = new Message(discordMsgId, discordId, timeCreated);
+            msgSpam = new Message(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get latest message for spam detection.");

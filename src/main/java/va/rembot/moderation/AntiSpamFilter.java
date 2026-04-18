@@ -8,9 +8,9 @@ import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StrikeSpamDao;
 import va.rembot.database.dao.UserDao;
+import va.rembot.database.models.DiscordUser;
 import va.rembot.database.models.Message;
 import va.rembot.database.models.StrikeSpam;
-import va.rembot.database.models.User;
 import va.rembot.exceptions.MessageSpamNotFoundException;
 import va.rembot.exceptions.StrikeSpamNotFoundException;
 import va.rembot.lib.ModerationLib;
@@ -28,24 +28,34 @@ public class AntiSpamFilter extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
-        if (event.getMember().getUnsortedRoles().contains(modRole)) return;
-
         var usrDao = new UserDao();
         var strikeSpamDao = new StrikeSpamDao();
         var messageDao = new MessageDao();
 
-        var msgCreated = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
+        var msg = event.getMessage();
+        var msgCreated = msg.getTimeCreated().toInstant().toEpochMilli();
         var user = event.getMember();
         var discordId = event.getMember().getIdLong();
         var usrSnowflake = UserSnowflake.fromId(discordId);
         var discordMsgId = event.getMessageIdLong();
+        var msgContent = msg.getContentRaw();
+
         Timestamp timeFirstMsgCreated;
         Timestamp timeLastMsgCreated;
 
-        usrDao.create(new User(discordId));
+        String attachmentLinks = "";
+
+        for (var file : msg.getAttachments()) {
+             attachmentLinks += file.getUrl() + " ";
+        }
+
+        usrDao.create(new DiscordUser(discordId));
+        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent,  attachmentLinks));
+
+        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
+        if (event.getMember().getUnsortedRoles().contains(modRole)) return;
+
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
-        messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated)));
 
         timeFirstMsgCreated = messageDao
                 .getFirst(discordId)
