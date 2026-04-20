@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import va.rembot.commands.non_slash.PingPong;
 import va.rembot.commands.slash.admin.*;
 import va.rembot.moderation.AntiSpamFilter;
+import va.rembot.moderation.AutoDeleteDiscordInviteLinks;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 import va.rembot.other.highlight.HighlightedMessage;
 
@@ -149,6 +150,7 @@ public class BotConfig extends ListenerAdapter {
                 new Unmute(),
                 new BannedWordsFilter(),
                 new AntiSpamFilter(),
+                new AutoDeleteDiscordInviteLinks(),
                 new HighlightedMessage(),
                 // non slash
                 new PingPong());
