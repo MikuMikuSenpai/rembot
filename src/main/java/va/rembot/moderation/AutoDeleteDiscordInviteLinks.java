@@ -13,14 +13,6 @@ public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        //TODO: check with miku if mods should be exempt from this if so:
-//        Member member = event.getMember();
-//        Role modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
-//
-//        if (member.getUnsortedRoles().contains(modRole)) {
-//            return;
-//        }
-
         Message message = event.getMessage();
         String messageContent = message.getContentRaw();
 
