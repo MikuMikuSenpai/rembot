@@ -21,7 +21,7 @@ public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
 
         if (matcher.find()) {
            event.getChannel()
-                   .sendMessage("Discord links not allowed.")
+                   .sendMessage("Discord invite links are not allowed.")
                    .and(message.delete())
                    .queue();
         }
