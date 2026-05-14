@@ -25,10 +25,10 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.5.32") // needed for logging (https://jda.wiki/setup/logging/)
 
-    compileOnly("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
-    annotationProcessor("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
-    testCompileOnly("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.44") // lombok = less boilerplate code
+    compileOnly("org.projectlombok:lombok:1.18.46") // lombok = less boilerplate code
+    annotationProcessor("org.projectlombok:lombok:1.18.46") // lombok = less boilerplate code
+    testCompileOnly("org.projectlombok:lombok:1.18.46") // lombok = less boilerplate code
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.46") // lombok = less boilerplate code
 
     testImplementation(libs.junit.jupiter) //testing bs
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") //testing bs
