@@ -62,9 +62,8 @@ public class MessageDao implements Dao<Message>{
                 timeCreated = result.getTimestamp(3);
                 messageContent = result.getString(4);
                 attachmentLinks = result.getString(5);
+                msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
             }
-
-            msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get message.");
@@ -72,7 +71,7 @@ public class MessageDao implements Dao<Message>{
             log.error("Error: {}", e.getMessage());
         }
 
-        return Optional.of(msg);
+        return Optional.ofNullable(msg);
 
     }
 

@@ -48,6 +48,11 @@ public class HighlightedMessage extends ListenerAdapter {
 
             var msgObject = msgDao.get(msgId);
 
+            if (msgObject.isEmpty()) {
+                log.error("[onMessageReactionAdd] Couldn't highlight message. Message is not stored in database. This could be because the bot was started/restarted/created after the message was created. The message ID is: {}", msgId);
+                return;
+            }
+            
             long msgAuthorId = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
                     .discordId();
