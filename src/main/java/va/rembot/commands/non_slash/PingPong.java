@@ -26,7 +26,7 @@ public class PingPong extends ListenerAdapter {
             var timeTookInMs = (double) timeTook / 1_000_000;
             var df = new DecimalFormat("#.##"); // only print 2 decimals
 
-            event.getMessage()
+            msg
                     .reply("pong (took " + df.format(timeTookInMs) + " ms) [version: " + BotConfig.IMAGE_TAG + "]")
                     .queue();
         }
