@@ -100,7 +100,7 @@ public class HighlightedMessage extends ListenerAdapter {
 
             //extract media URL from message
             Pattern pattern = Pattern.compile("https?\\S+" +
-                    "(\\.avi|" +
+                    "(?:\\.avi|" +
                     "\\.gif|" +
                     "\\.heic|" +
                     "\\.jpe?g|" +
@@ -109,7 +109,7 @@ public class HighlightedMessage extends ListenerAdapter {
                     "\\.mp4|" +
                     "\\.png|" +
                     "\\.webm|" +
-                    "\\.webp)(\\S+|)", Pattern.CASE_INSENSITIVE);
+                    "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(msgContent);
             String mediaUrl;
 
