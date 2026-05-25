@@ -225,6 +225,14 @@ public class BotConfig extends ListenerAdapter {
             log.warn("[onReady] ANTI_SPAM_STRIKE_AMOUNT is 0 or a negative number, this means that people will be instantly banned if spamming this is probably NOT what you want. Check your .env file.");
         }
 
+        if (substituteBannedWordCheckAmountInt <= 0) {
+            log.warn("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
+        }
+
+        if (allowedAmountSubstituteCharactersPerMessage <= 0) {
+            log.warn("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
+        }
+
         bot.addEventListener(
                 new Ban(),
                 new Unban(),
