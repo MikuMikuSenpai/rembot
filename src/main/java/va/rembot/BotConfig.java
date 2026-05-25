@@ -199,6 +199,10 @@ public class BotConfig extends ListenerAdapter {
             bot.shutdown();
         }
 
+        if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0) {
+            log.warn("REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
+        }
+
         bot.addEventListener(
                 new Ban(),
                 new Unban(),
