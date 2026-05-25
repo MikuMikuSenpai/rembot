@@ -199,6 +199,12 @@ public class BotConfig extends ListenerAdapter {
             bot.shutdown();
         }
 
+        if (Integer.parseInt(ANTI_SPAM_WORDS_AMOUNT) <= 0) {
+            log.error("[onReady] ANTI_SPAM_WORDS_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
         if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0) {
             log.warn("[onReady] REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
         }
