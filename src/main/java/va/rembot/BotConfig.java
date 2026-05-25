@@ -200,7 +200,11 @@ public class BotConfig extends ListenerAdapter {
         }
 
         if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0) {
-            log.warn("REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
+            log.warn("[onReady] REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
+        }
+
+        if (antiSpamStrikeAmountInt <= 0) {
+            log.warn("[onReady] ANTI_SPAM_STRIKE_AMOUNT is 0 or a negative number, this means that people will be instantly banned if spamming this is probably NOT what you want. Check your .env file.");
         }
 
         bot.addEventListener(
