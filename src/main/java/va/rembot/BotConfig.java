@@ -3,6 +3,7 @@ package va.rembot;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -140,6 +141,42 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
+        }
+
+        try {
+            bot.getRoleById(MOD_ROLE_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] MOD_ROLE_ID {} is not valid, fix your .env file.", MOD_ROLE_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] MOD_ROLE_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getChannelById(TextChannel.class, LOG_CHANNEL_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] LOG_CHANNEL_ID {} is not valid, fix your .env file.", LOG_CHANNEL_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] LOG_CHANNEL_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getChannelById(TextChannel.class, DARWIN_CHANNEL_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] DARWIN_CHANNEL_ID {} is not valid, fix your .env file.", DARWIN_CHANNEL_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] DARWIN_CHANNEL_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
         }
 
         bot.addEventListener(
