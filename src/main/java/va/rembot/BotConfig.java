@@ -28,6 +28,7 @@ public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
     public static final String IMAGE_TAG = System.getenv("IMAGE_TAG");
+    public static final String GUILD_ID = System.getenv("GUILD_ID");
     private static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
     @Getter
     private static Long modRoleIdLong = 0L;
@@ -141,6 +142,25 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
+        }
+
+        if (bot.getGuilds().size() > 1) {
+            log.error("[onReady] rembot can only be connected to one server at a time. Fix this issue by only adding the bot to your main server.");
+            log.error("[onReady] Current connected guilds/servers: {}", bot.getGuilds());
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getGuildById(GUILD_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] GUILD_ID {} is not valid, fix your .env file.", GUILD_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] GUILD_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
         }
 
         try {
