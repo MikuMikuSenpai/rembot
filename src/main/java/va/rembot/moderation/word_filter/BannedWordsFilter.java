@@ -533,7 +533,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         Map<Character, List<Character>> subsForChars = new HashMap<>();
         subsForChars.put('a', List.of('@', '4', '^'));
         subsForChars.put('e', List.of('3', '€'));
-        subsForChars.put('i', List.of('!', '¡', '|'));
+        subsForChars.put('i', List.of('!', '¡', '|', '1'));
         subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
         return subsForChars;
