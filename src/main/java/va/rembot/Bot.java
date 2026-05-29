@@ -45,6 +45,11 @@ public class Bot {
             log.error(e.getMessage());
         }
 
+        bot
+                .getApplicationManager()
+                .setDescription("Bot made so i can mess around\n\nhttps://github.com/MikuMikuSenpai/rembot")
+                .queue();
+
         bot.addEventListener(new BotConfig());
     }
 
