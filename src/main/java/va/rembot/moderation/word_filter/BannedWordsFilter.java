@@ -461,12 +461,6 @@ public class BannedWordsFilter extends ListenerAdapter {
             if (isSub)
                 amountOfSubWords++;
 
-            StringBuilder stringBuilder = new StringBuilder(newWord);
-            replaceSubWithChar(stringBuilder, 0, indexForSubs, newList);
-
-            log.debug("[substitute] newList: {}", newList);
-            log.debug("[substitute] FINAL newWord: {}", newWord);
-
             // we can change amountOfSubWords to any number but higher = less performant
             // we do + 1 because we also include a concatenated message of the original
             // for example original message "badword badword2" would become "badword" "badword2" "badwordbadword2"
@@ -482,6 +476,13 @@ public class BannedWordsFilter extends ListenerAdapter {
 
                 break;
             }
+
+            StringBuilder stringBuilder = new StringBuilder(newWord);
+            replaceSubWithChar(stringBuilder, 0, indexForSubs, newList);
+
+            log.debug("[substitute] newList: {}", newList);
+            log.debug("[substitute] FINAL newWord: {}", newWord);
+
             isSub = false;
         }
 
