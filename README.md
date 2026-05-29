@@ -12,6 +12,7 @@ Remastered mbot get it mbot rembot yeah my bad
     * Send Messages
     * Manage Messages
 2. Create a directory for example: `rembot-directory` and create a file called `.env` with this information:
+(**fill in correct information where needed, and read it carefully**).
    ```sh
    ### REMBOT CONFIGURATION FILE ###
    # Read thoroughly to avoid issues with running bot.
