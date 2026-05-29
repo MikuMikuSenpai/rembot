@@ -1,6 +1,6 @@
 services:
   rembot:
-    image: ghcr.io/mikumikusenpai/rembot:${IMAGE_TAG}
+    build: .
     container_name: rembot
     depends_on:
       db:
