@@ -18,7 +18,7 @@ Remastered mbot get it mbot rembot yeah my bad
 5. Start the bot by opening a terminal in the `rembot` directory and executing the command: `docker compose up` 
 (Starting with the `-d` "detached" option is not recommended on first startup as important error messages
 would not be shown).
-   1. To close the rembot logs in terminal either type `d` or force close your terminal.
+   1. To close the rembot logs in terminal either force close your terminal (this can be avoided by doing docker compose up **-d**).
 6. To stop the bot: `docker compose stop`
 
 For more information regarding docker consult their documentation.
