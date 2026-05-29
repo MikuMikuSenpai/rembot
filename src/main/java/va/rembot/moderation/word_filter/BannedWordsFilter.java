@@ -24,6 +24,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
+        if (LIST_BANNED_WORDS.isEmpty()) return;
 
         var member = event.getMember();
         var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
