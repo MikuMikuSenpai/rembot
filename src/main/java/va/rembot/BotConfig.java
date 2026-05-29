@@ -3,6 +3,7 @@ package va.rembot;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -27,6 +28,7 @@ public class BotConfig extends ListenerAdapter {
 
     public static final String BOT_TOKEN = System.getenv("BOT_TOKEN");
     public static final String IMAGE_TAG = System.getenv("IMAGE_TAG");
+    public static final String GUILD_ID = System.getenv("GUILD_ID");
     private static final String MOD_ROLE_ID = System.getenv("MOD_ROLE_ID");
     @Getter
     private static Long modRoleIdLong = 0L;
@@ -79,6 +81,12 @@ public class BotConfig extends ListenerAdapter {
 
         try {
             antiSpamTimeAmountInt = Integer.parseInt(ANTI_SPAM_TIME_AMOUNT);
+
+            if (antiSpamTimeAmountInt <= 0) {
+                log.error("[onReady] ANTI_SPAM_TIME_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
+                log.error("[onReady] rembot can not start without fixing this issue first.");
+                bot.shutdown();
+            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
@@ -90,6 +98,12 @@ public class BotConfig extends ListenerAdapter {
 
         try {
             antiSpamMuteAmountInt = Integer.parseInt(ANTI_SPAM_MUTE_AMOUNT);
+
+            if (antiSpamMuteAmountInt <= 0) {
+                log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
+                log.error("[onReady] rembot can not start without fixing this issue first.");
+                bot.shutdown();
+            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
@@ -101,6 +115,10 @@ public class BotConfig extends ListenerAdapter {
 
         try {
             antiSpamStrikeAmountInt = Integer.parseInt(ANTI_SPAM_STRIKE_AMOUNT);
+
+            if (antiSpamStrikeAmountInt <= 0) {
+                log.warn("[onReady] ANTI_SPAM_STRIKE_AMOUNT is 0 or a negative number, this means that people will be instantly banned if spamming this is probably NOT what you want. Check your .env file.");
+            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
@@ -112,6 +130,10 @@ public class BotConfig extends ListenerAdapter {
 
         try {
             substituteBannedWordCheckAmountInt = Integer.parseInt(SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT);
+
+            if (substituteBannedWordCheckAmountInt <= 0) {
+                log.warn("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
+            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
@@ -130,9 +152,13 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] HIGHLIGHT_STAR_THRESHOLD ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
         }
-        
+
         try {
             allowedAmountSubstituteCharactersPerMessage = Integer.parseInt(ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE);
+
+            if (allowedAmountSubstituteCharactersPerMessage <= 0) {
+                log.warn("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
+            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
@@ -140,6 +166,74 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
 
+        }
+
+        if (bot.getGuilds().size() > 1) {
+            log.error("[onReady] rembot can only be connected to one server at a time. Fix this issue by only adding the bot to your main server.");
+            log.error("[onReady] Current connected guilds/servers: {}", bot.getGuilds());
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getGuildById(GUILD_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] GUILD_ID {} is not valid, fix your .env file.", GUILD_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] GUILD_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getRoleById(MOD_ROLE_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] MOD_ROLE_ID {} is not valid, fix your .env file.", MOD_ROLE_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {} // catching error if its empty this is handled by the ENV var check above
+
+        try {
+            bot.getChannelById(TextChannel.class, LOG_CHANNEL_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] LOG_CHANNEL_ID {} is not valid, fix your .env file.", LOG_CHANNEL_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] LOG_CHANNEL_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        try {
+            bot.getChannelById(TextChannel.class, DARWIN_CHANNEL_ID).getJDA();
+        } catch (NullPointerException e) {
+            log.error("[onReady] DARWIN_CHANNEL_ID {} is not valid, fix your .env file.", DARWIN_CHANNEL_ID);
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        } catch (IllegalArgumentException e) {
+            log.error("[onReady] DARWIN_CHANNEL_ID may not be empty, fix your .env file.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        //we need to check this cus itll break SQL shit if we dont
+        try {
+            if (Integer.parseInt(ANTI_SPAM_WORDS_AMOUNT) <= 0) {
+                log.error("[onReady] ANTI_SPAM_WORDS_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
+                log.error("[onReady] rembot can not start without fixing this issue first.");
+                bot.shutdown();
+            }
+        } catch (NumberFormatException e) {
+            log.error("[onReady] ANTI_SPAM_WORDS_AMOUNT may not be empty.");
+            log.error("[onReady] rembot can not start without fixing this issue first.");
+            bot.shutdown();
+        }
+
+        if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0) {
+            log.warn("[onReady] REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
         }
 
         bot.addEventListener(
