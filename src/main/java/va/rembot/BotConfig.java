@@ -41,7 +41,7 @@ public class BotConfig extends ListenerAdapter {
     public static final String[] WHITELISTED_WORDS_ARRAY = WHITELISTED_WORDS.split(",");
     public static final String MYSQL_ROOT_PASSWORD = System.getenv("MYSQL_ROOT_PASSWORD");
     public static final String MYSQL_DATABASE = System.getenv("MYSQL_DATABASE");
-    public static final String ANTI_SPAM_WORDS_AMOUNT = System.getenv("ANTI_SPAM_WORDS_AMOUNT");
+    public static final String ANTI_SPAM_MESSAGES_AMOUNT = System.getenv("ANTI_SPAM_MESSAGES_AMOUNT");
     private static final String ANTI_SPAM_TIME_AMOUNT = System.getenv("ANTI_SPAM_TIME_AMOUNT");
     @Getter
     private static int antiSpamTimeAmountInt = 0;
@@ -221,13 +221,13 @@ public class BotConfig extends ListenerAdapter {
 
         //we need to check this cus itll break SQL shit if we dont
         try {
-            if (Integer.parseInt(ANTI_SPAM_WORDS_AMOUNT) <= 0) {
-                log.error("[onReady] ANTI_SPAM_WORDS_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
+            if (Integer.parseInt(ANTI_SPAM_MESSAGES_AMOUNT) <= 0) {
+                log.error("[onReady] ANTI_SPAM_MESSAGES_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
                 log.error("[onReady] rembot can not start without fixing this issue first.");
                 bot.shutdown();
             }
         } catch (NumberFormatException e) {
-            log.error("[onReady] ANTI_SPAM_WORDS_AMOUNT may not be empty.");
+            log.error("[onReady] ANTI_SPAM_MESSAGES_AMOUNT may not be empty.");
             log.error("[onReady] rembot can not start without fixing this issue first.");
             bot.shutdown();
         }

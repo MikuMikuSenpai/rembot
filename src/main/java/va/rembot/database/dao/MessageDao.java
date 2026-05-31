@@ -86,7 +86,7 @@ public class MessageDao implements Dao<Message>{
 
         String query =
                 "SELECT * FROM " +
-                "(SELECT * FROM messages WHERE user_id = ? ORDER BY time_created DESC LIMIT " + BotConfig.ANTI_SPAM_WORDS_AMOUNT +") AS recent_messages " +
+                "(SELECT * FROM messages WHERE user_id = ? ORDER BY time_created DESC LIMIT " + BotConfig.ANTI_SPAM_MESSAGES_AMOUNT +") AS recent_messages " +
                 "ORDER BY time_created ASC LIMIT 1";
 
         try (Connection conn = DataSource.getConnection();
@@ -125,7 +125,7 @@ public class MessageDao implements Dao<Message>{
 
         String query =
                 "SELECT * FROM " +
-                "(SELECT * FROM messages WHERE user_id = ? ORDER BY time_created DESC LIMIT " + BotConfig.ANTI_SPAM_WORDS_AMOUNT + ") AS recent_messages " +
+                "(SELECT * FROM messages WHERE user_id = ? ORDER BY time_created DESC LIMIT " + BotConfig.ANTI_SPAM_MESSAGES_AMOUNT + ") AS recent_messages " +
                 "LIMIT 1";
 
         try (Connection conn = DataSource.getConnection();
