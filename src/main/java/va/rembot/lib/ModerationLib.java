@@ -2,9 +2,7 @@ package va.rembot.lib;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -23,6 +21,12 @@ public class ModerationLib {
     private static final int EMBED_MESSAGE_COLOR = 0xbb0a1e;
     private static final String EMBED_MESSAGE_TITLE_BANNED = "Someone got banned";
     private static final String EMBED_MESSAGE_TITLE_MUTED = "Someone got muted";
+
+    public static boolean isMod(Member member) {
+
+        Role modRole = member.getJDA().getRoleById(BotConfig.getModRoleIdLong());
+        return member.getUnsortedRoles().contains(modRole);
+    }
 
     public static void banUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
 

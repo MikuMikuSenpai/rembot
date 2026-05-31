@@ -52,8 +52,7 @@ public class AntiSpamFilter extends ListenerAdapter {
         usrDao.create(new DiscordUser(discordId));
         messageDao.create(new Message(discordMsgId, discordId, new Timestamp(msgCreated), msgContent,  attachmentLinks));
 
-        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
-        if (event.getMember().getUnsortedRoles().contains(modRole)) return;
+        if (ModerationLib.isMod(event.getMember())) return;
 
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
 

@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
+import va.rembot.lib.ModerationLib;
 
 import java.util.*;
 
@@ -26,10 +27,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
         if (LIST_BANNED_WORDS.isEmpty()) return;
 
-        var member = event.getMember();
-        var modRole = event.getJDA().getRoleById(BotConfig.getModRoleIdLong());
-
-        if (member.getUnsortedRoles().contains(modRole)) {
+        if (ModerationLib.isMod(event.getMember())) {
             log.debug("[onMessageReceived] This user is mod, banned words filter not applied.");
             return;
         }
