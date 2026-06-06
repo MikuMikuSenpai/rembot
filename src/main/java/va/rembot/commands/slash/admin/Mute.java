@@ -1,6 +1,7 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,22 +16,22 @@ public class Mute extends ListenerAdapter {
 
             event.deferReply(true).queue();
 
-            var reason = "No reason provided";
-            var target = event.getOption("username").getAsUser();
-            var minutes = event.getOption("minutes").getAsInt();
-            var usrSnowflake = UserSnowflake.fromId(target.getId());
-            var slashCommandUser = event.getInteraction().getUser();
+            User target = event.getOption("username").getAsUser();
+            int minutes = event.getOption("minutes").getAsInt();
+            UserSnowflake usrSnowflake = UserSnowflake.fromId(target.getId());
+            User slashCommandUser = event.getInteraction().getUser();
+            String reason;
 
-            // "reason" is an optional input, could be null so handle it:
             try {
                 reason = event.getOption("reason").getAsString();
-            } catch (NullPointerException ignored) {}
+            } catch (NullPointerException ignored) {
+                reason = "No reason provided.";
+            }
 
-            // "hours" is an optional input, could be null so handle it:
             try {
-                var hours = event.getOption("hours").getAsInt();
-                var hoursToMinutes = hours * 60;
-                var totalMuteTime = minutes + hoursToMinutes;
+                int hours = event.getOption("hours").getAsInt();
+                int hoursToMinutes = hours * 60;
+                int totalMuteTime = minutes + hoursToMinutes;
                 ModerationLib.muteUsingSlashCommand(event, usrSnowflake, reason, totalMuteTime, slashCommandUser, target);
             } catch (NullPointerException e) {
                 ModerationLib.muteUsingSlashCommand(event, usrSnowflake, reason, minutes, slashCommandUser, target);

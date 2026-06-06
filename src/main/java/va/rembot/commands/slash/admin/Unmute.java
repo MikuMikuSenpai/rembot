@@ -1,5 +1,6 @@
 package va.rembot.commands.slash.admin;
 
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,20 +14,22 @@ public class Unmute extends ListenerAdapter {
 
             event.deferReply(true).queue();
 
-            var target = event.getOption("username").getAsUser();
+            User target = event.getOption("username").getAsUser();
 
-            if (!event.getGuild().getMemberById(target.getId()).isTimedOut()) { //if user != timedout dont unmute
+            if (!event.getGuild().getMemberById(target.getId()).isTimedOut()) {
                 event.getHook().editOriginal("This user is not muted, can't unmute them.").queue();
                 return;
             }
 
-            var reason = "No reason provided";
-            var usrSnowflake = UserSnowflake.fromId(target.getId());
-            var slashCommandUser = event.getUser();
+            String reason;
+            UserSnowflake usrSnowflake = UserSnowflake.fromId(target.getId());
+            User slashCommandUser = event.getUser();
 
             try {
                 reason = event.getOption("reason").getAsString();
-            } catch (NullPointerException ignored) {}
+            } catch (NullPointerException e) {
+                reason = "No reason provided.";
+            }
 
             ModerationLib.unmuteUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
 
