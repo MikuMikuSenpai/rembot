@@ -16,15 +16,15 @@ public class PingPong extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var msg = event.getMessage();
-        var msgRaw = msg.getContentRaw();
+        var msg = event.getMessage();//TODO: fix name conflict with JDA's "message"
+        String msgRaw = msg.getContentRaw();
 
-        if (msgRaw.equals("&ping")){
-            var timeSent = msg.getTimeCreated().toLocalDateTime();
-            var timeNow = LocalDateTime.now();
-            var timeTook = Duration.between(timeSent, timeNow).abs().getNano();
-            var timeTookInMs = (double) timeTook / 1_000_000;
-            var df = new DecimalFormat("#.##"); // only print 2 decimals
+        if (msgRaw.equals("&ping")) {
+            LocalDateTime timeSent = msg.getTimeCreated().toLocalDateTime();
+            LocalDateTime timeNow = LocalDateTime.now();
+            int timeTook = Duration.between(timeSent, timeNow).abs().getNano();
+            double timeTookInMs = (double) timeTook / 1_000_000;
+            DecimalFormat df = new DecimalFormat("#.##");
 
             msg
                     .reply("pong (took " + df.format(timeTookInMs) + " ms) [version: " + BotConfig.IMAGE_TAG + "]")
