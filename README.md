@@ -33,4 +33,3 @@ For more information regarding docker consult their documentation.
    * Manage Messages
 2. Copy [.env.example](.env.example) and create your own .env variant
 3. ```docker compose -f ./docker-compose-dev.yml up --build```
-   1. Each time you make a change to rembot, you will need to rebuild it using the --build option.
