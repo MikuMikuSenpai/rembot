@@ -23,6 +23,16 @@ public class MessageDao implements Dao<Message>{
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
 
+            if (message.messageContent().length() > 4000){
+                log.error("Message content is too long. Message could not be stored in the database.");
+                throw new SQLException();
+            }
+
+            if (message.attachmentsLinks().length() > 5000){
+                log.error("Attachment links are too long. Message could not be stored in the database.");
+                throw new SQLException();
+            }
+
             pStmt.setLong(1, message.discordMessageId());
             pStmt.setLong(2, message.discordId());
             pStmt.setTimestamp(3, message.timeCreated());
