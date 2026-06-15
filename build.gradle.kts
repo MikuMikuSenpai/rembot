@@ -21,7 +21,7 @@ dependencies {
     }
 
     implementation("com.mysql:mysql-connector-j:9.7.0")//mysql database jdbc
-    implementation("com.zaxxer:HikariCP:7.0.2")//for connection pooling = performance
+    implementation("com.zaxxer:HikariCP:7.1.0")//for connection pooling = performance
 
     implementation("ch.qos.logback:logback-classic:1.5.34") // needed for logging (https://jda.wiki/setup/logging/)
 
