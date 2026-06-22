@@ -25,8 +25,12 @@ hs_err_pid*
 replay_pid*
 
 build
+bin
 .gradle
 .idea
 .env
 # Ignore Kotlin plugin data
 .kotlin
+
+# emacs
+\#*\#
