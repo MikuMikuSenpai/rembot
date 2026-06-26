@@ -2,7 +2,7 @@
 
 plugins {
     application
-    id("com.gradleup.shadow") version "9.4.2" // need this for generating .jar
+    id("com.gradleup.shadow") version "9.4.3" // need this for generating .jar
 }
 
 repositories {
