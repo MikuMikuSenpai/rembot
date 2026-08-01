@@ -1,5 +1,6 @@
 package va.rembot.commands.non_slash;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.BotConfig;
@@ -16,7 +17,7 @@ public class PingPong extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var msg = event.getMessage();//TODO: fix name conflict with JDA's "message"
+        Message msg = event.getMessage();
         String msgRaw = msg.getContentRaw();
 
         if (msgRaw.equals("&ping")) {
