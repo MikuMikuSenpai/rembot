@@ -18,7 +18,7 @@ public class Unban extends ListenerAdapter {
 
             User target = event.getOption("username").getAsUser();
             UserSnowflake usrSnowflake = UserSnowflake.fromId(target.getId());
-            User slashCommandUser = event.getInteraction().getUser();
+            User slashCommandUser = event.getUser();
             String reason;
 
             try {
