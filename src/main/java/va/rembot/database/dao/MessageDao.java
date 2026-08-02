@@ -5,10 +5,7 @@ import va.rembot.BotConfig;
 import va.rembot.database.DataSource;
 import va.rembot.database.models.Message;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,19 +58,20 @@ public class MessageDao implements Dao<Message>{
 
             ps.setLong(1, discordMsgId);
 
-            var result = ps.executeQuery();
-            var discordUserId = 0L;
+            ResultSet result = ps.executeQuery();
+            long discordUserId = 0L;
             Timestamp timeCreated = null;
-            var messageContent = "";
-            var attachmentLinks = "";
+            String messageContent = "";
+            String attachmentLinks = "";
 
             while (result.next()) {
                 discordUserId = result.getLong(2);
                 timeCreated = result.getTimestamp(3);
                 messageContent = result.getString(4);
                 attachmentLinks = result.getString(5);
-                msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
             }
+
+            msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get message.");
@@ -104,11 +102,11 @@ public class MessageDao implements Dao<Message>{
 
             ps.setLong(1, discordId);
 
-            var result = ps.executeQuery();
-            var discordMsgId = 0L;
+            ResultSet result = ps.executeQuery();
+            long discordMsgId = 0L;
             Timestamp timeCreated = null;
-            var messageContent = "";
-            var attachmentLinks = "";
+            String messageContent = "";
+            String attachmentLinks = "";
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
@@ -143,8 +141,8 @@ public class MessageDao implements Dao<Message>{
 
             ps.setLong(1, discordId);
 
-            var result = ps.executeQuery();
-            var discordMsgId = 0L;
+            ResultSet result = ps.executeQuery();
+            long discordMsgId = 0L;
             Timestamp timeCreated = null;
             String messageContent = "";
             String attachmentLinks = "";

@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import va.rembot.database.DataSource;
 import va.rembot.database.models.StrikeSpam;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,8 +52,8 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
 
             ps.setLong(1, discordId);
 
-            var result = ps.executeQuery();
-            var amount = 0;
+            ResultSet result = ps.executeQuery();
+            int amount = 0;
             Timestamp mostRecentGiven = null;
 
             while (result.next()) {

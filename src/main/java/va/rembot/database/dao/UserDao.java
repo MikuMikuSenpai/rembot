@@ -6,6 +6,7 @@ import va.rembot.database.models.DiscordUser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ public class UserDao implements Dao<DiscordUser>{
     @Override
     public void create(DiscordUser user) {
 
-        var id = user.discordId();
+        long id = user.discordId();
         String query = "INSERT IGNORE INTO users (discord_user_id) VALUES (?)";
 
         try (Connection conn = DataSource.getConnection();
@@ -43,8 +44,8 @@ public class UserDao implements Dao<DiscordUser>{
 
             ps.setLong(1, id);
 
-            var result = ps.executeQuery();
-            var userId = 0L;
+            ResultSet result = ps.executeQuery();
+            long userId = 0L;
             while (result.next()) {
                 userId = result.getLong(1);
             }
