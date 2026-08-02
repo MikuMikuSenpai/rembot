@@ -10,9 +10,6 @@ import va.rembot.lib.ModerationLib;
 import java.util.*;
 
 @Slf4j
-///banned words get auto deleted, we dont do any moderation (ban/kick...) atm.
-///first we check if we can find the banned word normally in the string (best case scenario/fastest)
-///afterwards we substitute characters to again find the banned word (only if there is a sub char in original msg)
 public class BannedWordsFilter extends ListenerAdapter {
 
     private static final List<String> LIST_BANNED_WORDS = Arrays.stream(BotConfig.BANNED_WORDS_ARRAY).toList();
@@ -20,7 +17,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     private static final Map<Character, List<Character>> SUBS_PER_CHAR = getSubsForChars();
     private static final Set<Character> DOUBLE_ANTI_CENSOR_CHARS = getPotentialDoubleAntiCensor();
     private static final Set<Character> FILTERED_SPECIAL_CHARS = getFilteredSpecialChars();
-    private static final Set<Character> SUBSTITUTE_CHARS = new HashSet<>();
+    private static final Set<Character> SUBSTITUTE_CHARS = getAllSubstituteChars();
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -32,77 +29,41 @@ public class BannedWordsFilter extends ListenerAdapter {
             return;
         }
 
-        var msg = event.getMessage().getContentRaw();
-        //we exclude any URLs/links, they do not need to be checked and
-        // would report false positives if they had any sub chars in them (they likely do)
+        String msg = event.getMessage().getContentRaw();
+        //exclude links for potential false positive
         msg = msg.replaceAll("https?:\\/\\/\\S+", "");
-        var msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
-        var msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
-        //keep this for now commented, the below was just the normal msg without the EmojiHelper
-        //but since EmojiHelper also just sends the msg we would have duplicates so im p sure we can remove this
-        //im keeping this in case it breaks but this will be removed post v1 probably
-//        var msgAsArray = msg.split(" ");
-//        var msgAsArrayTrimmed = Arrays.stream(msgAsArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
-//        var msgAsArrayAsList = Arrays.stream(msgAsArrayTrimmed).distinct().toList();
+        String msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
+        String msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replaceAll(" ", "");
 
-//        StringBuilder msgAsArrayAsListString = new StringBuilder();
-//        msgAsArrayAsList.forEach(msgAsArrayAsListString::append);
+        String msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
 
-        var msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
+        for (Character c : FILTERED_SPECIAL_CHARS)
+            msgTotal = msgTotal.replace(c.toString(), "");
 
-        // filter out any char that would be in the way of filter such as quotes ""
-        for (var item : FILTERED_SPECIAL_CHARS) {
-            log.debug("[onMessageReceived] Looping over special chars {}", item.toString());
+        String[] msgTotalArray = Arrays.stream(msgTotal.split(" ")).distinct().toList().toArray(new String[0]);
+        String[] msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
 
-            msgTotal = msgTotal.replace(item.toString(), "");
-        }
-
-        var msgTotalArray = Arrays.stream(msgTotal.split(" ")).distinct().toList().toArray(new String[0]);
-        var msgTotalArrayTrimmed = Arrays.stream(msgTotalArray).filter(word -> !word.isEmpty()).toArray(String[]::new);
-
-        // skip the heavy (slow) substitute method if possible
         if (checkMsgBeforeSubstituting(msgTotalArray, event, msg))
             return;
 
-        //the below two for loops are used to check if there are any substitute chars in current msg
-        // if NOT skip checking for banned words since we did that above
-        // letters: a, b, c,...
-        for (var key : SUBS_PER_CHAR.keySet()) {
+        boolean hasSubInMsg = false;
+        boolean hasDoubleAntiCensorChar = false;
+        int countSubChars = 0;
+        boolean tooManySubCharsInMessage = false;
+        for (String word : msgTotalArray) {
 
-            log.debug("[onMessageReceived] letter: {}", key.toString());
+            char[] wordAsCharArray = word.toCharArray();
 
-            // substitute chars: @, 4, !, ...
-            for (var value : SUBS_PER_CHAR.get(key)) {
-
-                log.debug("[onMessageReceived] substitute char: {}", value.toString());
-                SUBSTITUTE_CHARS.add(value);
-
-            }
-        }
-
-        var hasSubInMsg = false;
-        var hasDoubleAntiCensorChar = false;
-        var countSubChars = 0;
-        var tooManySubCharsInMessage = false;
-        for (var word : msgTotalArray) {
-
-            var charArray = word.toCharArray();
-
-            //same as foreach char of word
-            for (var character : charArray){
-
-                log.debug("[onMessageReceived] character {}", character);
+            for (char character : wordAsCharArray){
 
                 if (SUBSTITUTE_CHARS.contains(character)) {
-                    log.debug("[onMessageReceived] Substitute char detected");
                     hasSubInMsg = true;
                     countSubChars++;
                 }
 
-                if (DOUBLE_ANTI_CENSOR_CHARS.contains(character)) {
-                    log.debug("[onMessageReceived] (potential) Anti double char detected");
+                if (DOUBLE_ANTI_CENSOR_CHARS.contains(character))
                     hasDoubleAntiCensorChar = true;
-                }
+
             }
         }
 
@@ -537,6 +498,10 @@ public class BannedWordsFilter extends ListenerAdapter {
         subsForChars.put('o', List.of('0', '●', '○', '°', '@'));
 
         return subsForChars;
+    }
+
+    private static HashSet<Character> getAllSubstituteChars() {
+        return new HashSet<>(Set.of('@', '4', '^', '3', '€', '!', '¡', '|', '1', '0', '●', '○', '°'));
     }
 
     /// returns double anti censor candidate chars
