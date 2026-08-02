@@ -5,7 +5,4 @@ public class StarMessageNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public StarMessageNotFoundException(String message, long messageId) {
-        super(message + " " + messageId);
-    }
 }

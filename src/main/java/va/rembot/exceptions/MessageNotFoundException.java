@@ -5,7 +5,4 @@ public class MessageNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public MessageNotFoundException(String message, long messageId) {
-        super(message + " " + messageId);
-    }
 }
