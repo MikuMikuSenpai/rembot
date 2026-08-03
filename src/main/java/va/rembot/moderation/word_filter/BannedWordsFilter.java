@@ -23,11 +23,7 @@ public class BannedWordsFilter extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
         if (LIST_BANNED_WORDS.isEmpty()) return;
-
-        if (ModerationLib.isMod(event.getMember())) {
-            log.debug("[onMessageReceived] This user is mod, banned words filter not applied.");
-            return;
-        }
+        if (ModerationLib.isMod(event.getMember())) return;
 
         String msg = event.getMessage().getContentRaw();
         //exclude links for potential false positive
@@ -67,20 +63,12 @@ public class BannedWordsFilter extends ListenerAdapter {
             }
         }
 
-        //we could check this per word (currently we take the total amount of the message)
-        // and still substitute if words have less than X sub chars
-        // but I believe this is the better approach as it could technically still
-        // overwhelm the heap memory if someone spams e.g. one sub char in many words
         if (countSubChars > BotConfig.getAllowedAmountSubstituteCharactersPerMessage())
             tooManySubCharsInMessage = true;
 
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
         log.debug("[onMessageReceived] msgEmojisConvertedToCharsTrimmed: {}", msgEmojisConvertedToCharsTrimmed);
-//        log.debug("[onMessageReceived] msgAsArray: {}", (Object) msgAsArray);
-//        log.debug("[onMessageReceived] msgAsArrayTrimmed: {}", (Object) msgAsArrayTrimmed);
-//        log.debug("[onMessageReceived] msgAsArrayAsList: {}", msgAsArrayAsList);
-//        log.debug("[onMessageReceived] msgAsArrayAsListString: {}", msgAsArrayAsListString);
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] msgTotalArrayTrimmed: {}", (Object) msgTotalArrayTrimmed);
@@ -91,19 +79,17 @@ public class BannedWordsFilter extends ListenerAdapter {
 
             if (tooManySubCharsInMessage) {
 
-                var user = event.getAuthor().getAsMention();
-                var msgRaw = event.getMessage().getContentRaw();
-
+                String userMention = event.getAuthor().getAsMention();
                 event.getJDA().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID)
-                        .sendMessage("**[POTENTIAL BANNED WORD]** " + user + " <M: " + msgRaw + ">").queue();
+                        .sendMessage("**[POTENTIAL BANNED WORD]** " + userMention + " <M: " + msg + ">").queue();
                 return;
             }
 
             return;
         }
 
-        var substitutedMsg = substitute(msgTotalArrayTrimmed, event);
-        var combinedWordsList = getCombinedWords(substitutedMsg);
+        List<String> substitutedMsg = substitute(msgTotalArrayTrimmed, event);
+        List<String> combinedWordsList = getCombinedWords(substitutedMsg);
 
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
         log.debug("[onMessageReceived] combinedWordsList: {}", combinedWordsList);
@@ -133,33 +119,29 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
-    /// returns true if there is a banned word spotted in msg without substituting
-    /// this results in significantly faster deleting of the message
+    /// check b4 substituting = fast!
     private boolean checkMsgBeforeSubstituting(String[] msgTotal, MessageReceivedEvent event, String originalMsgRaw) {
 
-        var msgTotalList = Arrays.stream(msgTotal).toList();
-        var combinedWords = getCombinedWords(msgTotalList);
+        List<String> msgTotalList = Arrays.stream(msgTotal).toList();
+        List<String> combinedWords = getCombinedWords(msgTotalList);
 
         log.debug("[checkMsgBeforeSubstituting] msgTotal {}", (Object) msgTotal);
         log.debug("[checkMsgBeforeSubstituting] combinedWords {}", combinedWords);
         log.debug("[checkMsgBeforeSubstituting] msgTotalList {}", msgTotalList);
 
+        if (hasWhitelistedCombinedWords(combinedWords))
+            return hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(combinedWords, event, originalMsgRaw);
+
         // this is copied from above (inside onMessageReceived method), for more info read above
-        for (var word : msgTotalList){
+        for (String word : msgTotalList) {
 
-            if (hasWhitelistedCombinedWords(combinedWords)) {
-                return loopOverMsgExcludeWhitelistBoolean(combinedWords, msgTotalList, event, originalMsgRaw);
-            }
-
-            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(word))) {
-                return loopOverMsgExcludeWhitelistBoolean(word, msgTotalList, event, originalMsgRaw);
-            }
+            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(word)))
+                return hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(word, msgTotalList, event, originalMsgRaw);
 
             if (LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 deleteMsg(event, originalMsgRaw, word);
                 return true;
             }
-
         }
 
         return false;
@@ -175,20 +157,30 @@ public class BannedWordsFilter extends ListenerAdapter {
                 .queue();
     }
 
-    /// This variant is made for checkMsgBeforeSubstituting method
-    /// Loops over msgTotal, for each word looks for any non-whitelisted combined word (2 words)
-    /// AND if it is a banned word, if yes it calls the delete method AND returns true (so that substitute method is skipped)
-    private boolean loopOverMsgExcludeWhitelistBoolean(List<String> combinedWordsList, List<String> msgTotalList, MessageReceivedEvent event, String msg){
+    /// combined word variant
+    private boolean hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(List<String> combinedWordsList, MessageReceivedEvent event, String msg) {
 
-        var whitelistedWords = getWhitelistedWords(combinedWordsList);
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] Checking for banned words before substituting combined words variant");
 
-        log.debug("[loopOverMsgExcludeWhitelistBoolean] (combined whitelist word) msgTotalList: {}", msgTotalList);
-        log.debug("[loopOverMsgExcludeWhitelistBoolean] (combined whitelist word) whiteListedWords: {}", whitelistedWords);
+        String newMsg = "";
+        List<String> newMsgAsList;
 
-        for (String word : msgTotalList){
-            if (!whitelistedWords.contains(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST BANNED WORD: {}", word);
+        for (String combinedWord : combinedWordsList) {
+            if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(combinedWord))) {
+                newMsg = msg.replaceAll(combinedWord, "");
+                log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] whitelisted combined word found: {}", combinedWord);
+            }
+        }
 
+        newMsgAsList = Arrays.asList(newMsg.trim().split(" "));
+
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] newMsg: {}", newMsg);
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] newMsgAsList: {}", newMsgAsList);
+
+        for (String word : newMsgAsList){
+            //should we check whitelist word case-sensitive? idk prob not... -_o_-
+            if (!WHITELISTED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word)) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
+                log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] NON-WHITELIST BANNED WORD: {}", word);
                 deleteMsg(event, msg, word);
                 return true;
             }
@@ -197,17 +189,15 @@ public class BannedWordsFilter extends ListenerAdapter {
         return false;
     }
 
-    /// This variant is made for checkMsgBeforeSubstituting method
-    /// Loops over msgTotal, for each word looks for any non-whitelisted word
-    /// AND if it is a banned word, if yes it calls the delete method AND returns true (so that substitute method is skipped)
-    private boolean loopOverMsgExcludeWhitelistBoolean(String whitelistedWord, List<String> msgTotalList, MessageReceivedEvent event, String msg){
+    /// singular word variant
+    private boolean hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(String whitelistedWord, List<String> msgTotalList, MessageReceivedEvent event, String msg){
 
-        log.debug("[loopOverMsgExcludeWhitelistBoolean] (single whitelist word) msgTotalList: {}", msgTotalList);
-        log.debug("[loopOverMsgExcludeWhitelistBoolean] (single whitelist word) whitelistedWord: {}", whitelistedWord);
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] (single whitelist word) msgTotalList: {}", msgTotalList);
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] (single whitelist word) whitelistedWord: {}", whitelistedWord);
 
         for (String word : msgTotalList){
             if (!whitelistedWord.equals(word) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))){
-                log.debug("[loopOverMsgExcludeWhitelistBoolean] NON-WHITELIST BANNED WORD: {}", word);
+                log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] NON-WHITELIST BANNED WORD: {}", word);
 
                 deleteMsg(event, msg, word);
                 return true;
@@ -489,7 +479,6 @@ public class BannedWordsFilter extends ListenerAdapter {
         }
     }
 
-    /// returns current subs supported per character
     private static Map<Character, List<Character>> getSubsForChars() {
         Map<Character, List<Character>> subsForChars = new HashMap<>();
         subsForChars.put('a', List.of('@', '4', '^'));
@@ -504,7 +493,6 @@ public class BannedWordsFilter extends ListenerAdapter {
         return new HashSet<>(Set.of('@', '4', '^', '3', '€', '!', '¡', '|', '1', '0', '●', '○', '°'));
     }
 
-    /// returns double anti censor candidate chars
     private static Set<Character> getPotentialDoubleAntiCensor() {
         Set<Character> doubleAntiCensorChars = new HashSet<>();
         doubleAntiCensorChars.add('(');
@@ -513,7 +501,6 @@ public class BannedWordsFilter extends ListenerAdapter {
         return doubleAntiCensorChars;
     }
 
-    /// returns special chars that are removed from original msg before filter
     private static Set<Character> getFilteredSpecialChars() {
         Set<Character> filteredSpecialChars = new HashSet<>();
         filteredSpecialChars.add('\"');
