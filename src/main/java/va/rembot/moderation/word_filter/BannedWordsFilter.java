@@ -222,7 +222,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         Map<Integer, Set<Character>> indexForSubs = new HashMap<>();
         Set<Character> potentialSubs = new HashSet<>();
         StringBuilder doubleAntiCensorChecker = new StringBuilder();
-        String newWord;
+        StringBuilder newWord = new StringBuilder();
         int indexForSub = 0;
         boolean isSub = false;
         boolean isDoubleAntiCensorChar = false;
@@ -230,7 +230,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         for (String word : inputList) {
 
             char[] chars = word.toCharArray();
-            newWord = "";
+            newWord.setLength(0);
             indexForSubs.clear();
             potentialSubs.clear();
 
@@ -282,7 +282,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                     log.debug("[substitute] Second char (checking combined word): {}", doubleAntiCensorChecker);
 
                     if (doubleAntiCensorChecker.toString().equals("()")) {
-                        newWord += "o";
+                        newWord.append("o");
                         isDoubleAntiCensorChar = true;
                         continue;
                     }
@@ -291,7 +291,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                     log.error("[substitute] ArrayIndexOutOfBoundsException {}", e.getMessage());
                 }
 
-                newWord += chars[i];
+                newWord.append(chars[i]);
                 log.debug("[substitute] Current new word (building it): {}", newWord);
             }
 
