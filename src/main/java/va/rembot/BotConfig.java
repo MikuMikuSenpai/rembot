@@ -62,8 +62,6 @@ public class BotConfig extends ListenerAdapter {
     private static int allowedAmountSubstituteCharactersPerMessage = 0;
 
     @Override
-    //we assign the ENV vars first to be sure that they are the correct values
-    // before using them in all the other files
     public void onReady(ReadyEvent event) {
 
         var bot = event.getJDA();
@@ -76,7 +74,6 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] MOD_ROLE_ID ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         try {
@@ -93,7 +90,6 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] ANTI_SPAM_TIME_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         try {
@@ -110,37 +106,32 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         try {
             antiSpamStrikeAmountInt = Integer.parseInt(ANTI_SPAM_STRIKE_AMOUNT);
 
-            if (antiSpamStrikeAmountInt <= 0) {
+            if (antiSpamStrikeAmountInt <= 0)
                 log.warn("[onReady] ANTI_SPAM_STRIKE_AMOUNT is 0 or a negative number, this means that people will be instantly banned if spamming this is probably NOT what you want. Check your .env file.");
-            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] ANTI_SPAM_STRIKE_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         try {
             substituteBannedWordCheckAmountInt = Integer.parseInt(SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT);
 
-            if (substituteBannedWordCheckAmountInt <= 0) {
+            if (substituteBannedWordCheckAmountInt <= 0)
                 log.warn("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
-            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] SUBSTITUTE_BANNED_WORD_CHECK_AMOUNT ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         try {
@@ -156,16 +147,14 @@ public class BotConfig extends ListenerAdapter {
         try {
             allowedAmountSubstituteCharactersPerMessage = Integer.parseInt(ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE);
 
-            if (allowedAmountSubstituteCharactersPerMessage <= 0) {
+            if (allowedAmountSubstituteCharactersPerMessage <= 0)
                 log.warn("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE is 0 or a negative number, this breaks banned word check. Change it to a positive number. Check your .env file.");
-            }
         } catch (NumberFormatException e) {
 
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING Check your .env file it is missing values use .env.example as a guide.");
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING The bot cannot start until this is fixed.");
             log.error("[onReady] ALLOWED_AMOUNT_SUBSTITUTE_CHARACTERS_PER_MESSAGE ENV VAR MISSING error: {}", e.getMessage());
             bot.shutdown();
-
         }
 
         if (bot.getGuilds().size() > 1) {
@@ -193,7 +182,7 @@ public class BotConfig extends ListenerAdapter {
             log.error("[onReady] MOD_ROLE_ID {} is not valid, fix your .env file.", MOD_ROLE_ID);
             log.error("[onReady] rembot can not start without fixing this issue first.");
             bot.shutdown();
-        } catch (IllegalArgumentException e) {} // catching error if its empty this is handled by the ENV var check above
+        } catch (IllegalArgumentException e) {}
 
         try {
             bot.getChannelById(TextChannel.class, LOG_CHANNEL_ID).getJDA();
@@ -232,9 +221,8 @@ public class BotConfig extends ListenerAdapter {
             bot.shutdown();
         }
 
-        if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0) {
+        if (EnvHelper.getREPLICATE_AMOUNT_INT() <= 0)
             log.warn("[onReady] REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
-        }
 
         bot.addEventListener(
                 new Ban(),
@@ -278,15 +266,11 @@ public class BotConfig extends ListenerAdapter {
 
     }
 
-    /// returns a string with replicas of the banned words including plural form this eases the bot hosting for the hoster
-    /// normally they would have to manually type "badword,badwordbadword" etc. for the edge cases where users
-    /// send bad words next to each other to avoid censor but this is automated now, including plural form (+s)
-    /// other plural forms (e.g. +es) need to be added by the host in their .env (this can be added later but not urgent)
     private static String[] getBannedWordsArray() {
 
         var replicateAmountInt = EnvHelper.getREPLICATE_AMOUNT_INT();
 
-        List<String> bannedWordsListTemp = new ArrayList<>(); //used for adding replicated words during iterations afterward all the items are added to real list
+        List<String> bannedWordsListTemp = new ArrayList<>();
         List<String> bannedWordsList = new ArrayList<>(Arrays.asList(BANNED_WORDS_ARRAY_TEMP));
 
         log.debug("[getBannedWordsArray] Current new bannedWordsList: {}", bannedWordsList);
