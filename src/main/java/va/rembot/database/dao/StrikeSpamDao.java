@@ -17,7 +17,7 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         String query = "INSERT IGNORE INTO strikes_spam (discord_user_id, amount, most_recent_given) VALUES (?, 0, ?)";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement pStmt = conn.prepareStatement(query)){
+             PreparedStatement pStmt = conn.prepareStatement(query)) {
 
             pStmt.setLong(1, strikeSpam.discordId());
             pStmt.setTimestamp(2, strikeSpam.mostRecentStrike());
@@ -48,7 +48,7 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         String query = "SELECT * FROM strikes_spam WHERE discord_user_id = ?";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)){
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, discordId);
 
@@ -88,25 +88,6 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
 
         } catch (SQLException e) {
             log.error("Could not update strikeSpam with new amount and timestamp for spam detection.");
-            log.error("StrikeSpam details: amount {}, mostRecentStrike {}, discordId {}", strikeSpam.amount(), strikeSpam.mostRecentStrike(), strikeSpam.discordId());
-            log.error("Error: {}", e.getMessage());
-        }
-    }
-
-    public void updateAmountToZero(StrikeSpam strikeSpam) {
-
-        String query = "UPDATE strikes_spam SET amount = 0, most_recent_given = ? WHERE discord_user_id = ?";
-
-        try (Connection conn = DataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)){
-
-            ps.setTimestamp(1, strikeSpam.mostRecentStrike());
-            ps.setLong(2, strikeSpam.discordId());
-
-            ps.executeUpdate();
-
-        } catch (SQLException e) {
-            log.error("Could not update strikeSpam to amount 0 and timestamp for spam detection.");
             log.error("StrikeSpam details: amount {}, mostRecentStrike {}, discordId {}", strikeSpam.amount(), strikeSpam.mostRecentStrike(), strikeSpam.discordId());
             log.error("Error: {}", e.getMessage());
         }

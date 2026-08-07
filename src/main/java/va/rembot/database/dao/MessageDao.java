@@ -3,29 +3,29 @@ package va.rembot.database.dao;
 import lombok.extern.slf4j.Slf4j;
 import va.rembot.BotConfig;
 import va.rembot.database.DataSource;
-import va.rembot.database.models.Message;
+import va.rembot.database.models.DiscordMessage;
 
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public class MessageDao implements Dao<Message>{
+public class MessageDao implements Dao<DiscordMessage> {
 
     @Override
-    public void create(Message message) {
+    public void create(DiscordMessage message) {
 
         String query = "INSERT IGNORE INTO messages (discord_message_id, user_id, time_created, message_content, attachments_links) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement pStmt = conn.prepareStatement(query)){
+             PreparedStatement pStmt = conn.prepareStatement(query)) {
 
-            if (message.messageContent().length() > 4000){
+            if (message.messageContent().length() > 4000) {
                 log.error("Message content is too long. Message could not be stored in the database.");
                 throw new SQLException();
             }
 
-            if (message.attachmentsLinks().length() > 5000){
+            if (message.attachmentsLinks().length() > 5000) {
                 log.error("Attachment links are too long. Message could not be stored in the database.");
                 throw new SQLException();
             }
@@ -47,14 +47,14 @@ public class MessageDao implements Dao<Message>{
     }
 
     @Override
-    public Optional<Message> get(long discordMsgId) {
+    public Optional<DiscordMessage> get(long discordMsgId) {
 
-        Message msg = null;
+        DiscordMessage msg = null;
 
         String query = "SELECT * FROM messages WHERE discord_message_id = ?";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)){
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, discordMsgId);
 
@@ -71,7 +71,7 @@ public class MessageDao implements Dao<Message>{
                 attachmentLinks = result.getString(5);
             }
 
-            msg = new Message(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
+            msg = new DiscordMessage(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get message.");
@@ -84,13 +84,13 @@ public class MessageDao implements Dao<Message>{
     }
 
     @Override
-    public List<Message> getAll() {
+    public List<DiscordMessage> getAll() {
         return List.of();
     }
 
-    public Optional<Message> getFirst(long discordId) {
+    public Optional<DiscordMessage> getFirst(long discordId) {
 
-        Message msgSpam = null;
+        DiscordMessage msgSpam = null;
 
         String query =
                 "SELECT * FROM " +
@@ -98,7 +98,7 @@ public class MessageDao implements Dao<Message>{
                 "ORDER BY time_created ASC LIMIT 1";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)){
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, discordId);
 
@@ -116,7 +116,7 @@ public class MessageDao implements Dao<Message>{
                 attachmentLinks = result.getString(5);
             }
 
-            msgSpam = new Message(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
+            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get first message for spam detection.");
@@ -127,9 +127,9 @@ public class MessageDao implements Dao<Message>{
         return Optional.of(msgSpam);
     }
 
-    public Optional<Message> getLatest(long discordId) {
+    public Optional<DiscordMessage> getLatest(long discordId) {
 
-        Message msgSpam = null;
+        DiscordMessage msgSpam = null;
 
         String query =
                 "SELECT * FROM " +
@@ -137,7 +137,7 @@ public class MessageDao implements Dao<Message>{
                 "LIMIT 1";
 
         try (Connection conn = DataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)){
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setLong(1, discordId);
 
@@ -155,7 +155,7 @@ public class MessageDao implements Dao<Message>{
                 attachmentLinks = result.getString(5);
             }
 
-            msgSpam = new Message(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
+            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks);
 
         } catch (SQLException e) {
             log.error("Could not get latest message for spam detection.");
@@ -167,13 +167,12 @@ public class MessageDao implements Dao<Message>{
     }
 
     @Override
-    public void update(Message message) {
+    public void update(DiscordMessage message) {
 
     }
 
     @Override
-    public void delete(Message message) {
+    public void delete(DiscordMessage message) {
 
     }
-
 }

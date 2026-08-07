@@ -13,7 +13,7 @@ import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StarMessageDao;
 import va.rembot.database.dao.UserDao;
-import va.rembot.database.models.Message;
+import va.rembot.database.models.DiscordMessage;
 import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
@@ -282,7 +282,7 @@ public class HighlightedMessage extends ListenerAdapter {
         }
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {

@@ -47,7 +47,6 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[onMessageReceived] msgTotal: {}", msgTotal);
         log.debug("[onMessageReceived] msgTotalArray: {}", (Object) msgTotalArray);
         log.debug("[onMessageReceived] combinedWords: {}", combinedWords);
-        log.debug("[onMessageReceived] LIST_BANNED_WORDS: {}", LIST_BANNED_WORDS);
 
         if (hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(combinedWords, event, msgTotal)) return;
 
