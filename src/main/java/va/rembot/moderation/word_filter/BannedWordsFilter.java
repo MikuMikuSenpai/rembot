@@ -234,8 +234,8 @@ public class BannedWordsFilter extends ListenerAdapter {
             indexForSubs.clear();
             potentialSubs.clear();
 
-            log.debug("[substitute method] characters: {}", Arrays.toString(chars));
-            log.debug("[substitute method] word: {}", word);
+            log.debug("[substitute] characters: {}", Arrays.toString(chars));
+            log.debug("[substitute] word: {}", word);
 
             for (int i = 0; i < word.length(); i++) {
 
@@ -250,11 +250,11 @@ public class BannedWordsFilter extends ListenerAdapter {
                 log.debug("[substitute] KEYS of subsForChars: {}", subsForChars.keySet());
 
                 // example a, b, c, ... (letters)
-                for (var key : subsForChars.keySet()) {
+                for (Character key : subsForChars.keySet()) {
                     log.debug("[substitute] Each key (subsForChars): {}", key);
 
                     // example @, 4, ... (substitute chars/replacements)
-                    for (var value : subsForChars.get(key)) {
+                    for (Character value : subsForChars.get(key)) {
                         log.debug("[substitute] Each value (subsForChars): {} for key: {}", value, key);
 
                         if (value.equals(chars[i])) {
