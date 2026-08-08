@@ -12,7 +12,7 @@ public class Ban extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("ban")){
+        if (event.getName().equals("ban")) {
 
             event.deferReply(true).queue();
 

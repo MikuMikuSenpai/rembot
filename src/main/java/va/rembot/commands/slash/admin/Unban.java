@@ -12,7 +12,7 @@ public class Unban extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("unban")){
+        if (event.getName().equals("unban")) {
 
             event.deferReply(true).queue();
 

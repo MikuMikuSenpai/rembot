@@ -12,7 +12,7 @@ public class Kick extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("kick")){
+        if (event.getName().equals("kick")) {
 
             event.deferReply(true).queue();
 
