@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import va.rembot.BotConfig;
 
@@ -31,36 +32,48 @@ public class ModerationLib {
 
         MessageEmbed embed = buildEmbedForBan(targetUser, reason, slashCommandUser);
 
-        event.getGuild()
-                .ban(usrSnowflake, 0, TimeUnit.MINUTES)
-                .reason(reason)
-                .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessageEmbeds(embed)
-                            .and(event.getHook().deleteOriginal())
-                            .queue();
-                    log.info("[banUsingSlashCommand] Banned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
-                }, new ErrorHandler()
-                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            logError("banUsingSlashCommand",
-                                    "Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
-                                    "ban",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("Failed to ban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
-                                    .queue();
-                        })
-                        .handle(ErrorResponse.UNKNOWN_USER, e -> {
-                            logError("banUsingSlashCommand",
-                                    "Dont know who the target user is (Unknown user).",
-                                    "ban",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("I can't find the person you are trying to ban (unknown user)." + slashCommandUser.getAsMention())
-                                    .queue();
-                        }));
+        try {
+            event.getGuild()
+                    .ban(usrSnowflake, 0, TimeUnit.MINUTES)
+                    .reason(reason)
+                    .queue(success -> {
+                        event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
+                                .sendMessageEmbeds(embed)
+                                .and(event.getHook().deleteOriginal())
+                                .queue();
+                        log.info("[banUsingSlashCommand] Banned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
+                    }, new ErrorHandler()
+                            .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                                logError("banUsingSlashCommand",
+                                        "Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                        "ban",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("Failed to ban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target).")
+                                        .queue();
+                            })
+                            .handle(ErrorResponse.UNKNOWN_USER, e -> {
+                                logError("banUsingSlashCommand",
+                                        "Dont know who the target user is (Unknown user).",
+                                        "ban",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("I can't find the person you are trying to ban (unknown user).")
+                                        .queue();
+                            }));
+        } catch (HierarchyException e) {
+            event.getHook()
+                    .editOriginal("Can't ban that person they have more (or same) perms than me!")
+                    .queue(success -> {
+                        logError("banUsingSlashCommand",
+                                "Bot doesn't have enough permissions to ban the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                "ban",
+                                slashCommandUser,
+                                targetUser);
+                    });
+        }
     }
 
     public static void banGeneric(MessageReceivedEvent event, UserSnowflake usrSnowflake, String reason, User targetUser) {
@@ -88,72 +101,96 @@ public class ModerationLib {
 
     public static void kickUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
 
-        event.getGuild()
-                .kick(usrSnowflake)
-                .reason(reason)
-                .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
-                            .sendMessage("**[USER KICK]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
-                            .and(event.getHook().deleteOriginal())
-                            .queue();
-                    log.info("[kickUsingSlashCommand] Kicked: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
-                }, new ErrorHandler()
-                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            logError("kickUsingSlashCommand",
-                                    "Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
-                                    "kick",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("Failed to kick that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
-                                    .queue();
-                        })
-                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
-                            logError("kickUsingSlashCommand",
-                                    "The member that was being kicked was already removed from this server before finishing the kicking task.",
-                                    "kick",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("The user you tried to kick was already removed from this server." + slashCommandUser.getAsMention())
-                                    .queue();
-                        }));
+        try {
+            event.getGuild()
+                    .kick(usrSnowflake)
+                    .reason(reason)
+                    .queue(success -> {
+                        event.getGuild().getChannelById(TextChannel.class , BotConfig.LOG_CHANNEL_ID)
+                                .sendMessage("**[USER KICK]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
+                                .and(event.getHook().deleteOriginal())
+                                .queue();
+                        log.info("[kickUsingSlashCommand] Kicked: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
+                    }, new ErrorHandler()
+                            .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                                logError("kickUsingSlashCommand",
+                                        "Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                        "kick",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("Failed to kick that user because I don't have sufficient perms (most likely need a role with higher permissions than the target).")
+                                        .queue();
+                            })
+                            .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                                logError("kickUsingSlashCommand",
+                                        "The member that was being kicked was already removed from this server before finishing the kicking task.",
+                                        "kick",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("The user you tried to kick was already removed from this server.")
+                                        .queue();
+                            }));
+        } catch (HierarchyException e) {
+            event.getHook()
+                    .editOriginal("Can't kick that person they have more (or same) perms than me!")
+                    .queue(success -> {
+                        logError("kickUsingSlashCommand",
+                                "Bot doesn't have enough permissions to kick the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                "kick",
+                                slashCommandUser,
+                                targetUser);
+                    });
+        }
     }
 
     public static void muteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, int muteTimeTotalMinutes, User slashCommandUser, User targetUser) {
 
         MessageEmbed embed = buildEmbedForMute(targetUser, reason, slashCommandUser, muteTimeTotalMinutes);
 
-        event.getGuild()
-                .timeoutFor(usrSnowflake, Duration.ofMinutes(muteTimeTotalMinutes))
-                .reason(reason)
-                .queue(success -> {
-                    event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
-                            .sendMessageEmbeds(embed)
-                            .and(event.getHook().deleteOriginal())
-                            .queue();
-                    log.info("[muteUsingSlashCommand] Muted: {} by moderator: {} reason: {}", targetUser, slashCommandUser, reason);
-                }, new ErrorHandler()
-                        .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
-                            logError("muteUsingSlashCommand",
-                                    "Bot doesn't have enough permissions to mute the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
-                                    "mute",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("Failed to muted that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
-                                    .queue();
-                        })
-                        .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
-                            logError("muteUsingSlashCommand",
-                                    "The member that was being muted was already removed from this server before finishing the muting task.",
-                                    "mute",
-                                    slashCommandUser,
-                                    targetUser);
-                            event.getHook()
-                                    .editOriginal("The user you tried to mute was already removed from this server." + slashCommandUser.getAsMention())
-                                    .queue();
-                        }));
+        try {
+            event.getGuild()
+                    .timeoutFor(usrSnowflake, Duration.ofMinutes(muteTimeTotalMinutes))
+                    .reason(reason)
+                    .queue(success -> {
+                        event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
+                                .sendMessageEmbeds(embed)
+                                .and(event.getHook().deleteOriginal())
+                                .queue();
+                        log.info("[muteUsingSlashCommand] Muted: {} by moderator: {} reason: {}", targetUser, slashCommandUser, reason);
+                    }, new ErrorHandler()
+                            .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
+                                logError("muteUsingSlashCommand",
+                                        "Bot doesn't have enough permissions to mute the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                        "mute",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("Failed to muted that user because I don't have sufficient perms (most likely need a role with higher permissions than the target).")
+                                        .queue();
+                            })
+                            .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
+                                logError("muteUsingSlashCommand",
+                                        "The member that was being muted was already removed from this server before finishing the muting task.",
+                                        "mute",
+                                        slashCommandUser,
+                                        targetUser);
+                                event.getHook()
+                                        .editOriginal("The user you tried to mute was already removed from this server.")
+                                        .queue();
+                            }));
+        } catch (HierarchyException e) {
+            event.getHook()
+                    .editOriginal("Can't mute that person they have more (or same) perms as me!")
+                    .queue(success -> {
+                        logError("muteUsingSlashCommand",
+                                "Bot doesn't have enough permissions to mute the target user. (Bot probably has a lower or same discord role hierarchy as the target).",
+                                "mute",
+                                slashCommandUser,
+                                targetUser);
+                    });
+        }
     }
 
     public static void muteSpam(MessageReceivedEvent event, UserSnowflake usrSnowflake, String reason, int strikes, User targetUsr) {
@@ -199,7 +236,7 @@ public class ModerationLib {
                                     slashCommandUser,
                                     targetUser);
                             event.getHook()
-                                    .editOriginal("Failed to unban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .editOriginal("Failed to unban that user because I don't have sufficient perms (most likely need a role with higher permissions than the target).")
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_BAN, e -> {
@@ -209,7 +246,7 @@ public class ModerationLib {
                                     slashCommandUser,
                                     targetUser);
                             event.getHook()
-                                    .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me)." + slashCommandUser.getAsMention())
+                                    .editOriginal("Failed to unban that user because I think that user is not banned (the ban is unknown to me).")
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_USER, e -> {
@@ -219,12 +256,12 @@ public class ModerationLib {
                                     slashCommandUser,
                                     targetUser);
                             event.getHook()
-                                    .editOriginal("I can't find the person you are trying to unban (unknown user)." + slashCommandUser.getAsMention())
+                                    .editOriginal("I can't find the person you are trying to unban (unknown user).")
                                     .queue();
                         }));
     }
 
-    public static void unmuteUsingSlashCommand(SlashCommandInteractionEvent event, UserSnowflake usrSnowflake, String reason, User slashCommandUser, User targetUser) {
+    public static void unmuteUsingSlashCommand(SlashCommandInteractionEvent event, String reason, User slashCommandUser, User targetUser) {
 
         event.getGuild()
                 .getMemberById(targetUser.getId())
@@ -243,7 +280,7 @@ public class ModerationLib {
                                     slashCommandUser,
                                     targetUser);
                             event.getHook()
-                                    .editOriginal("Failed to unmute that user because I don't have sufficient perms (most likely need a role with higher permissions than the target)." + slashCommandUser.getAsMention())
+                                    .editOriginal("Failed to unmute that user because I don't have sufficient perms (most likely need a role with higher permissions than the target).")
                                     .queue();
                         })
                         .handle(ErrorResponse.UNKNOWN_MEMBER, e -> {
@@ -253,7 +290,7 @@ public class ModerationLib {
                                     slashCommandUser,
                                     targetUser);
                             event.getHook()
-                                    .editOriginal("Failed to unmute that user because they were removed from the guild before the unmuting task finished." + slashCommandUser.getAsMention())
+                                    .editOriginal("Failed to unmute that user because they were removed from the guild before the unmuting task finished.")
                                     .queue();
                         }));
     }

@@ -22,7 +22,6 @@ public class Unmute extends ListenerAdapter {
             }
 
             String reason;
-            UserSnowflake usrSnowflake = UserSnowflake.fromId(target.getId());
             User slashCommandUser = event.getUser();
 
             try {
@@ -31,7 +30,7 @@ public class Unmute extends ListenerAdapter {
                 reason = "No reason provided.";
             }
 
-            ModerationLib.unmuteUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
+            ModerationLib.unmuteUsingSlashCommand(event, reason, slashCommandUser, target);
 
         }
     }
