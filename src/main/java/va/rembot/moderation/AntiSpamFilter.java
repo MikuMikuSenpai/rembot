@@ -19,7 +19,6 @@ import va.rembot.exceptions.StrikeSpamNotFoundException;
 import va.rembot.lib.ModerationLib;
 
 import java.sql.*;
-import java.time.Instant;
 
 @Slf4j
 public class AntiSpamFilter extends ListenerAdapter {

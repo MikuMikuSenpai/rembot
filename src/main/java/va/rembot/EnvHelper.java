@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-/// Helper method for loading ENV variables that are to be used within BotConfig
+/// Helper for loading ENV variables to use within BotConfig
 public class EnvHelper {
 
     private static final String REPLICATE_AMOUNT = System.getenv("REPLICATE_AMOUNT");

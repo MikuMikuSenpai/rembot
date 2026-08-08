@@ -2,6 +2,7 @@ package va.rembot;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -20,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/// All global variables should be here
-/// Configuration related to EventListeners and adding slash commands should be set in "onReady" method
-/// The "onReady" method ensures rembot is fully loaded/started
+/// All global variables should be here and configuration is done here
 @Slf4j
 public class BotConfig extends ListenerAdapter {
 
@@ -64,7 +63,7 @@ public class BotConfig extends ListenerAdapter {
     @Override
     public void onReady(ReadyEvent event) {
 
-        var bot = event.getJDA();
+        JDA bot = event.getJDA();
 
         try {
             modRoleIdLong = Long.parseLong(MOD_ROLE_ID);
@@ -262,8 +261,6 @@ public class BotConfig extends ListenerAdapter {
                                 .addOption(OptionType.USER, "username", "The user to be unmuted.", true)
                                 .addOption(OptionType.STRING, "reason", "Reason for unmute.", false))
                 .queue(success -> log.info("Successfully loaded all slash commands."));
-
-
     }
 
     private static String[] getBannedWordsArray() {
