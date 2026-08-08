@@ -1,6 +1,7 @@
 package va.rembot.commands.slash.admin;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,21 +12,22 @@ public class Kick extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("kick")){
+        if (event.getName().equals("kick")) {
 
-           event.deferReply(true).queue();
+            event.deferReply(true).queue();
 
-           var target = event.getOption("username").getAsUser();
-           var usrSnowflake = UserSnowflake.fromId(target.getId());
-           var slashCommandUser = event.getInteraction().getUser();
+            User target = event.getOption("username").getAsUser();
+            UserSnowflake usrSnowflake = UserSnowflake.fromId(target.getId());
+            User slashCommandUser = event.getUser();
+            String reason;
 
-           // "reason" is an optional input, could be null so handle it:
-           try {
-               var reason = event.getOption("reason").getAsString();
-               ModerationLib.kickUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
-           } catch (NullPointerException e) {
-               ModerationLib.kickUsingSlashCommand(event, usrSnowflake, "No reason provided.", slashCommandUser, target);
-           }
+            try {
+                reason = event.getOption("reason").getAsString();
+            } catch (NullPointerException e) {
+                reason = "No reason provided.";
+            }
+
+            ModerationLib.kickUsingSlashCommand(event, usrSnowflake, reason, slashCommandUser, target);
         }
     }
 }

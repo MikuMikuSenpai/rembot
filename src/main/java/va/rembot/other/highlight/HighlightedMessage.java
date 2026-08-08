@@ -13,7 +13,7 @@ import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StarMessageDao;
 import va.rembot.database.dao.UserDao;
-import va.rembot.database.models.Message;
+import va.rembot.database.models.DiscordMessage;
 import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
@@ -24,13 +24,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
 
-    private static String starEmojiUnicode = "U+2B50";
+    private static final String STAR_EMOJI_UNICODE = "U+2B50";
 
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
@@ -40,13 +41,13 @@ public class HighlightedMessage extends ListenerAdapter {
                 .asUnicode()
                 .getAsCodepoints();
 
-        if (emojiAsUnicode.equalsIgnoreCase(starEmojiUnicode)) {
+        if (emojiAsUnicode.equalsIgnoreCase(STAR_EMOJI_UNICODE)) {
 
             long msgId = event.getMessageIdLong();
-            var starMsgDao = new StarMessageDao();
-            var msgDao = new MessageDao();
+            StarMessageDao starMessageDao = new StarMessageDao();
+            MessageDao messageDao = new MessageDao();
 
-            var msgObject = msgDao.get(msgId);
+            Optional<DiscordMessage> msgObject = messageDao.get(msgId);
 
             if (msgObject.isEmpty()) {
                 log.error("[onMessageReactionAdd] Couldn't highlight message. Message is not stored in database. This could be because the bot was started/restarted/created after the message was created. The message ID is: {}", msgId);
@@ -54,52 +55,42 @@ public class HighlightedMessage extends ListenerAdapter {
             }
             
             long msgAuthorId = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
                     .discordId();
 
-            //this currently returns null if used on bots since we dont store their ID in DB,
-            // this is currently our expected behavior if we want to support bots
-            // we'd just have to store their messages in DB
-            // currently cus msg doesnt exist we return a default Message object with defaults: userid as 0 which
-            // obv doesnt exist so results in null below
-            var user = event.getJDA().getUserById(msgAuthorId);
+            User user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
-                log.error("[onMessageReactionAdd] user object is NULL, they are not stored in the database. Cannot highlight any of their messages.");
+                log.error("[onMessageReactionAdd] Cannot retrieve user from database, they are not stored in the database. Cannot highlight any of their messages.");
                 return;
             }
 
-            starMsgDao.create(new StarMessage(msgId, 0, false, 0));//init the bs thing
-
-            // we query this one later as perf improvement in case the user is null above
-            var starMsgObject = starMsgDao.get(msgId);
+            starMessageDao.create(new StarMessage(msgId, 0, false, 0));
+            Optional<StarMessage> starMsgObject = starMessageDao.get(msgId);
 
             int starAmount = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .starAmount();
 
             boolean isSent = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .isSent();
 
             long embedMsgId = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .embedMessageId();
 
             String msgContent = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
                     .messageContent();
 
             String attachmentLinks = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
                     .attachmentsLinks();
 
             int newStarAmount = starAmount + 1;
+            starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
-            // update w new star amount
-            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
-
-            //extract media URL from message
-            Pattern pattern = Pattern.compile("https?\\S+" +
+            Pattern findMediaUrls = Pattern.compile("https?\\S+" +
                     "(?:\\.avi|" +
                     "\\.gif|" +
                     "\\.heic|" +
@@ -110,7 +101,7 @@ public class HighlightedMessage extends ListenerAdapter {
                     "\\.png|" +
                     "\\.webm|" +
                     "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(msgContent);
+            Matcher matcher = findMediaUrls.matcher(msgContent);
             String mediaUrl;
 
             boolean hasMediaLink;
@@ -125,39 +116,32 @@ public class HighlightedMessage extends ListenerAdapter {
             boolean hasAttachments;
             if (attachmentLinks.isEmpty())
                 hasAttachments = false;
-            else {
+            else
                 hasAttachments = true;
-            }
 
             if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
 
-                String stars = Integer.valueOf(newStarAmount).toString();
-                EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
-                TextChannel darwinChannel = event.getGuild()
-                        .getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
+                String newStarAmountAsString = Integer.valueOf(newStarAmount).toString();
+                EmbedBuilder embedHighlight = getBaseEmbedMessage(user, newStarAmountAsString, msgContent);
+                TextChannel darwinChannel = event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
-                //prevent sending duplicates
                 if (!isSent) {
-
-                    isSent = true;
 
                     if (msgContent.length() <= 1024) {
 
-                        boolean finalIsSent = isSent;
                         darwinChannel
                                 .sendMessageEmbeds(embedHighlight.build())
                                 .queue(message -> {
                                     long newEmbedMsgId = message.getIdLong();
-                                    starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
+                                    starMessageDao.update(new StarMessage(msgId, newStarAmount, true, newEmbedMsgId));
 
                                     if (hasAttachments || hasMediaLink)
                                         darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
-
                                 });
                     } else {
 
                         try {
-                            var myFile = new File("long_message.txt");
+                            File myFile = new File("long_message.txt");
                             if (myFile.createNewFile()) {
 
                                 FileWriter fw = new FileWriter(myFile);
@@ -165,33 +149,24 @@ public class HighlightedMessage extends ListenerAdapter {
                                 fw.flush();
                                 fw.close();
 
-                                boolean finalIsSent = isSent;
-                                //so for some reason using FileUpload with sendFiles
-                                // makes the text file above the embed which is ugly as fk,
-                                //so we do it manual way but this makes it so that
-                                // if we ever want to be able to delete msghihglight + attachments
-                                // we'll have to store EACH attachement msg id
-                                // i think we r fine tho since wont need this
                                 darwinChannel
                                         .sendMessageEmbeds(embedHighlight.build())
                                         .queue(message -> {
-                                            var newEmbedMsgId = message.getIdLong();
-                                            starMsgDao.update(new StarMessage(msgId, newStarAmount, finalIsSent, newEmbedMsgId));
+                                            long newEmbedMsgId = message.getIdLong();
+                                            starMessageDao.update(new StarMessage(msgId, newStarAmount, true, newEmbedMsgId));
 
                                             if (hasAttachments || hasMediaLink)
                                                 darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
                                         });
 
                                 darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-                                myFile.delete();//ignore the warning, we want to delete this
+                                myFile.delete();
                             }
                         } catch (IOException e) {
                             log.error("[onMessageReactionAdd] Something went wrong while trying to create and upload text file to discord.");
                             log.error(e.getMessage());
                         }
                     }
-
-                    //if message was already sent (we edit to update stars amount instead of sending a new embed):
                 } else {
 
                     darwinChannel
@@ -210,16 +185,16 @@ public class HighlightedMessage extends ListenerAdapter {
                 .asUnicode()
                 .getAsCodepoints();
 
-        if (emojiAsUnicode.equalsIgnoreCase(starEmojiUnicode)) {
+        if (emojiAsUnicode.equalsIgnoreCase(STAR_EMOJI_UNICODE)) {
 
             long msgId = event.getMessageIdLong();
-            var starMsgDao = new StarMessageDao();
-            var msgDao = new MessageDao();
+            StarMessageDao starMessageDao = new StarMessageDao();
+            MessageDao messageDao = new MessageDao();
 
-            var msgObject = msgDao.get(msgId);
+            Optional<DiscordMessage> msgObject = messageDao.get(msgId);
 
             long msgAuthorId = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
                     .discordId();
 
             User user = event.getJDA().getUserById(msgAuthorId);
@@ -228,37 +203,35 @@ public class HighlightedMessage extends ListenerAdapter {
                 return;
             }
 
-            var starMsgObject = starMsgDao.get(msgId);
+            Optional<StarMessage> starMsgObject = starMessageDao.get(msgId);
 
             int starAmount = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .starAmount();
 
             boolean isSent = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .isSent();
 
             long embedMsgId = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with id: ", msgId))
+                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
                     .embedMessageId();
 
             String msgContent = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with id: ", msgId))
+                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
                     .messageContent();
 
             int newStarAmount = starAmount - 1;
 
-            String stars = Integer.valueOf(newStarAmount).toString();
-
-            EmbedBuilder embedHighlight = getBaseEmbedMessage(user, stars, msgContent);
-
+            String newStarAmountAsString = Integer.valueOf(newStarAmount).toString();
+            EmbedBuilder embedHighlight = getBaseEmbedMessage(user, newStarAmountAsString, msgContent);
             TextChannel darwinChannel = event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID);
 
             darwinChannel
                     .editMessageEmbedsById(embedMsgId, embedHighlight.build())
                     .queue();
 
-            starMsgDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
+            starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
         }
     }
 
@@ -282,7 +255,7 @@ public class HighlightedMessage extends ListenerAdapter {
         }
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new Message(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {

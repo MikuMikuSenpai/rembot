@@ -1,6 +1,21 @@
 # rembot
 Remastered mbot get it mbot rembot yeah my bad
 
+## Reference Sheet
+
+```text
+[] = optional
+Slash Commands (/)
+    Admin Commands (privileged access)
+        /ban username [reason]
+        /kick username [reason]
+        /mute username minutes [hours] [reason]
+        /unban username [reason]
+        /unmute username [reason]
+Non-Slash Commands (&)
+    &ping - returns "pong", time took in milliseconds (ms) and what version of rembot is running.
+```
+
 ## Quickstart:
 
 ### Production/Hosting:
@@ -33,4 +48,3 @@ For more information regarding docker consult their documentation.
    * Manage Messages
 2. Copy [.env.example](.env.example) and create your own .env variant
 3. ```docker compose -f ./docker-compose-dev.yml up --build```
-   1. Each time you make a change to rembot, you will need to rebuild it using the --build option.

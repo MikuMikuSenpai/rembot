@@ -8,7 +8,6 @@ import java.util.Map;
 @Slf4j
 public class EmojiHelper {
 
-    /// Converts all emojis (that are registered in emojiSubsMap()) to their corresponding character.
     public static String emojiToChar(String msg) {
 
         String msgExcludingEmojis = msg;
@@ -24,11 +23,22 @@ public class EmojiHelper {
         return msgExcludingEmojis;
     }
 
+    public static boolean hasLetterEmojiInMessage(String message) {
+
+        log.debug("[hasLetterEmojiInMessage] message: {}", message);
+
+        for (String emoji : emojiSubsMap().keySet()) {
+
+            log.debug("[hasLetterEmojiInMessage] emoji: {}", emoji);
+
+            if (message.contains(emoji))
+                return true;
+        }
+        return false;
+    }
+
     private static Map<String, Character> emojiSubsMap() {
 
-        // the keys are the UTF-16 Encodings (hexadecimal format) for each emoji
-        // the values represent the normal char they replace
-        // (just paste an emoji between "" and it should put the Unicode)
         HashMap<String, Character> emojiForChar = new HashMap<>();
         emojiForChar.put("\uD83C\uDDE6", 'a');
         emojiForChar.put("\uD83C\uDDE7", 'b');

@@ -22,20 +22,15 @@ public class Bot {
                     BOT_TOKEN,
                     GatewayIntent.GUILD_MESSAGES,
                     GatewayIntent.MESSAGE_CONTENT,
-                    GatewayIntent.GUILD_MESSAGE_REACTIONS,//need this for star bs thing
-                    GatewayIntent.GUILD_MEMBERS)//DO NOT delete this intent, this will make sure cache is updated if
-                    // members leave cus currently its on ALL (MemberCachePolicy.ALL)
-                    // and users would stay infinitely in cache but this intent prevents that
-                    // (removes them if they leave guild)
+                    GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                    GatewayIntent.GUILD_MEMBERS)
                     .disableCache( // this is to ignore the jda warnings, might need to enable these in the future
                             CacheFlag.VOICE_STATE,
                             CacheFlag.EMOJI,
                             CacheFlag.STICKER,
                             CacheFlag.SCHEDULED_EVENTS,
                             CacheFlag.SOUNDBOARD_SOUNDS)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL)//this could be bad in the future if dead server
-                    // would become huge but for now this is fine and the easiest need
-                    // to cache members for example for unmuting
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)//if server becomes big change this
                     .build();
             printLogo();
         } catch (InvalidTokenException e) {
@@ -45,8 +40,7 @@ public class Bot {
             log.error(e.getMessage());
         }
 
-        bot
-                .getApplicationManager()
+        bot.getApplicationManager()
                 .setDescription("Bot made so i can mess around\n\nhttps://github.com/MikuMikuSenpai/rembot")
                 .queue();
 
@@ -55,11 +49,11 @@ public class Bot {
 
     private static void printLogo(){
         // credits: https://www.asciiart.eu/text-to-ascii-art
-        // Update below configuration so that the logo can be updated correctly on new version releases
-        // Current input text "REMBOT v0.0.0 PRERELEASE"
+        // Keep below updated on every release
+        // input_text: "REMBOT v0.0.0 PRERELEASE"
         // Font: standard Normal Normal 80
-        // None
-        // None
+        // None 0 0
+        // None standard 14pt
         // Whitespace Break | Trim Whitespace
         log.info(" ____  _____ __  __ ____   ___ _____          ___   ___   ___  ");
         log.info("|  _ \\| ____|  \\/  | __ ) / _ \\_   _| __   __/ _ \\ / _ \\ / _ \\ ");

@@ -6,6 +6,7 @@ import va.rembot.database.models.StarMessage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -40,11 +41,11 @@ public class StarMessageDao implements Dao<StarMessage>{
 
             ps.setLong(1, MsgId);
 
-            var result = ps.executeQuery();
-            var discordMsgId = 0L;
-            var starAmount = 0;
-            var isSent = false;
-            var embedMsgId = 0L;
+            ResultSet result = ps.executeQuery();
+            long discordMsgId = 0L;
+            int starAmount = 0;
+            boolean isSent = false;
+            long embedMsgId = 0L;
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);

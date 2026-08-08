@@ -1,6 +1,5 @@
-.env.example
-.idea
-.gradle
 .github
+.gradle
+.idea
 build
-
+.env.example
