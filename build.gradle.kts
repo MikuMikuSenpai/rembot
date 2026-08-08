@@ -21,7 +21,7 @@ dependencies {
         exclude(module = "tink")
     }
 
-    implementation("com.mysql:mysql-connector-j:9.7.0")
+    implementation("com.mysql:mysql-connector-j:26.7.0")
     implementation("com.zaxxer:HikariCP:7.0.2") // Connection pooling = performance
 
     implementation("ch.qos.logback:logback-classic:1.5.34") // (https://jda.wiki/setup/logging/)
