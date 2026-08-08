@@ -72,12 +72,12 @@ public class AntiSpamFilter extends ListenerAdapter {
 
         long timeFirstMsgCreatedSeconds = timeFirstMsgCreated.toInstant().getEpochSecond();
         long timeLastMsgCreatedSeconds = timeLastMsgCreated.toInstant().getEpochSecond();
-        long timeLastTimeStrikeGiven = lastTimeStrikeGiven.toInstant().getEpochSecond();
-        long timeMsgSentNow = new Timestamp(msgCreated).toInstant().getEpochSecond();
+        long timeLastTimeStrikeGivenSeconds = lastTimeStrikeGiven.toInstant().getEpochSecond();
+        long timeMsgSentNowSeconds = new Timestamp(msgCreated).toInstant().getEpochSecond();
 
         if (timeLastMsgCreatedSeconds - timeFirstMsgCreatedSeconds <= ANTI_SPAM_TIME_AMOUNT && timeLastMsgCreatedSeconds != timeFirstMsgCreatedSeconds) {
 
-            if (timeMsgSentNow - timeLastTimeStrikeGiven > 5) {
+            if (timeMsgSentNowSeconds - timeLastTimeStrikeGivenSeconds > 5) {
                 log.debug("[onMessageReceived] spam detected, strike given to {}", msg.getAuthor());
                 strikes++;
                 strikeSpamDao.update(new StrikeSpam(discordId, strikes, new Timestamp(msgCreated)));
