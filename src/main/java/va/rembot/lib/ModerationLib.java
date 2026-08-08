@@ -39,6 +39,7 @@ public class ModerationLib {
                             .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
+                    log.info("[banUsingSlashCommand] Banned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("banUsingSlashCommand",
@@ -73,6 +74,7 @@ public class ModerationLib {
                     event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
                             .queue();
+                    log.info("[banGeneric] Banned: {} for reason: {}", targetUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("banGeneric",
@@ -94,6 +96,7 @@ public class ModerationLib {
                             .sendMessage("**[USER KICK]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
                             .and(event.getHook().deleteOriginal())
                             .queue();
+                    log.info("[kickUsingSlashCommand] Kicked: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("kickUsingSlashCommand",
@@ -129,6 +132,7 @@ public class ModerationLib {
                             .sendMessageEmbeds(embed)
                             .and(event.getHook().deleteOriginal())
                             .queue();
+                    log.info("[muteUsingSlashCommand] Muted: {} by moderator: {} reason: {}", targetUser, slashCommandUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("muteUsingSlashCommand",
@@ -164,6 +168,7 @@ public class ModerationLib {
                             .sendMessageEmbeds(embed)
                             .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " 3 strikes = ban."))
                             .queue();
+                    log.info("[onMessageReceived] Spam detected, muted and strike given to {}", targetUsr);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("muteSpam",
@@ -185,6 +190,7 @@ public class ModerationLib {
                             .sendMessage("**[USER UNBAN]**: " + usrSnowflake.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
                             .and(event.getHook().deleteOriginal())
                             .queue();
+                    log.info("[unbanUsingSlashCommand] Unbanned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("unbanUsingSlashCommand",
@@ -228,6 +234,7 @@ public class ModerationLib {
                             .sendMessage("**[USER UNMUTE]**: " + targetUser.getAsMention() + " <R:" + reason + "> [MOD:" + slashCommandUser.getAsMention() + "]")
                             .and(event.getHook().deleteOriginal())
                             .queue();
+                    log.info("[unmuteUsingSlashCommand] Unmuted: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, reason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("unmuteUsingSlashCommand",

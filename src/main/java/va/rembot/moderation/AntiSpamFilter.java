@@ -78,7 +78,6 @@ public class AntiSpamFilter extends ListenerAdapter {
         if (timeLastMsgCreatedSeconds - timeFirstMsgCreatedSeconds <= ANTI_SPAM_TIME_AMOUNT && timeLastMsgCreatedSeconds != timeFirstMsgCreatedSeconds) {
 
             if (timeMsgSentNowSeconds - timeLastTimeStrikeGivenSeconds > 5) {
-                log.debug("[onMessageReceived] spam detected, strike given to {}", msg.getAuthor());
                 strikes++;
                 strikeSpamDao.update(new StrikeSpam(discordId, strikes, new Timestamp(msgCreated)));
 
