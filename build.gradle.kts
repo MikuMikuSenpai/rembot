@@ -15,7 +15,7 @@ application {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:6.4.1") {
+    implementation("net.dv8tion:JDA:6.5.0") {
         //audio stuff
         exclude(module = "opus-java")
         exclude(module = "tink")
