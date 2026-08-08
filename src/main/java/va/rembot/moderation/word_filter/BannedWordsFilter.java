@@ -27,9 +27,12 @@ public class BannedWordsFilter extends ListenerAdapter {
         String msg = event.getMessage().getContentRaw();
         msg = msg.replaceAll("https?://\\S+", "");
         String msgEmojisConvertedToChars = EmojiHelper.emojiToChar(msg);
-        String msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replace(" ", "");
+        String msgEmojisConvertedToCharsTrimmed = "";
 
-        String msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed);
+        if (EmojiHelper.hasLetterEmojiInMessage(msg))
+            msgEmojisConvertedToCharsTrimmed = msgEmojisConvertedToChars.replace(" ", "");
+
+        String msgTotal = (msgEmojisConvertedToChars + " " + msgEmojisConvertedToCharsTrimmed).trim();
 
         for (Character c : FILTERED_SPECIAL_CHARS)
             msgTotal = msgTotal.replace(c.toString(), "");
@@ -39,7 +42,11 @@ public class BannedWordsFilter extends ListenerAdapter {
                 .filter(word -> !word.isEmpty())
                 .toList().toArray(new String[0]);
 
-        List<String> combinedWords = getCombinedWords(Arrays.stream(msgTotalArray).toList());
+        String[] msgTotalArrayBeforeSubstituting = Arrays.stream(msgTotal.split(" "))
+                .filter(word -> !word.isEmpty())
+                .toList().toArray(new String[0]);
+
+        List<String> combinedWords = getCombinedWords(Arrays.stream(msgTotalArrayBeforeSubstituting).toList());
 
         log.debug("[onMessageReceived] msg: {}", msg);
         log.debug("[onMessageReceived] msgEmojisConvertedToChars: {}", msgEmojisConvertedToChars);
@@ -87,12 +94,12 @@ public class BannedWordsFilter extends ListenerAdapter {
 //            }
 
         List<String> substitutedMsg = substitute(msgTotalArray);
-        List<String> combinedWordsList = getCombinedWords(substitutedMsg);
+        combinedWords = getCombinedWords(substitutedMsg);
 
         log.debug("[onMessageReceived] substitutedMsg: {}", substitutedMsg);
-        log.debug("[onMessageReceived] combinedWordsList: {}", combinedWordsList);
+        log.debug("[onMessageReceived] combinedWords: {}", combinedWords);
 
-        checkMessageForBannedWordExcludingWhitelisted(combinedWordsList, substitutedMsg, event, msg);
+        checkMessageForBannedWordExcludingWhitelisted(combinedWords, substitutedMsg, event, msg);
     }
 
     private void deleteMsg(MessageReceivedEvent event, String msg, String bannedWord){
@@ -107,7 +114,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
     private boolean hasBannedWordExcludingWhitelistedWordsBeforeSubstituting(List<String> combinedWordsList, MessageReceivedEvent event, String msg) {
 
-        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] Checking for banned words before substituting combined words variant");
+        log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] Checking for banned words before substituting");
 
         String newMsg = msg;
         List<String> newMsgAsList;

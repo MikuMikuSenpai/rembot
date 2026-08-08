@@ -23,6 +23,20 @@ public class EmojiHelper {
         return msgExcludingEmojis;
     }
 
+    public static boolean hasLetterEmojiInMessage(String message) {
+
+        log.debug("[hasLetterEmojiInMessage] message: {}", message);
+
+        for (String emoji : emojiSubsMap().keySet()) {
+
+            log.debug("[hasLetterEmojiInMessage] emoji: {}", emoji);
+
+            if (message.contains(emoji))
+                return true;
+        }
+        return false;
+    }
+
     private static Map<String, Character> emojiSubsMap() {
 
         HashMap<String, Character> emojiForChar = new HashMap<>();
