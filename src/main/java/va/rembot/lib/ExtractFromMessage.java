@@ -12,10 +12,12 @@ public class ExtractFromMessage {
                 "\\.gif|" +
                 "\\.heic|" +
                 "\\.jpe?g|" +
+                "\\.m4v|" +
                 "\\.mkv|" +
                 "\\.mov|" +
                 "\\.mp4|" +
                 "\\.png|" +
+                "\\.svg|" +
                 "\\.webm|" +
                 "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
 
