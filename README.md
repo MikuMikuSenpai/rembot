@@ -21,7 +21,7 @@ Features
         Auto-delete messages that include a discord server/guild invite link
         Deleted messages are logged in a log channel
     Other
-        Message highlight based on the star emoji
+        Message highlight based on the star emoji reaction
 ```
 
 ## Quickstart:
