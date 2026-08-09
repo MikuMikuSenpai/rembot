@@ -50,11 +50,14 @@ public class DeletedMessage extends ListenerAdapter {
         if (!mediaUrl.isEmpty())
             messageContent = messageContent.replace(mediaUrl, "");
 
+        if (ExtractFromMessage.endsWithUrl(messageContent))
+            messageContent = messageContent + " ";
+
         if (messageContent.length() + attachmentLinks.length() <= 1900) {
             String finalMessageContent = messageContent;
             logChannel.sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + messageContent + ">\n" + attachmentLinks + mediaUrl)
                     .queue(success -> {
-                        log.info("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", author, finalMessageContent, attachmentLinks);
+                        log.info("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", user, finalMessageContent, attachmentLinks);
                     });
         } else {
             try {
@@ -66,10 +69,13 @@ public class DeletedMessage extends ListenerAdapter {
                     fw.flush();
                     fw.close();
 
+                    String finalMessageContent = messageContent;
                     logChannel
                             .sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + "Message content was too long see attached file below for original message.>\n" + attachmentLinks + mediaUrl)
                             .and(logChannel.sendFiles(FileUpload.fromData(file)))
-                            .queue();
+                            .queue(success -> {
+                                log.info("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", user, finalMessageContent, attachmentLinks);
+                            });
                     file.delete();
                 }
 

@@ -3,9 +3,7 @@ package va.rembot.moderation;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import va.rembot.lib.ExtractFromMessage;
 
 public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
 
@@ -16,14 +14,13 @@ public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
         Message message = event.getMessage();
         String messageContent = message.getContentRaw();
 
-        Pattern pattern = Pattern.compile("\\S*discord(?:\\.gg|\\.com\\/invite)\\S+");
-        Matcher matcher = pattern.matcher(messageContent);
+        boolean messageIncludesDiscordInviteLink = ExtractFromMessage.hasDiscordInviteLink(messageContent);
 
-        if (matcher.find()) {
-           event.getChannel()
-                   .sendMessage("Discord invite links are not allowed.")
-                   .and(message.delete())
-                   .queue();
+        if (messageIncludesDiscordInviteLink) {
+            event.getChannel()
+                    .sendMessage("Discord invite links are not allowed.")
+                    .and(message.delete())
+                    .queue();
         }
     }
 }

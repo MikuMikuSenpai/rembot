@@ -26,4 +26,19 @@ public class ExtractFromMessage {
         else
             return "";
     }
+
+    public static boolean endsWithUrl(String message) {
+        Pattern pattern = Pattern.compile("https?://\\S+$");
+        Matcher matcher = pattern.matcher(message);
+
+        return matcher.find();
+    }
+
+    public static boolean hasDiscordInviteLink(String message) {
+
+        Pattern pattern = Pattern.compile("\\S*discord(?:\\.gg|\\.com\\/invite)\\S+");
+        Matcher matcher = pattern.matcher(message);
+
+        return matcher.find();
+    }
 }
