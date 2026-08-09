@@ -2,6 +2,8 @@ package va.rembot.other.highlight;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -18,6 +20,7 @@ import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
 import va.rembot.exceptions.StarMessageNotFoundException;
+import va.rembot.lib.ExtractFromMessage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,8 +28,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
@@ -90,28 +91,13 @@ public class HighlightedMessage extends ListenerAdapter {
             int newStarAmount = starAmount + 1;
             starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
-            Pattern findMediaUrls = Pattern.compile("https?\\S+" +
-                    "(?:\\.avi|" +
-                    "\\.gif|" +
-                    "\\.heic|" +
-                    "\\.jpe?g|" +
-                    "\\.mkv|" +
-                    "\\.mov|" +
-                    "\\.mp4|" +
-                    "\\.png|" +
-                    "\\.webm|" +
-                    "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = findMediaUrls.matcher(msgContent);
-            String mediaUrl;
-
+            String mediaUrl = ExtractFromMessage.extractMediaUrls(msgContent);
             boolean hasMediaLink;
-            if (matcher.find()) {
-                hasMediaLink = true;
-                mediaUrl = matcher.group();
-            } else {
+
+            if (mediaUrl.isEmpty())
                 hasMediaLink = false;
-                mediaUrl = "";
-            }
+            else
+                hasMediaLink = true;
 
             boolean hasAttachments;
             if (attachmentLinks.isEmpty())
@@ -239,23 +225,22 @@ public class HighlightedMessage extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var msgDao = new MessageDao();
-        var userDao = new UserDao();
+        MessageDao msgDao = new MessageDao();
+        UserDao userDao = new UserDao();
 
-        var msg = event.getMessage();
+        Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         long discordMsgId = event.getMessageIdLong();
         long discordId = event.getAuthor().getIdLong();
         long msgTimeCreated = msg.getTimeCreated().toInstant().toEpochMilli();
 
-        String attachmentLinks = "";
+        StringBuilder attachmentLinks = new StringBuilder();
 
-        for (var file : msg.getAttachments()) {
-            attachmentLinks += file.getUrl() + " ";
-        }
+        for (Attachment attachment : msg.getAttachments())
+            attachmentLinks.append(attachment.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString()));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {

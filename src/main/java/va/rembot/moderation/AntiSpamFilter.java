@@ -47,7 +47,7 @@ public class AntiSpamFilter extends ListenerAdapter {
         StringBuilder attachmentLinks = new StringBuilder();
 
         for (Attachment file : msg.getAttachments())
-             attachmentLinks.append(file.getUrl()).append(" ");
+            attachmentLinks.append(file.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
         messageDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, attachmentLinks.toString()));
