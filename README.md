@@ -19,6 +19,7 @@ Features
         Auto-delete messages that contain a banned word(s)
         Auto-mute users who spam (mute detection can be customized)
         Auto-delete messages that include a discord server/guild invite link
+        Deleted messages are logged in a log channel
     Other
         Message highlight based on the star emoji
 ```
