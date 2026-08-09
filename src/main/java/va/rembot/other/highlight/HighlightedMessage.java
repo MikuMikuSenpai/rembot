@@ -2,6 +2,8 @@ package va.rembot.other.highlight;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -223,23 +225,22 @@ public class HighlightedMessage extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        var msgDao = new MessageDao();
-        var userDao = new UserDao();
+        MessageDao msgDao = new MessageDao();
+        UserDao userDao = new UserDao();
 
-        var msg = event.getMessage();
+        Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         long discordMsgId = event.getMessageIdLong();
         long discordId = event.getAuthor().getIdLong();
         long msgTimeCreated = msg.getTimeCreated().toInstant().toEpochMilli();
 
-        String attachmentLinks = "";
+        StringBuilder attachmentLinks = new StringBuilder();
 
-        for (var file : msg.getAttachments()) {
-            attachmentLinks += file.getUrl() + " ";
-        }
+        for (Attachment attachment : msg.getAttachments())
+            attachmentLinks.append(attachment.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString()));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {
