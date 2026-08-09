@@ -14,6 +14,7 @@ import va.rembot.commands.non_slash.PingPong;
 import va.rembot.commands.slash.admin.*;
 import va.rembot.moderation.AntiSpamFilter;
 import va.rembot.moderation.AutoDeleteDiscordInviteLinks;
+import va.rembot.moderation.DeletedMessage;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 import va.rembot.other.highlight.HighlightedMessage;
 
@@ -224,16 +225,18 @@ public class BotConfig extends ListenerAdapter {
             log.warn("[onReady] REPLICATE_AMOUNT is set to 0 or a negative number, this means that banned words are not replicated this is probably not what you want. Check your .env file.");
 
         bot.addEventListener(
+                new BannedWordsFilter(),
+                new AntiSpamFilter(),
+                new AutoDeleteDiscordInviteLinks(),
+                new HighlightedMessage(),
+                new DeletedMessage(),
+                // slash commands
                 new Ban(),
                 new Unban(),
                 new Kick(),
                 new Mute(),
                 new Unmute(),
-                new BannedWordsFilter(),
-                new AntiSpamFilter(),
-                new AutoDeleteDiscordInviteLinks(),
-                new HighlightedMessage(),
-                // non slash
+                // non-slash commands
                 new PingPong());
 
         bot.updateCommands()

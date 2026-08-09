@@ -18,6 +18,7 @@ import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
 import va.rembot.exceptions.StarMessageNotFoundException;
+import va.rembot.lib.ExtractFromMessage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,8 +26,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
@@ -90,28 +89,13 @@ public class HighlightedMessage extends ListenerAdapter {
             int newStarAmount = starAmount + 1;
             starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
-            Pattern findMediaUrls = Pattern.compile("https?\\S+" +
-                    "(?:\\.avi|" +
-                    "\\.gif|" +
-                    "\\.heic|" +
-                    "\\.jpe?g|" +
-                    "\\.mkv|" +
-                    "\\.mov|" +
-                    "\\.mp4|" +
-                    "\\.png|" +
-                    "\\.webm|" +
-                    "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = findMediaUrls.matcher(msgContent);
-            String mediaUrl;
-
+            String mediaUrl = ExtractFromMessage.extractMediaUrls(msgContent);
             boolean hasMediaLink;
-            if (matcher.find()) {
-                hasMediaLink = true;
-                mediaUrl = matcher.group();
-            } else {
+
+            if (mediaUrl.isEmpty())
                 hasMediaLink = false;
-                mediaUrl = "";
-            }
+            else
+                hasMediaLink = true;
 
             boolean hasAttachments;
             if (attachmentLinks.isEmpty())
