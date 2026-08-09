@@ -6,6 +6,10 @@ on:
   workflow_dispatch:
   push:
     branches: ['main']
+    paths-ignore:
+      - '.github/**'
+      - '.env.example'
+      - '*.md'
     tags:
       - "v*.*.*" #if tags get pushed create rembot image for that specific tag
 
