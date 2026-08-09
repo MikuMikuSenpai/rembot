@@ -82,7 +82,7 @@ public class DeletedMessage extends ListenerAdapter {
             } catch (IOException e) {
                 log.error("[onMessageDelete] Something went wrong while storing deleted message as file format.");
                 log.error("[onMessageDelete] Error: {}", e.getMessage());
-                log.error("[onMessageDelete] Stack trace: {}", e.getStackTrace());
+                log.error("[onMessageDelete] Stack trace: {}", (Object) e.getStackTrace());
             }
         }
     }
