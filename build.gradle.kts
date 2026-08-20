@@ -24,7 +24,7 @@ dependencies {
     implementation("com.mysql:mysql-connector-j:26.7.0")
     implementation("com.zaxxer:HikariCP:7.0.2") // Connection pooling = performance
 
-    implementation("ch.qos.logback:logback-classic:1.6.1") // (https://jda.wiki/setup/logging/)
+    implementation("ch.qos.logback:logback-classic:1.6.3") // (https://jda.wiki/setup/logging/)
 
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
