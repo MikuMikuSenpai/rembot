@@ -6,8 +6,9 @@
 # Linux start script should use lf
 /gradlew        text eol=lf
 
-# These are Windows script files and should use crlf
-*.bat           text eol=crlf
+# https://github.com/spring-projects/spring-security/issues/10039
+# Ensure that line endings for DOS batch files are not modified.
+*.bat -text
 
 # Binary files should be left untouched
 *.jar           binary
