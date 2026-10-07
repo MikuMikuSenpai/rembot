@@ -57,7 +57,7 @@ public class HighlightedMessage extends ListenerAdapter {
             
             long msgAuthorId = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .discordId();
+                    .discordUserId();
 
             User user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
@@ -181,7 +181,7 @@ public class HighlightedMessage extends ListenerAdapter {
 
             long msgAuthorId = msgObject
                     .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .discordId();
+                    .discordUserId();
 
             User user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
@@ -240,7 +240,7 @@ public class HighlightedMessage extends ListenerAdapter {
             attachmentLinks.append(attachment.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString()));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString(), false, ""));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {

@@ -33,7 +33,7 @@ public class DeletedMessage extends ListenerAdapter {
         MessageDao messageDao = new MessageDao();
         Optional<DiscordMessage> messageObject = messageDao.get(messageId);
 
-        discordUserId = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).discordId();
+        discordUserId = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).discordUserId();
         messageContent = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).messageContent();
         attachmentLinks = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).attachmentsLinks();
 

@@ -50,7 +50,7 @@ public class AntiSpamFilter extends ListenerAdapter {
             attachmentLinks.append(file.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
-        messageDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, attachmentLinks.toString()));
+        messageDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgCreated), msgContent, attachmentLinks.toString(), false, ""));
         strikeSpamDao.create(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
 
         timeFirstMsgCreated = messageDao
