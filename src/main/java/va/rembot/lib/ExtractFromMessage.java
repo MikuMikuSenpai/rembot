@@ -19,14 +19,19 @@ public class ExtractFromMessage {
                 "\\.png|" +
                 "\\.svg|" +
                 "\\.webm|" +
-                "\\.webp)\\S*", Pattern.CASE_INSENSITIVE);
+                "\\.webp|" +
+                "klipy\\.com/gifs/\\S)\\S*", Pattern.CASE_INSENSITIVE);
 
         Matcher matcher = findMediaUrls.matcher(message);
+        StringBuilder result = new StringBuilder();
 
-        if (matcher.find())
-            return matcher.group();
-        else
+        while (matcher.find())
+            result.append(matcher.group()).append(" ");
+
+        if (result.isEmpty())
             return "";
+        else
+            return result.toString();
     }
 
     public static boolean endsWithUrl(String message) {

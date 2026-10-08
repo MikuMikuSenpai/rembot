@@ -72,12 +72,16 @@ public class EditedMessage extends ListenerAdapter {
         boolean isEdited = message.isEdited();
         String jumpUrl = message.editedLogJumpUrl();
         String eventMediaUrl = ExtractFromMessage.extractMediaUrls(messageContentFromEvent);
+        String[] eventMediaUrlAsArray = eventMediaUrl.split(" ");
 
         String messageContentFromEventCopyPreStringManipul = messageContentFromEvent;
         String messageContentFromDBCopyPreStringManipul = messageContentFromDB;
 
-        if (!eventMediaUrl.isEmpty())
-            messageContentFromEvent = messageContentFromEvent.replace(eventMediaUrl, "");
+        if (!eventMediaUrl.isEmpty()) {
+            for (String eventMediaUrlEntry : eventMediaUrlAsArray) {
+                messageContentFromEvent = messageContentFromEvent.replace(eventMediaUrlEntry, "");
+            }
+        }
 
         if (ExtractFromMessage.endsWithUrl(messageContentFromEvent)) {
             messageContentFromEvent = messageContentFromEvent + " ";
@@ -86,12 +90,19 @@ public class EditedMessage extends ListenerAdapter {
         }
 
         String mediaUrl = ExtractFromMessage.extractMediaUrls(messageContentFromDB);
+        String[] mediaUrlAsArray = mediaUrl.split(" ");
 
-        if (!mediaUrl.isEmpty())
-            messageContentFromDB = messageContentFromDB.replace(mediaUrl, "");
+        if (!mediaUrl.isEmpty()) {
+            for (String mediaUrlEntry : mediaUrlAsArray) {
+                messageContentFromDB = messageContentFromDB.replace(mediaUrlEntry, "");
+            }
+        }
 
-        if (ExtractFromMessage.endsWithUrl(messageContentFromDB))
+        if (ExtractFromMessage.endsWithUrl(messageContentFromDB)) {
             messageContentFromDB = messageContentFromDB + " ";
+        } else {
+            messageContentFromDB = messageContentFromDB.trim();
+        }
 
         String messageContentFromEventCopy = messageContentFromEvent;
         int originalMessageLength = messageContentFromDB.length() + message.attachmentsLinks().length() + mediaUrl.length();
