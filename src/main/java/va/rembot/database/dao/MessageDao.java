@@ -15,7 +15,7 @@ public class MessageDao implements Dao<DiscordMessage> {
     @Override
     public void create(DiscordMessage message) {
 
-        String query = "INSERT IGNORE INTO messages (discord_message_id, user_id, time_created, message_content, attachments_links, is_edited, edited_log_jump_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT IGNORE INTO messages (discord_message_id, user_id, time_created, message_content, attachments_links, is_edited, edited_log_jump_url, edited_log_counter) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)) {
@@ -37,12 +37,13 @@ public class MessageDao implements Dao<DiscordMessage> {
             pStmt.setString(5, message.attachmentsLinks());
             pStmt.setBoolean(6, message.isEdited());
             pStmt.setString(7, message.editedLogJumpUrl());
+            pStmt.setInt(8, message.editedLogCounter());
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
             log.error("Could not insert Message in DB.");
-            log.error("Message details: discordMessageId {}, discordUserId {}, timeCreated {}, messageContent {}, attachmentsLinks {}, isEdited {}, editedLogJumpUrl {}",
-                    message.discordMessageId(), message.discordUserId(), message.timeCreated(), message.messageContent(), message.attachmentsLinks(), message.isEdited(), message.editedLogJumpUrl());
+            log.error("Message details: discordMessageId {}, discordUserId {}, timeCreated {}, messageContent {}, attachmentsLinks {}, isEdited {}, editedLogJumpUrl {}, editedLogCounter {}",
+                    message.discordMessageId(), message.discordUserId(), message.timeCreated(), message.messageContent(), message.attachmentsLinks(), message.isEdited(), message.editedLogJumpUrl(), message.editedLogCounter());
             log.error("Error: {}", e.getMessage());;
         }
 
@@ -67,6 +68,7 @@ public class MessageDao implements Dao<DiscordMessage> {
             String attachmentLinks = "";
             boolean isEdited = false;
             String editedLogJumpUrl = "";
+            int editedLogCounter = 0;
 
             while (result.next()) {
                 discordUserId = result.getLong(2);
@@ -75,9 +77,10 @@ public class MessageDao implements Dao<DiscordMessage> {
                 attachmentLinks = result.getString(5);
                 isEdited = result.getBoolean(6);
                 editedLogJumpUrl = result.getString(7);
+                editedLogCounter = result.getInt(8);
             }
 
-            msg = new DiscordMessage(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl);
+            msg = new DiscordMessage(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
             log.error("Could not get message.");
@@ -115,6 +118,7 @@ public class MessageDao implements Dao<DiscordMessage> {
             String attachmentLinks = "";
             boolean isEdited = false;
             String editedLogJumpUrl = "";
+            int editedLogCounter = 0;
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
@@ -124,9 +128,10 @@ public class MessageDao implements Dao<DiscordMessage> {
                 attachmentLinks = result.getString(5);
                 isEdited = result.getBoolean(6);
                 editedLogJumpUrl = result.getString(7);
+                editedLogCounter = result.getInt(8);
             }
 
-            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl);
+            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
             log.error("Could not get first message for spam detection.");
@@ -158,6 +163,7 @@ public class MessageDao implements Dao<DiscordMessage> {
             String attachmentLinks = "";
             boolean isEdited = false;
             String editedLogJumpUrl = "";
+            int editedLogCounter = 0;
 
             while (result.next()) {
                 discordMsgId = result.getLong(1);
@@ -167,9 +173,10 @@ public class MessageDao implements Dao<DiscordMessage> {
                 attachmentLinks = result.getString(5);
                 isEdited = result.getBoolean(6);
                 editedLogJumpUrl = result.getString(7);
+                editedLogCounter = result.getInt(8);
             }
 
-            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl);
+            msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
             log.error("Could not get latest message for spam detection.");
@@ -182,7 +189,7 @@ public class MessageDao implements Dao<DiscordMessage> {
 
     @Override
     public void update(DiscordMessage message) {
-        String query = "UPDATE messages SET user_id = ?, time_created = ?, message_content = ?, attachments_links = ?, is_edited = ?, edited_log_jump_url = ? WHERE discord_message_id = ?";
+        String query = "UPDATE messages SET user_id = ?, time_created = ?, message_content = ?, attachments_links = ?, is_edited = ?, edited_log_jump_url = ?, edited_log_counter = ? WHERE discord_message_id = ?";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)) {
@@ -193,7 +200,8 @@ public class MessageDao implements Dao<DiscordMessage> {
             pStmt.setString(4, message.attachmentsLinks());
             pStmt.setBoolean(5, message.isEdited());
             pStmt.setString(6, message.editedLogJumpUrl());
-            pStmt.setLong(7, message.discordMessageId());
+            pStmt.setInt(7, message.editedLogCounter());
+            pStmt.setLong(8, message.discordMessageId());
 
             pStmt.executeUpdate();
 

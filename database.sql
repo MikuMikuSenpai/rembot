@@ -19,6 +19,7 @@ CREATE TABLE messages(
     -- only relevant for edit logging, im no db guy so idk if this is frankenstein ngl...
     is_edited BOOLEAN NOT NULL,
     edited_log_jump_url VARCHAR(200),
+    edited_log_counter TINYINT NOT NULL,
 
     PRIMARY KEY(discord_message_id),
     CONSTRAINT FK_users FOREIGN KEY (user_id)

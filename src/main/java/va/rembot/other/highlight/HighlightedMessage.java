@@ -240,7 +240,7 @@ public class HighlightedMessage extends ListenerAdapter {
             attachmentLinks.append(attachment.getUrl()).append(" ");
 
         userDao.create(new DiscordUser(discordId));
-        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString(), false, ""));
+        msgDao.create(new DiscordMessage(discordMsgId, discordId, new Timestamp(msgTimeCreated), msgContent, attachmentLinks.toString(), false, "", 0));
     }
 
     private static EmbedBuilder getBaseEmbedMessage(User user, String stars, String messageContent) {

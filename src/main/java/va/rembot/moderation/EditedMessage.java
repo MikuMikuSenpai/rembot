@@ -41,7 +41,8 @@ public class EditedMessage extends ListenerAdapter {
                     placeholder,
                     "",
                     false,
-                    ""));
+                    "",
+                    0));
             messageCopy = messageDao.get(messageId).orElseThrow(() -> new RuntimeException("[onMessageUpdate] Could not get message from DB."));
             message = messageCopy;
         }
@@ -66,7 +67,8 @@ public class EditedMessage extends ListenerAdapter {
                 messageContentFromEvent,
                 message.attachmentsLinks(),
                 true,
-                ""));
+                "",
+                message.editedLogCounter()));
 
         String messageAuthor = event.getAuthor().getAsMention();
         boolean isEdited = message.isEdited();
@@ -108,17 +110,19 @@ public class EditedMessage extends ListenerAdapter {
         int originalMessageLength = messageContentFromDB.length() + message.attachmentsLinks().length() + mediaUrl.length();
         int eventMessageLength = messageContentFromEvent.length() + eventMediaUrl.length();
 
+        // https://discord.com/channels/server_id/channel_id/message_id
+        String linkToMessage = "https://discord.com/channels/" + event.getGuild().getIdLong() + "/" + event.getGuildChannel().getIdLong() + "/" + messageId;
         final DiscordMessage finalMessage = message;
 
         // kinda spagheti but fk it we roll with this
         if (!isEdited) {
             if (originalMessageLength < 1900) {
-                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <O:" + messageContentFromDB + ">\n" + message.attachmentsLinks() + mediaUrl)
+                logChannel.sendMessage("**[MESSAGE EDITED]** " + linkToMessage + " " + messageAuthor + " <O:" + messageContentFromDB + ">\n" + message.attachmentsLinks() + mediaUrl)
                         .queue(originalMessage -> {
 
                             if (eventMessageLength < 1900) {
                                 //original = short | edited = short
-                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
+                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
                                     .queue(editedMessage -> {
                                         logChannel.sendMessage(originalMessage.getJumpUrl()).queue();
                                         messageDao.update(new DiscordMessage(
@@ -128,12 +132,13 @@ public class EditedMessage extends ListenerAdapter {
                                                 messageContentFromEventCopyPreStringManipul,
                                                 finalMessage.attachmentsLinks(),
                                                 true,
-                                                editedMessage.getJumpUrl()));
+                                                editedMessage.getJumpUrl(),
+                                                finalMessage.editedLogCounter() + 2));
                                     });
                             } else {
 
                                 //original = short | edited = long
-                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:message too long. Check file below." + ">\n" + eventMediaUrl)
+                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:message too long. Check file below." + ">\n" + eventMediaUrl)
                                         .queue(editedMessage -> {
                                             try {
                                                 File myFile = new File("edited_content_too_long.txt");
@@ -157,12 +162,13 @@ public class EditedMessage extends ListenerAdapter {
                                                     messageContentFromEventCopyPreStringManipul,
                                                     finalMessage.attachmentsLinks(),
                                                     true,
-                                                    editedMessage.getJumpUrl()));
+                                                    editedMessage.getJumpUrl(),
+                                                    finalMessage.editedLogCounter() + 2));
                                         });
                             }
                         });
             } else {
-                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <O:message too long. Check file below." + ">\n" + message.attachmentsLinks() + mediaUrl)
+                logChannel.sendMessage("**[MESSAGE EDITED]** " + linkToMessage + " " + messageAuthor + " <O:message too long. Check file below." + ">\n" + message.attachmentsLinks() + mediaUrl)
                         .queue(originalMessage -> {
 
                             File file = new File("orginal_content_too_long.txt");
@@ -181,7 +187,7 @@ public class EditedMessage extends ListenerAdapter {
 
                             if (eventMessageLength < 1900) {
                                 //original = long | edited = short
-                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
+                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
                                         .queue(editedMessage -> {
                                             logChannel.sendMessage(originalMessage.getJumpUrl()).queue();
                                             messageDao.update(new DiscordMessage(
@@ -191,11 +197,12 @@ public class EditedMessage extends ListenerAdapter {
                                                     messageContentFromEventCopyPreStringManipul,
                                                     finalMessage.attachmentsLinks(),
                                                     true,
-                                                    editedMessage.getJumpUrl()));
+                                                    editedMessage.getJumpUrl(),
+                                                    finalMessage.editedLogCounter() + 2));
                                         });
                             } else {
                                 //original = long | edited = long
-                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:message too long. Check file below." + ">\n" + eventMediaUrl)
+                                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:message too long. Check file below." + ">\n" + eventMediaUrl)
                                         .queue(editedMessage -> {
                                             try {
                                                 File myFile = new File("edited_content_too_long.txt");
@@ -219,14 +226,15 @@ public class EditedMessage extends ListenerAdapter {
                                                     messageContentFromEventCopyPreStringManipul,
                                                     finalMessage.attachmentsLinks(),
                                                     true,
-                                                    editedMessage.getJumpUrl()));
+                                                    editedMessage.getJumpUrl(),
+                                                    finalMessage.editedLogCounter() + 2));
                                         });
                             }
                         });
             }
         } else {
             if (eventMessageLength < 1900) {
-                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
+                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E" + finalMessage.editedLogCounter() + ":" + messageContentFromEventCopy + ">\n" + eventMediaUrl)
                         .queue(editedMessage -> {
                             logChannel.sendMessage(jumpUrl).queue();
                             messageDao.update(new DiscordMessage(
@@ -236,11 +244,12 @@ public class EditedMessage extends ListenerAdapter {
                                     messageContentFromEventCopyPreStringManipul,
                                     finalMessage.attachmentsLinks(),
                                     true,
-                                    editedMessage.getJumpUrl()));
+                                    editedMessage.getJumpUrl(),
+                                    finalMessage.editedLogCounter() + 1));
                         });
 
             } else {
-                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E:message too long. Check file below." + ">\n" + eventMediaUrl)
+                logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E" + finalMessage.editedLogCounter() + ":message too long. Check file below." + ">\n" + eventMediaUrl)
                         .queue(editedMessage -> {
                             try {
                                 File myFile = new File("edited_content_too_long.txt");
@@ -263,7 +272,8 @@ public class EditedMessage extends ListenerAdapter {
                                     messageContentFromEventCopy,
                                     finalMessage.attachmentsLinks(),
                                     true,
-                                    editedMessage.getJumpUrl()));
+                                    editedMessage.getJumpUrl(),
+                                    finalMessage.editedLogCounter() + 1));
                         });
             }
         }
