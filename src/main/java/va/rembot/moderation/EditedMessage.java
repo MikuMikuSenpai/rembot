@@ -31,13 +31,13 @@ public class EditedMessage extends ListenerAdapter {
         DiscordMessage messageCopy;
         if (message.discordUserId() == 0) {
             long discordUserId = event.getAuthor().getIdLong();
-            long currentNano = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
+            long createdEpochMilli = event.getMessage().getTimeCreated().toInstant().toEpochMilli();
             String placeholder = "UNKNOWN (message was not stored in DB)";
 
             messageDao.create(new DiscordMessage(
                     messageId,
                     discordUserId,
-                    new Timestamp(currentNano),
+                    new Timestamp(createdEpochMilli),
                     placeholder,
                     "",
                     false,
