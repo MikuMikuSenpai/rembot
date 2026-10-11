@@ -49,21 +49,15 @@ public class Bot {
 
     private static void printLogo(){
         // credits: https://www.asciiart.eu/text-to-ascii-art
-        // Keep below updated on every release
-        // input_text: "REMBOT v0.0.0 PRERELEASE"
+        // input_text: "REMBOT" / only project name is ASCII art for now
         // Font: standard Normal Normal 80
         // None 0 0
         // None standard 14pt
         // Whitespace Break | Trim Whitespace
-        log.info(" ____  _____ __  __ ____   ___ _____          ___   ___   ___  ");
-        log.info("|  _ \\| ____|  \\/  | __ ) / _ \\_   _| __   __/ _ \\ / _ \\ / _ \\ ");
-        log.info("| |_) |  _| | |\\/| |  _ \\| | | || |   \\ \\ / / | | | | | | | | |");
-        log.info("|  _ <| |___| |  | | |_) | |_| || |    \\ V /| |_| | |_| | |_| |");
-        log.info("|_|_\\_\\_____|_|__|_|____/_\\___/_|_|  ___\\_/  \\___(_)___(_)___/ ");
-
-        log.info("|  _ \\|  _ \\| ____|  _ \\| ____| |   | ____|  / \\  / ___|| ____|");
-        log.info("| |_) | |_) |  _| | |_) |  _| | |   |  _|   / _ \\ \\___ \\|  _|  ");
-        log.info("|  __/|  _ <| |___|  _ <| |___| |___| |___ / ___ \\ ___) | |___ ");
-        log.info("|_|   |_| \\_\\_____|_| \\_\\_____|_____|_____/_/   \\_\\____/|_____|  ");
+        log.info(" ____  _____ __  __ ____   ___ _____");
+        log.info("|  _ \\| ____|  \\/  | __ ) / _ \\_   _|");
+        log.info("| |_) |  _| | |\\/| |  _ \\| | | || |");
+        log.info("|  _ <| |___| |  | | |_) | |_| || |");
+        log.info("|_|_\\_\\_____|_|__|_|____/_\\___/_|_| PRERELEASE");
     }
 }
