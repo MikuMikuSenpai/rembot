@@ -16,6 +16,10 @@ CREATE TABLE messages(
     message_content VARCHAR(4000) NOT NULL,
     -- 5000 chars should be enough? these would be maximum 10 links in total including whitespaces between them
     attachments_links VARCHAR(5000) NOT NULL,
+    -- only relevant for edit logging, im no db guy so idk if this is frankenstein ngl...
+    is_edited BOOLEAN NOT NULL,
+    edited_log_jump_url VARCHAR(200),
+    edited_log_counter TINYINT NOT NULL,
 
     PRIMARY KEY(discord_message_id),
     CONSTRAINT FK_users FOREIGN KEY (user_id)

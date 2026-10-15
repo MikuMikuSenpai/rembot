@@ -15,6 +15,7 @@ import va.rembot.commands.slash.admin.*;
 import va.rembot.moderation.AntiSpamFilter;
 import va.rembot.moderation.AutoDeleteDiscordInviteLinks;
 import va.rembot.moderation.DeletedMessage;
+import va.rembot.moderation.EditedMessage;
 import va.rembot.moderation.word_filter.BannedWordsFilter;
 import va.rembot.other.highlight.HighlightedMessage;
 
@@ -230,6 +231,7 @@ public class BotConfig extends ListenerAdapter {
                 new AutoDeleteDiscordInviteLinks(),
                 new HighlightedMessage(),
                 new DeletedMessage(),
+                new EditedMessage(),
                 // slash commands
                 new Ban(),
                 new Unban(),
