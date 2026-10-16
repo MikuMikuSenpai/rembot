@@ -47,7 +47,7 @@ CREATE EVENT clean_messages
     ON SCHEDULE
     EVERY 12 HOUR
     DO
-    DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 1 WEEK) < NOW();
+    DELETE FROM messages WHERE DATE_ADD(time_created, INTERVAL 6 MONTH) < NOW();
 
 CREATE EVENT clean_starred_messages
     ON SCHEDULE
