@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 public class DeletedMessage extends ListenerAdapter {
@@ -31,11 +30,12 @@ public class DeletedMessage extends ListenerAdapter {
         TextChannel logChannel = event.getGuild().getChannelById(TextChannel.class, BotConfig.LOG_CHANNEL_ID);
 
         MessageDao messageDao = new MessageDao();
-        Optional<DiscordMessage> messageObject = messageDao.get(messageId);
+        DiscordMessage messageObject = messageDao.get(messageId)
+                .orElseThrow(() -> new MessageNotFoundException("[onMessageDelete] Could not retrieve discord message from DB."));
 
-        discordUserId = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).discordUserId();
-        messageContent = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).messageContent();
-        attachmentLinks = messageObject.orElseThrow(() -> new MessageNotFoundException("Could not retrieve message from database.")).attachmentsLinks();
+        discordUserId = messageObject.discordUserId();
+        messageContent = messageObject.messageContent();
+        attachmentLinks = messageObject.attachmentsLinks();
 
         Member user = event.getGuild().getMemberById(discordUserId);
 
@@ -54,10 +54,9 @@ public class DeletedMessage extends ListenerAdapter {
             messageContent = messageContent + " ";
 
         if (messageContent.length() + attachmentLinks.length() <= 1900) {
-            String finalMessageContent = messageContent;
             logChannel.sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + messageContent + ">\n" + attachmentLinks + mediaUrl)
                     .queue(success -> {
-                        log.info("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", user, finalMessageContent, attachmentLinks);
+                        log.info("[onMessageDelete] Message was deleted: {}", messageObject);
                     });
         } else {
             try {
