@@ -63,12 +63,12 @@ public class AntiSpamFilter extends ListenerAdapter {
         int strikes;
         Timestamp lastTimeStrikeGiven;
 
-        strikes = strikeSpamDao
+        StrikeSpam strikeSpamObject = strikeSpamDao
                 .getAmount(discordId)
-                .orElseThrow(() -> new StrikeSpamNotFoundException("strikeSpamDao could not find amount for user with discord id: " + discordId)).amount();
-        lastTimeStrikeGiven = strikeSpamDao
-                .getAmount(discordId)
-                .orElseThrow(() -> new StrikeSpamNotFoundException("strikeSpamDao could not find lastTimeStrikeGiven for user with discord id: " + discordId)).mostRecentStrike();
+                .orElseThrow(() -> new StrikeSpamNotFoundException("[onMessageReceived] Could not retrieve strikeSpam object from DB for userId: " + discordId));
+
+        strikes = strikeSpamObject.amount();
+        lastTimeStrikeGiven = strikeSpamObject.mostRecentStrike();
 
         long timeFirstMsgCreatedSeconds = timeFirstMsgCreated.toInstant().getEpochSecond();
         long timeLastMsgCreatedSeconds = timeLastMsgCreated.toInstant().getEpochSecond();
