@@ -122,7 +122,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         if (hasWhitelistedCombinedWords(combinedWordsList)) {
             for (String combinedWord : combinedWordsList) {
-                if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(combinedWord))) {
+                if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(combinedWord))) {
                     newMsg = newMsg.replaceAll(combinedWord, "");
                     log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] whitelisted combined word found: {}", combinedWord);
                 }
@@ -135,8 +135,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] newMsgAsList: {}", newMsgAsList);
 
         for (String word : newMsgAsList) {
-            //should we check whitelist word case-sensitive? idk prob not... -_o_-
-            if (WHITELISTED_WORDS.stream().noneMatch(s -> s.equalsIgnoreCase(word)) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+            if (WHITELISTED_WORDS.stream().noneMatch(s -> s.equals(word)) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 log.debug("[hasBannedWordExcludingWhitelistedWordsBeforeSubstituting] NON-WHITELIST BANNED WORD: {}", word);
                 deleteMsg(event, msg, word);
                 return true;
@@ -162,7 +161,7 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         if (hasWhitelistedCombinedWords(combinedWordsList)) {
             for (String combinedWord : combinedWordsList) {
-                if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(combinedWord))) {
+                if (WHITELISTED_WORDS.stream().anyMatch(s -> s.equals(combinedWord))) {
                     newMessage = newMessage.replaceAll(combinedWord, "");
                     log.debug("[checkMessageForBannedWordExcludingWhitelisted] whitelisted combined word found: {}", combinedWord);
                 }
@@ -174,7 +173,7 @@ public class BannedWordsFilter extends ListenerAdapter {
         log.debug("[checkMessageForBannedWordExcludingWhitelisted] newMessageAsList: {}", newMessageAsList);
 
         for (String word : newMessageAsList) {
-            if (WHITELISTED_WORDS.stream().noneMatch(s -> s.equalsIgnoreCase(word)) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
+            if (WHITELISTED_WORDS.stream().noneMatch(s -> s.equals(word)) && LIST_BANNED_WORDS.stream().anyMatch(s -> s.equalsIgnoreCase(word))) {
                 log.debug("[checkMessageForBannedWordExcludingWhitelisted] NON-WHITELIST BANNED WORD: {}", word);
                 deleteMsg(event, msg, word);
                 break;
