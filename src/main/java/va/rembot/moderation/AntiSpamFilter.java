@@ -1,9 +1,8 @@
 package va.rembot.moderation;
 
-import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -20,7 +19,6 @@ import va.rembot.lib.ModerationLib;
 
 import java.sql.*;
 
-@Slf4j
 public class AntiSpamFilter extends ListenerAdapter {
 
     private static final int ANTI_SPAM_TIME_AMOUNT = BotConfig.getAntiSpamTimeAmountInt();
@@ -40,7 +38,7 @@ public class AntiSpamFilter extends ListenerAdapter {
         long discordId = event.getMember().getIdLong();
         long discordMsgId = event.getMessageIdLong();
         UserSnowflake usrSnowflake = UserSnowflake.fromId(discordId);
-        Member user = event.getMember();
+        User user = event.getAuthor();
         Timestamp timeFirstMsgCreated;
         Timestamp timeLastMsgCreated;
         String msgContent = msg.getContentRaw();
@@ -82,9 +80,9 @@ public class AntiSpamFilter extends ListenerAdapter {
                 strikeSpamDao.update(new StrikeSpam(discordId, strikes, new Timestamp(msgCreated)));
 
                 if (strikes < ANTI_SPAM_STRIKE_AMOUNT)
-                    ModerationLib.muteSpam(event, usrSnowflake, "Spamming", strikes, user.getUser());
+                    ModerationLib.muteSpam(event, usrSnowflake, "Spamming", strikes, user);
                 else {
-                    ModerationLib.banGeneric(event, usrSnowflake, "Spamming", user.getUser());
+                    ModerationLib.banGeneric(event, usrSnowflake, "Spamming", user);
                     strikeSpamDao.update(new StrikeSpam(discordId, 0, new Timestamp(msgCreated)));
                 }
             }
