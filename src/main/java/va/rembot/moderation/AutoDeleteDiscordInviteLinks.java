@@ -14,9 +14,7 @@ public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
         Message message = event.getMessage();
         String messageContent = message.getContentRaw();
 
-        boolean messageIncludesDiscordInviteLink = MessageLib.hasDiscordInviteLink(messageContent);
-
-        if (messageIncludesDiscordInviteLink) {
+        if (MessageLib.hasDiscordInviteLink(messageContent)) {
             event.getChannel()
                     .sendMessage("Discord invite links are not allowed.")
                     .and(message.delete())
