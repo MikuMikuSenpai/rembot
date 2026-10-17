@@ -13,6 +13,7 @@ A clear and concise description of what the bug is.
 **Reproduce**
 
 Steps to reproduce the behavior:
+
 1. Do ...
 2. Then do ...
 3. ...
@@ -28,4 +29,4 @@ If applicable, add screenshots or videos to help explain your problem.
 
 **Additional information (optional)**
 
-Add any other context about the problem here.
+Add any other context about the problem here (e.g. logs).
