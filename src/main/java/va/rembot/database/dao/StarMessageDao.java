@@ -15,18 +15,21 @@ import java.util.Optional;
 public class StarMessageDao implements Dao<StarMessage>{
     @Override
     public void create(StarMessage starMessage) {
-        String query = "INSERT IGNORE INTO starred_messages (discord_message_id, star_amount) VALUES (?, 0)";
+        String query = "INSERT IGNORE INTO starred_messages (discord_message_id, star_amount, is_sent, embed_message_id) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)){
 
             pStmt.setLong(1, starMessage.discordMsgId());
+            pStmt.setInt(2, starMessage.starAmount());
+            pStmt.setBoolean(3, starMessage.isSent());
+            pStmt.setLong(4, starMessage.embedMessageId());
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not insert new starMessage in DB table starred_messages.");
-            log.error("Details: discordMsgId {}, starAmount {}", starMessage.discordMsgId(), starMessage.starAmount());
-            log.error("Error: {}", e.getMessage());
+            log.error("[create] Could not insert new starMessage in DB.");
+            log.error("[create] Details starMessage: {}", starMessage);
+            log.error("[create] Error: {}", e.getMessage());
         }
     }
 
@@ -57,9 +60,9 @@ public class StarMessageDao implements Dao<StarMessage>{
             starMsg = new StarMessage(discordMsgId, starAmount, isSent, embedMsgId);
 
         } catch (SQLException e) {
-            log.error("Could not query star message based on discord message id.");
-            log.error("Discord message id of user: {}", MsgId);
-            log.error("Error: {}", e.getMessage());
+            log.error("[get] Could not get starMessage from DB");
+            log.error("[get] Discord message id: {}", MsgId);
+            log.error("[get] Error: {}", e.getMessage());
         }
 
         return Optional.of(starMsg);
@@ -85,9 +88,9 @@ public class StarMessageDao implements Dao<StarMessage>{
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not update star amount.");
-            log.error("Details: discordMsgId {}, starAmount {}", starMessage.discordMsgId(), starMessage.starAmount());
-            log.error("Error: {}", e.getMessage());
+            log.error("[update] Could not update star amount.");
+            log.error("[update] Details: {}", starMessage);
+            log.error("[update] Error: {}", e.getMessage());
         }
     }
 

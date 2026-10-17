@@ -41,10 +41,9 @@ public class MessageDao implements Dao<DiscordMessage> {
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not insert Message in DB.");
-            log.error("Message details: discordMessageId {}, discordUserId {}, timeCreated {}, messageContent {}, attachmentsLinks {}, isEdited {}, editedLogJumpUrl {}, editedLogCounter {}",
-                    message.discordMessageId(), message.discordUserId(), message.timeCreated(), message.messageContent(), message.attachmentsLinks(), message.isEdited(), message.editedLogJumpUrl(), message.editedLogCounter());
-            log.error("Error: {}", e.getMessage());;
+            log.error("[create] Could not insert Message in DB.");
+            log.error("[create] Message details: {}", message);
+            log.error("[create] Error: {}", e.getMessage());
         }
 
     }
@@ -83,9 +82,9 @@ public class MessageDao implements Dao<DiscordMessage> {
             msg = new DiscordMessage(discordMsgId, discordUserId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
-            log.error("Could not get message.");
-            log.error("Discord message id: {}", discordMsgId);
-            log.error("Error: {}", e.getMessage());
+            log.error("[get] Could not get message.");
+            log.error("[get] Discord message id: {}", discordMsgId);
+            log.error("[get] Error: {}", e.getMessage());
         }
 
         return Optional.ofNullable(msg);
@@ -134,9 +133,9 @@ public class MessageDao implements Dao<DiscordMessage> {
             msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
-            log.error("Could not get first message for spam detection.");
-            log.error("Discord id of user: {}", discordId);
-            log.error("Error: {}", e.getMessage());
+            log.error("[getFirst] Could not get first message for spam detection.");
+            log.error("[getFirst] Discord id of user: {}", discordId);
+            log.error("[getFirst] Error: {}", e.getMessage());
         }
 
         return Optional.of(msgSpam);
@@ -179,9 +178,9 @@ public class MessageDao implements Dao<DiscordMessage> {
             msgSpam = new DiscordMessage(discordMsgId, discordId, timeCreated, messageContent, attachmentLinks, isEdited, editedLogJumpUrl, editedLogCounter);
 
         } catch (SQLException e) {
-            log.error("Could not get latest message for spam detection.");
-            log.error("Discord id of user: {}", discordId);
-            log.error("Error: {}", e.getMessage());
+            log.error("[getLatest] Could not get latest message for spam detection.");
+            log.error("[getLatest] Discord id of user: {}", discordId);
+            log.error("[getLatest] Error: {}", e.getMessage());
         }
 
         return Optional.of(msgSpam);

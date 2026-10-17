@@ -17,34 +17,34 @@ public class UserDao implements Dao<DiscordUser>{
     @Override
     public void create(DiscordUser user) {
 
-        long id = user.discordId();
+        long discordUserId = user.discordId();
+
         String query = "INSERT IGNORE INTO users (discord_user_id) VALUES (?)";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)){
 
-            ps.setLong(1, id);
+            ps.setLong(1, discordUserId);
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not insert User in DB.");
-            log.error("Details: discordId {}", user.discordId());
-            log.error("Error: {}", e.getMessage());
+            log.error("[create] Could not insert User in DB.");
+            log.error("[create] Details: {}", user);
+            log.error("[create] Error: {}", e.getMessage());
         }
-
     }
 
     @Override
-    public Optional<DiscordUser> get(long id) {
+    public Optional<DiscordUser> get(long discordUserId) {
         DiscordUser user = null;
         String query = "SELECT * FROM users WHERE discord_user_id = ?";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)){
 
-            ps.setLong(1, id);
-
+            ps.setLong(1, discordUserId);
             ResultSet result = ps.executeQuery();
+
             long userId = 0L;
             while (result.next()) {
                 userId = result.getLong(1);
@@ -53,9 +53,9 @@ public class UserDao implements Dao<DiscordUser>{
             user = new DiscordUser(userId);
 
         } catch (SQLException e) {
-            log.error("Could not get user by id.");
-            log.error("Details: discordId {}", id);
-            log.error("Error: {}", e.getMessage());
+            log.error("[get] Could not get user by id.");
+            log.error("[get] discordUserId: {}", discordUserId);
+            log.error("[get] Error: {}", e.getMessage());
         }
 
         return Optional.of(user);

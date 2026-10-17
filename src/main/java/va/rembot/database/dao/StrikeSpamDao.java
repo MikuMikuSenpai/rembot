@@ -14,35 +14,25 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
     @Override
     public void create(StrikeSpam strikeSpam) {
 
-        String query = "INSERT IGNORE INTO strikes_spam (discord_user_id, amount, most_recent_given) VALUES (?, 0, ?)";
+        String query = "INSERT IGNORE INTO strikes_spam (discord_user_id, amount, most_recent_given) VALUES (?, ?, ?)";
 
         try (Connection conn = DataSource.getConnection();
              PreparedStatement pStmt = conn.prepareStatement(query)) {
 
             pStmt.setLong(1, strikeSpam.discordId());
-            pStmt.setTimestamp(2, strikeSpam.mostRecentStrike());
+            pStmt.setInt(2, strikeSpam.amount());
+            pStmt.setTimestamp(3, strikeSpam.mostRecentStrike());
             pStmt.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not insert new StrikeSpam in DB.");
-            log.error("Details: discordId {}, mostRecentStrike{}", strikeSpam.discordId(), strikeSpam.mostRecentStrike());
-            log.error("Error: {}", e.getMessage());
+            log.error("[create] Could not insert new StrikeSpam in DB.");
+            log.error("[create] Details: {}", strikeSpam);
+            log.error("[create] Error: {}", e.getMessage());
         }
-
     }
 
     @Override
-    public Optional<StrikeSpam> get(long id) {
-        return Optional.empty();
-    }
-
-    @Override
-    public List<StrikeSpam> getAll() {
-        return List.of();
-    }
-
-    public Optional<StrikeSpam> getAmount(long discordId) {
-
+    public Optional<StrikeSpam> get(long discordUserId) {
         StrikeSpam strikeSpam = null;
 
         String query = "SELECT * FROM strikes_spam WHERE discord_user_id = ?";
@@ -50,9 +40,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
         try (Connection conn = DataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
-            ps.setLong(1, discordId);
-
+            ps.setLong(1, discordUserId);
             ResultSet result = ps.executeQuery();
+
             int amount = 0;
             Timestamp mostRecentGiven = null;
 
@@ -61,15 +51,20 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
                 mostRecentGiven = result.getTimestamp(3);
             }
 
-            strikeSpam = new StrikeSpam(discordId, amount, mostRecentGiven);
+            strikeSpam = new StrikeSpam(discordUserId, amount, mostRecentGiven);
 
         } catch (SQLException e) {
-            log.error("Could not get strike amount for spam detection.");
-            log.error("Discord id of user: {}", discordId);
-            log.error("Error: {}", e.getMessage());
+            log.error("[get] Could not get strikeSpam from DB");
+            log.error("[get] Discord id of user: {}", discordUserId);
+            log.error("[get] Error: {}", e.getMessage());
         }
 
         return Optional.of(strikeSpam);
+    }
+
+    @Override
+    public List<StrikeSpam> getAll() {
+        return List.of();
     }
 
     @Override
@@ -87,9 +82,9 @@ public class StrikeSpamDao implements Dao<StrikeSpam> {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Could not update strikeSpam with new amount and timestamp for spam detection.");
-            log.error("StrikeSpam details: amount {}, mostRecentStrike {}, discordId {}", strikeSpam.amount(), strikeSpam.mostRecentStrike(), strikeSpam.discordId());
-            log.error("Error: {}", e.getMessage());
+            log.error("[update] Could not update strikeSpam with new amount and timestamp for spam detection.");
+            log.error("[update] StrikeSpam details: {}", strikeSpam);
+            log.error("[update] Error: {}", e.getMessage());
         }
     }
 
