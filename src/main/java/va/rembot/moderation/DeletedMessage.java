@@ -46,12 +46,19 @@ public class DeletedMessage extends ListenerAdapter {
             author = user.getAsMention();
 
         String mediaUrl = MessageLib.extractMediaUrls(messageContent);
+        String[] mediaUrlAsArray = mediaUrl.split(" ");
 
-        if (!mediaUrl.isEmpty())
-            messageContent = messageContent.replace(mediaUrl, "");
+        if (!mediaUrl.isEmpty()) {
+            for (String mediaUrlEntry : mediaUrlAsArray) {
+                messageContent = messageContent.replace(mediaUrlEntry, "");
+            }
+        }
 
-        if (MessageLib.endsWithUrl(messageContent))
+        if (MessageLib.endsWithUrl(messageContent)) {
             messageContent = messageContent + " ";
+        } else {
+            messageContent = messageContent.trim();
+        }
 
         if (messageContent.length() + attachmentLinks.length() <= 1900) {
             logChannel.sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + messageContent + ">\n" + attachmentLinks + mediaUrl)
