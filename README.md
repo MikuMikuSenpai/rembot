@@ -13,6 +13,7 @@ Slash Commands (/)
         /unban username [reason]
         /unmute username [reason]
 Non-Slash Commands (&)
+    &nuke - role play as Kim Jong-un and nuke a country
     &ping - returns "pong", time took in milliseconds (ms) and what version of rembot is running.
 Features
     Moderation
