@@ -1,7 +1,6 @@
 package va.rembot.commands.slash.admin;
 
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import va.rembot.lib.ModerationLib;
