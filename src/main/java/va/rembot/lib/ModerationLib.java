@@ -203,7 +203,7 @@ public class ModerationLib {
                 .queue(success -> {
                     event.getGuild().getChannelById(TextChannel.class, BotConfig.DARWIN_CHANNEL_ID)
                             .sendMessageEmbeds(embed)
-                            .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " 3 strikes = ban."))
+                            .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " " + BotConfig.getAntiSpamStrikeAmountInt() + " strikes = ban."))
                             .queue();
                     log.info("[onMessageReceived] Spam detected, muted and strike given to {}", targetUsr);
                 }, new ErrorHandler()
