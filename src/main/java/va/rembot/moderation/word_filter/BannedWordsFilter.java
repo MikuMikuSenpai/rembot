@@ -326,9 +326,6 @@ public class BannedWordsFilter extends ListenerAdapter {
 
         if (possibleSubs.containsKey(index)) {
 
-            char originalChar = stringBuilder.charAt(index);
-            log.debug("[replaceSubWithChar] originalChar: {}", originalChar);
-
             for (Character sub : possibleSubs.get(index)) {
                 stringBuilder.setCharAt(index, sub);
                 log.debug("[replaceSubWithChar] sub: {}", sub);
@@ -336,7 +333,6 @@ public class BannedWordsFilter extends ListenerAdapter {
                 replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
             }
 
-            stringBuilder.setCharAt(index, originalChar);
         } else {
             replaceSubWithChar(stringBuilder, index + 1, possibleSubs, newList);
         }
