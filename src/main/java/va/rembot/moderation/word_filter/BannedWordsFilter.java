@@ -190,22 +190,22 @@ public class BannedWordsFilter extends ListenerAdapter {
         return false;
     }
 
-    private List<String> getCombinedWords(List<String> substitutedMsg) {
+    private List<String> getCombinedWords(List<String> message) {
 
         List<String> combinedWordsList = new ArrayList<>();
         StringBuilder combinedWord = new StringBuilder();
         int comboWordIndexStart = 0;
         int comboWordIndexNext = 1;
 
-        for (int i = 0; i < substitutedMsg.size(); i++) {
+        for (int i = 0; i < message.size(); i++) {
 
             // combined word cant be one word
-            if (substitutedMsg.size() == 1) break;
+            if (message.size() == 1) break;
 
-            log.debug("[getCombinedWords] Combo word ONE: {}", substitutedMsg.get(comboWordIndexStart));
-            log.debug("[getCombinedWords] Combo word TWO: {}", substitutedMsg.get(comboWordIndexNext));
+            log.debug("[getCombinedWords] Combo word ONE: {}", message.get(comboWordIndexStart));
+            log.debug("[getCombinedWords] Combo word TWO: {}", message.get(comboWordIndexNext));
 
-            combinedWord.append(substitutedMsg.get(comboWordIndexStart)).append(" ").append(substitutedMsg.get(comboWordIndexNext));
+            combinedWord.append(message.get(comboWordIndexStart)).append(" ").append(message.get(comboWordIndexNext));
             combinedWordsList.add(combinedWord.toString());
 
             log.debug("[getCombinedWords] Combined word: {}", combinedWord);
@@ -214,7 +214,7 @@ public class BannedWordsFilter extends ListenerAdapter {
             comboWordIndexStart += 1;
             comboWordIndexNext += 1;
 
-            if (comboWordIndexStart >= substitutedMsg.size() || comboWordIndexNext + 1 >= substitutedMsg.size()) break;
+            if (comboWordIndexStart >= message.size() || comboWordIndexNext + 1 >= message.size()) break;
         }
 
         log.debug("[getCombinedWords] The list being returned: {}", combinedWordsList);
