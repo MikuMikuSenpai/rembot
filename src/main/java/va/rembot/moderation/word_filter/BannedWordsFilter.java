@@ -268,6 +268,7 @@ public class BannedWordsFilter extends ListenerAdapter {
                             potentialSubs.add(key);
                             indexForSub = i;
                             isSub = true;
+                            break;
                         }
                     }
                 }
