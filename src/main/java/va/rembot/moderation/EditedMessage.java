@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.models.DiscordMessage;
-import va.rembot.lib.ExtractFromMessage;
+import va.rembot.lib.MessageLib;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -73,7 +73,7 @@ public class EditedMessage extends ListenerAdapter {
         String messageAuthor = event.getAuthor().getAsMention();
         boolean isEdited = message.isEdited();
         String jumpUrl = message.editedLogJumpUrl();
-        String eventMediaUrl = ExtractFromMessage.extractMediaUrls(messageContentFromEvent);
+        String eventMediaUrl = MessageLib.extractMediaUrls(messageContentFromEvent);
         String[] eventMediaUrlAsArray = eventMediaUrl.split(" ");
 
         String messageContentFromEventCopyPreStringManipul = messageContentFromEvent;
@@ -85,13 +85,13 @@ public class EditedMessage extends ListenerAdapter {
             }
         }
 
-        if (ExtractFromMessage.endsWithUrl(messageContentFromEvent)) {
+        if (MessageLib.endsWithUrl(messageContentFromEvent)) {
             messageContentFromEvent = messageContentFromEvent + " ";
         } else {
             messageContentFromEvent = messageContentFromEvent.trim();
         }
 
-        String mediaUrl = ExtractFromMessage.extractMediaUrls(messageContentFromDB);
+        String mediaUrl = MessageLib.extractMediaUrls(messageContentFromDB);
         String[] mediaUrlAsArray = mediaUrl.split(" ");
 
         if (!mediaUrl.isEmpty()) {
@@ -100,7 +100,7 @@ public class EditedMessage extends ListenerAdapter {
             }
         }
 
-        if (ExtractFromMessage.endsWithUrl(messageContentFromDB)) {
+        if (MessageLib.endsWithUrl(messageContentFromDB)) {
             messageContentFromDB = messageContentFromDB + " ";
         } else {
             messageContentFromDB = messageContentFromDB.trim();

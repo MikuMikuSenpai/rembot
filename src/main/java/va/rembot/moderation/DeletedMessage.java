@@ -10,7 +10,7 @@ import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.models.DiscordMessage;
 import va.rembot.exceptions.MessageNotFoundException;
-import va.rembot.lib.ExtractFromMessage;
+import va.rembot.lib.MessageLib;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -45,12 +45,12 @@ public class DeletedMessage extends ListenerAdapter {
         } else
             author = user.getAsMention();
 
-        String mediaUrl = ExtractFromMessage.extractMediaUrls(messageContent);
+        String mediaUrl = MessageLib.extractMediaUrls(messageContent);
 
         if (!mediaUrl.isEmpty())
             messageContent = messageContent.replace(mediaUrl, "");
 
-        if (ExtractFromMessage.endsWithUrl(messageContent))
+        if (MessageLib.endsWithUrl(messageContent))
             messageContent = messageContent + " ";
 
         if (messageContent.length() + attachmentLinks.length() <= 1900) {

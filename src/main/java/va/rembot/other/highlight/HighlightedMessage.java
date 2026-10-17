@@ -20,7 +20,7 @@ import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
 import va.rembot.exceptions.StarMessageNotFoundException;
-import va.rembot.lib.ExtractFromMessage;
+import va.rembot.lib.MessageLib;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -91,7 +91,7 @@ public class HighlightedMessage extends ListenerAdapter {
             int newStarAmount = starAmount + 1;
             starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
-            String mediaUrl = ExtractFromMessage.extractMediaUrls(msgContent);
+            String mediaUrl = MessageLib.extractMediaUrls(msgContent);
             boolean hasMediaLink;
 
             if (mediaUrl.isEmpty())

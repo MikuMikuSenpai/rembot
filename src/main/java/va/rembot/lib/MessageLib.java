@@ -3,7 +3,7 @@ package va.rembot.lib;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExtractFromMessage {
+public class MessageLib {
 
     public static String extractMediaUrls(String message) {
 
@@ -32,6 +32,10 @@ public class ExtractFromMessage {
             return "";
         else
             return result.toString();
+    }
+
+    public static String removeUrls(String message) {
+        return message.replaceAll("https?://\\S+", "");
     }
 
     public static boolean endsWithUrl(String message) {

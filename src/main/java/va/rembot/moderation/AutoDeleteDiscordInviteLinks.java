@@ -3,7 +3,7 @@ package va.rembot.moderation;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import va.rembot.lib.ExtractFromMessage;
+import va.rembot.lib.MessageLib;
 
 public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
 
@@ -14,7 +14,7 @@ public class AutoDeleteDiscordInviteLinks extends ListenerAdapter {
         Message message = event.getMessage();
         String messageContent = message.getContentRaw();
 
-        boolean messageIncludesDiscordInviteLink = ExtractFromMessage.hasDiscordInviteLink(messageContent);
+        boolean messageIncludesDiscordInviteLink = MessageLib.hasDiscordInviteLink(messageContent);
 
         if (messageIncludesDiscordInviteLink) {
             event.getChannel()
