@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 public class HighlightedMessage extends ListenerAdapter {
@@ -48,16 +47,16 @@ public class HighlightedMessage extends ListenerAdapter {
             StarMessageDao starMessageDao = new StarMessageDao();
             MessageDao messageDao = new MessageDao();
 
-            Optional<DiscordMessage> msgObject = messageDao.get(msgId);
+            DiscordMessage msgObject = messageDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("[onMessageReactionAdd] Failure while trying to retrieve message from database with (discord message) id: " + msgId));
 
-            if (msgObject.isEmpty()) {
+            if (msgObject.discordUserId() == 0) {
                 log.error("[onMessageReactionAdd] Couldn't highlight message. Message is not stored in database. This could be because the bot was started/restarted/created after the message was created. The message ID is: {}", msgId);
                 return;
             }
             
-            long msgAuthorId = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .discordUserId();
+            long msgAuthorId = msgObject.discordUserId();
 
             User user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
@@ -66,44 +65,25 @@ public class HighlightedMessage extends ListenerAdapter {
             }
 
             starMessageDao.create(new StarMessage(msgId, 0, false, 0));
-            Optional<StarMessage> starMsgObject = starMessageDao.get(msgId);
+            StarMessage starMsgObject = starMessageDao.get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("[onMessageReactionAdd] Failure trying to retrieve star message from database with (discord message) id: " + msgId));
 
-            int starAmount = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .starAmount();
+            int starAmount = starMsgObject.starAmount();
+            boolean isSent = starMsgObject.isSent();
+            long embedMsgId = starMsgObject.embedMessageId();
 
-            boolean isSent = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .isSent();
-
-            long embedMsgId = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .embedMessageId();
-
-            String msgContent = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .messageContent();
-
-            String attachmentLinks = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .attachmentsLinks();
+            String msgContent = msgObject.messageContent();
+            String attachmentLinks = msgObject.attachmentsLinks();
 
             int newStarAmount = starAmount + 1;
             starMessageDao.update(new StarMessage(msgId, newStarAmount, isSent, embedMsgId));
 
             String mediaUrl = MessageLib.extractMediaUrls(msgContent);
             boolean hasMediaLink;
-
-            if (mediaUrl.isEmpty())
-                hasMediaLink = false;
-            else
-                hasMediaLink = true;
+            hasMediaLink = !mediaUrl.isEmpty();
 
             boolean hasAttachments;
-            if (attachmentLinks.isEmpty())
-                hasAttachments = false;
-            else
-                hasAttachments = true;
+            hasAttachments = !attachmentLinks.isEmpty();
 
             if (newStarAmount >= BotConfig.getHighlightStarThresholdInt()){
 
@@ -177,11 +157,11 @@ public class HighlightedMessage extends ListenerAdapter {
             StarMessageDao starMessageDao = new StarMessageDao();
             MessageDao messageDao = new MessageDao();
 
-            Optional<DiscordMessage> msgObject = messageDao.get(msgId);
+            DiscordMessage msgObject = messageDao
+                    .get(msgId)
+                    .orElseThrow(() -> new MessageNotFoundException("[onMessageReactionRemove] Failure while trying to retrieve message from database with (discord message) id: " + msgId));
 
-            long msgAuthorId = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .discordUserId();
+            long msgAuthorId = msgObject.discordUserId();
 
             User user = event.getJDA().getUserById(msgAuthorId);
             if (Objects.isNull(user)) {
@@ -189,23 +169,15 @@ public class HighlightedMessage extends ListenerAdapter {
                 return;
             }
 
-            Optional<StarMessage> starMsgObject = starMessageDao.get(msgId);
+            StarMessage starMsgObject = starMessageDao
+                    .get(msgId)
+                    .orElseThrow(() -> new StarMessageNotFoundException("[onMessageReactionRemove] Failure trying to retrieve star message from database with (discord message) id: " + msgId));
 
-            int starAmount = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .starAmount();
+            int starAmount = starMsgObject.starAmount();
+            boolean isSent = starMsgObject.isSent();
+            long embedMsgId = starMsgObject.embedMessageId();
 
-            boolean isSent = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .isSent();
-
-            long embedMsgId = starMsgObject
-                    .orElseThrow(() -> new StarMessageNotFoundException("Failure trying to retrieve star message from database with (discord message) id: " + msgId))
-                    .embedMessageId();
-
-            String msgContent = msgObject
-                    .orElseThrow(() -> new MessageNotFoundException("Failure while trying to retrieve message from database with (discord message) id: " + msgId))
-                    .messageContent();
+            String msgContent = msgObject.messageContent();
 
             int newStarAmount = starAmount - 1;
 
