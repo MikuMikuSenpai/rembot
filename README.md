@@ -1,4 +1,4 @@
-# rembot
+# reMbot
 Remastered mbot get it mbot rembot yeah my bad
 
 ## Reference Sheet
