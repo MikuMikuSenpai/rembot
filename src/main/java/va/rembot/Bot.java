@@ -49,15 +49,15 @@ public class Bot {
 
     private static void printLogo(){
         // credits: https://www.asciiart.eu/text-to-ascii-art
-        // input_text: "REMBOT" / only project name is ASCII art for now
+        // input_text: "reMbot" / only project name is ASCII art for now
         // Font: standard Normal Normal 80
         // None 0 0
         // None standard 14pt
         // Whitespace Break | Trim Whitespace
-        log.info(" ____  _____ __  __ ____   ___ _____");
-        log.info("|  _ \\| ____|  \\/  | __ ) / _ \\_   _|");
-        log.info("| |_) |  _| | |\\/| |  _ \\| | | || |");
-        log.info("|  _ <| |___| |  | | |_) | |_| || |");
-        log.info("|_|_\\_\\_____|_|__|_|____/_\\___/_|_| PRERELEASE");
+        log.info("          __  __ _           _   ");
+        log.info(" _ __ ___|  \\/  | |__   ___ | |_ ");
+        log.info("| '__/ _ \\ |\\/| | '_ \\ / _ \\| __|");
+        log.info("| | |  __/ |  | | |_) | (_) | |_ ");
+        log.info("|_|  \\___|_|  |_|_.__/ \\___/ \\__|" + "PRERELEASE");
     }
 }
