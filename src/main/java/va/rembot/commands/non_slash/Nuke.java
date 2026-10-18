@@ -34,6 +34,7 @@ public class Nuke extends ListenerAdapter {
     }
 
     private static HashMap<String, String> getANukableCountry() {
+        //pics made by @mikumikusenpai
         nukableCountries.put("France", "https://i.ibb.co/dwQQb4qK/nukeparis.jpg");
         nukableCountries.put("India", "https://i.ibb.co/7J0wQXCm/india-nuked.jpg");
         nukableCountries.put("Russia", "https://i.ibb.co/jk5M2PVq/russia-nuked.png");
