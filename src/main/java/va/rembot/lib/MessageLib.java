@@ -22,6 +22,7 @@ public class MessageLib {
                 "https?\\S+\\.webp\\S*|" +
                 "https?://w{0,3}\\.?instagram\\.com/p/\\S+|" +
                 "https?://w{0,3}\\.?instagram\\.com/reels/\\S+|" +
+                "https?://w{0,3}\\.?kick\\.com/\\S+/clips/\\S+|" +
                 "https?://w{0,3}\\.?klipy\\.com/gifs/\\S+|" +
                 "https?://w{0,3}\\.?open\\.spotify\\.com/track/\\S+|" +
                 "https?://w{0,3}\\.?reddit\\.com/r/\\S+/s/\\S+|" +
