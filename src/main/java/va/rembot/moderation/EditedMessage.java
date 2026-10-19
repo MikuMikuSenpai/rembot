@@ -4,15 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.models.DiscordMessage;
+import va.rembot.lib.GenericLib;
 import va.rembot.lib.MessageLib;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Timestamp;
 
 @Slf4j
@@ -114,7 +111,6 @@ public class EditedMessage extends ListenerAdapter {
         String linkToMessage = "https://discord.com/channels/" + event.getGuild().getIdLong() + "/" + event.getGuildChannel().getIdLong() + "/" + messageId;
         final DiscordMessage finalMessage = message;
 
-        // kinda spagheti but fk it we roll with this
         if (!isEdited) {
             if (originalMessageLength < 1900) {
                 logChannel.sendMessage("**[MESSAGE EDITED]** " + linkToMessage + " " + messageAuthor + " <O:" + messageContentFromDB + ">\n" + message.attachmentsLinks() + mediaUrl)
@@ -140,19 +136,12 @@ public class EditedMessage extends ListenerAdapter {
                                 //original = short | edited = long
                                 logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:message too long. Check file below." + ">\n" + eventMediaUrl)
                                         .queue(editedMessage -> {
-                                            try {
-                                                File myFile = new File("edited_content_too_long.txt");
-                                                if (myFile.createNewFile()) {
-                                                    FileWriter fw = new FileWriter(myFile);
-                                                    fw.write(messageContentFromEventCopyPreStringManipul);
-                                                    fw.flush();
-                                                    fw.close();
-                                                    logChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-                                                    myFile.delete();
-                                                }
-                                            } catch (IOException e) {
-                                                throw new RuntimeException(e);
-                                            }
+
+                                            GenericLib.sendTextAsAttachedFile(
+                                                    event,
+                                                    messageContentFromEventCopyPreStringManipul,
+                                                    "edited_content_too_long.txt",
+                                                    BotConfig.LOG_CHANNEL_ID);
 
                                             logChannel.sendMessage(originalMessage.getJumpUrl()).queue();
                                             messageDao.update(new DiscordMessage(
@@ -171,19 +160,11 @@ public class EditedMessage extends ListenerAdapter {
                 logChannel.sendMessage("**[MESSAGE EDITED]** " + linkToMessage + " " + messageAuthor + " <O:message too long. Check file below." + ">\n" + message.attachmentsLinks() + mediaUrl)
                         .queue(originalMessage -> {
 
-                            File file = new File("orginal_content_too_long.txt");
-                            try {
-                                if (file.createNewFile()) {
-                                    FileWriter fw = new FileWriter(file);
-                                    fw.write(messageContentFromDBCopyPreStringManipul);
-                                    fw.flush();
-                                    fw.close();
-                                    logChannel.sendFiles(FileUpload.fromData(file)).queue();
-                                    file.delete();
-                                }
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
+                            GenericLib.sendTextAsAttachedFile(
+                                    event,
+                                    messageContentFromDBCopyPreStringManipul,
+                                    "orginal_content_too_long.txt",
+                                    BotConfig.LOG_CHANNEL_ID);
 
                             if (eventMessageLength < 1900) {
                                 //original = long | edited = short
@@ -204,19 +185,12 @@ public class EditedMessage extends ListenerAdapter {
                                 //original = long | edited = long
                                 logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E1:message too long. Check file below." + ">\n" + eventMediaUrl)
                                         .queue(editedMessage -> {
-                                            try {
-                                                File myFile = new File("edited_content_too_long.txt");
-                                                if (myFile.createNewFile()) {
-                                                    FileWriter fw = new FileWriter(myFile);
-                                                    fw.write(messageContentFromEventCopyPreStringManipul);
-                                                    fw.flush();
-                                                    fw.close();
-                                                    logChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-                                                    myFile.delete();
-                                                }
-                                            } catch (IOException e) {
-                                                throw new RuntimeException(e);
-                                            }
+
+                                            GenericLib.sendTextAsAttachedFile(
+                                                    event,
+                                                    messageContentFromEventCopyPreStringManipul,
+                                                    "edited_content_too_long.txt",
+                                                    BotConfig.LOG_CHANNEL_ID);
 
                                             logChannel.sendMessage(originalMessage.getJumpUrl()).queue();
                                             messageDao.update(new DiscordMessage(
@@ -251,19 +225,13 @@ public class EditedMessage extends ListenerAdapter {
             } else {
                 logChannel.sendMessage("**[MESSAGE EDITED]** " + messageAuthor + " <E" + finalMessage.editedLogCounter() + ":message too long. Check file below." + ">\n" + eventMediaUrl)
                         .queue(editedMessage -> {
-                            try {
-                                File myFile = new File("edited_content_too_long.txt");
-                                if (myFile.createNewFile()) {
-                                    FileWriter fw = new FileWriter(myFile);
-                                    fw.write(messageContentFromEventCopy);
-                                    fw.flush();
-                                    fw.close();
-                                    logChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-                                    myFile.delete();
-                                }
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
+
+                            GenericLib.sendTextAsAttachedFile(
+                                    event,
+                                    messageContentFromEventCopyPreStringManipul,
+                                    "edited_content_too_long.txt",
+                                    BotConfig.LOG_CHANNEL_ID);
+
                             logChannel.sendMessage(jumpUrl).queue();
                             messageDao.update(new DiscordMessage(
                                     finalMessage.discordMessageId(),
