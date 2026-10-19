@@ -207,17 +207,29 @@ public class HighlightedMessage extends ListenerAdapter {
         embedHighlight.addField("user", user.getAsMention(), true);
         embedHighlight.addField("stars", stars, true);
         embedHighlight.setColor(0xffcd3c);
+        String messageLabel = "\uD83D\uDCAC"; //speech bubble emoji
+        String mediaUrls = MessageLib.extractMediaUrls(messageContent);
+
+        for (String entry : mediaUrls.split(" ")) {
+            messageContent = messageContent.replace(entry, "");
+        }
+
+        if (MessageLib.endsWithUrl(messageContent)) {
+            messageContent += " ";
+        } else {
+            messageContent.trim();
+        }
 
         if (messageContent.length() <= 1024) {
 
             if (messageContent.isEmpty()) {
-                embedHighlight.addField("msg", "Original msg was empty. (Check attachments below)", false);
+                embedHighlight.addField(messageLabel, "Original msg was empty. (Check attachments below)", false);
             } else {
-                embedHighlight.addField("msg", messageContent, false);
+                embedHighlight.addField(messageLabel, messageContent, false);
             }
 
         } else {
-            embedHighlight.addField("msg", "Message was too long check attached file for content", false);
+            embedHighlight.addField(messageLabel, "Message was too long check attached file for content", false);
         }
 
         return embedHighlight;
