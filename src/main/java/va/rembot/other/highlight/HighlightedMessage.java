@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.dao.StarMessageDao;
@@ -20,11 +19,9 @@ import va.rembot.database.models.StarMessage;
 import va.rembot.database.models.DiscordUser;
 import va.rembot.exceptions.MessageNotFoundException;
 import va.rembot.exceptions.StarMessageNotFoundException;
+import va.rembot.lib.GenericLib;
 import va.rembot.lib.MessageLib;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
 
@@ -105,33 +102,21 @@ public class HighlightedMessage extends ListenerAdapter {
                                         darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
                                 });
                     } else {
+                            darwinChannel
+                                    .sendMessageEmbeds(embedHighlight.build())
+                                    .queue(message -> {
+                                        long newEmbedMsgId = message.getIdLong();
+                                        starMessageDao.update(new StarMessage(msgId, newStarAmount, true, newEmbedMsgId));
 
-                        try {
-                            File myFile = new File("long_message.txt");
-                            if (myFile.createNewFile()) {
+                                        if (hasAttachments || hasMediaLink)
+                                            darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
+                                    });
 
-                                FileWriter fw = new FileWriter(myFile);
-                                fw.write(msgContent);
-                                fw.flush();
-                                fw.close();
-
-                                darwinChannel
-                                        .sendMessageEmbeds(embedHighlight.build())
-                                        .queue(message -> {
-                                            long newEmbedMsgId = message.getIdLong();
-                                            starMessageDao.update(new StarMessage(msgId, newStarAmount, true, newEmbedMsgId));
-
-                                            if (hasAttachments || hasMediaLink)
-                                                darwinChannel.sendMessage("Attachments: " + attachmentLinks + " " + mediaUrl).queue();
-                                        });
-
-                                darwinChannel.sendFiles(FileUpload.fromData(myFile)).queue();
-                                myFile.delete();
-                            }
-                        } catch (IOException e) {
-                            log.error("[onMessageReactionAdd] Something went wrong while trying to create and upload text file to discord.");
-                            log.error(e.getMessage());
-                        }
+                            GenericLib.sendTextAsAttachedFile(
+                                    event,
+                                    msgContent,
+                                    "long_message.txt",
+                                    BotConfig.DARWIN_CHANNEL_ID);
                     }
                 } else {
 
