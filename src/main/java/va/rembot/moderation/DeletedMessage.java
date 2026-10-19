@@ -60,7 +60,7 @@ public class DeletedMessage extends ListenerAdapter {
         if (messageContent.length() + attachmentLinks.length() + mediaUrl.length() <= 1900) {
             logChannel.sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + messageContent + ">\n" + attachmentLinks + mediaUrl)
                     .queue(success -> {
-                        log.info("[onMessageDelete] Message was deleted: {}", messageObject);
+                        log.debug("[onMessageDelete] Message was deleted: {}", messageObject);
                     });
         } else {
             String finalMessageContent = messageContent;
