@@ -4,18 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -54,10 +49,10 @@ public class ModerationLib {
                                 .queue();
 
                         if (originalReason.length() > 1024) {
-                            attachFile(event, originalReason, BotConfig.DARWIN_CHANNEL_ID);
+                            GenericLib.sendTextAsAttachedFile(event, originalReason, "reason_too_long.txt", BotConfig.DARWIN_CHANNEL_ID);
                         }
 
-                        log.info("[banUsingSlashCommand] Banned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
+                        log.debug("[banUsingSlashCommand] Banned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
                     }, new ErrorHandler()
                             .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                                 logError("banUsingSlashCommand",
@@ -111,10 +106,10 @@ public class ModerationLib {
                             .queue();
 
                     if (originalReason.length() > 1024) {
-                        attachFile(event, originalReason, BotConfig.DARWIN_CHANNEL_ID);
+                        GenericLib.sendTextAsAttachedFile(event, originalReason, "reason_too_long.txt", BotConfig.DARWIN_CHANNEL_ID);
                     }
 
-                    log.info("[banGeneric] Banned: {} for reason: {}", targetUser, originalReason);
+                    log.debug("[banGeneric] Banned: {} for reason: {}", targetUser, originalReason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("banGeneric",
@@ -145,10 +140,10 @@ public class ModerationLib {
                                 .queue();
 
                         if (originalReason.length() > 1900) {
-                            attachFile(event, originalReason, BotConfig.LOG_CHANNEL_ID);
+                            GenericLib.sendTextAsAttachedFile(event, originalReason, "reason_too_long.txt", BotConfig.LOG_CHANNEL_ID);
                         }
 
-                        log.info("[kickUsingSlashCommand] Kicked: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
+                        log.debug("[kickUsingSlashCommand] Kicked: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
                     }, new ErrorHandler()
                             .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                                 logError("kickUsingSlashCommand",
@@ -204,10 +199,10 @@ public class ModerationLib {
                                 .queue();
 
                         if (originalReason.length() > 1024) {
-                            attachFile(event, originalReason, BotConfig.DARWIN_CHANNEL_ID);
+                            GenericLib.sendTextAsAttachedFile(event, originalReason, "reason_too_long.txt", BotConfig.DARWIN_CHANNEL_ID);
                         }
 
-                        log.info("[muteUsingSlashCommand] Muted: {} by moderator: {} reason: {}", targetUser, slashCommandUser, originalReason);
+                        log.debug("[muteUsingSlashCommand] Muted: {} by moderator: {} reason: {}", targetUser, slashCommandUser, originalReason);
                     }, new ErrorHandler()
                             .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                                 logError("muteUsingSlashCommand",
@@ -254,7 +249,7 @@ public class ModerationLib {
                             .sendMessageEmbeds(embed)
                             .and(event.getMessage().reply("Stop spamming strike: " + strikes + "/" + BotConfig.getAntiSpamStrikeAmountInt() + " " + BotConfig.getAntiSpamStrikeAmountInt() + " strikes = ban."))
                             .queue();
-                    log.info("[onMessageReceived] Spam detected, muted and strike given to {}", targetUsr);
+                    log.debug("[onMessageReceived] Spam detected, muted and strike given to {}", targetUsr);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("muteSpam",
@@ -284,10 +279,10 @@ public class ModerationLib {
                             .queue();
 
                     if (originalReason.length() > 1900) {
-                        attachFile(event, originalReason, BotConfig.LOG_CHANNEL_ID);
+                        GenericLib.sendTextAsAttachedFile(event, originalReason, "reason_too_long.txt", BotConfig.LOG_CHANNEL_ID);
                     }
 
-                    log.info("[unbanUsingSlashCommand] Unbanned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
+                    log.debug("[unbanUsingSlashCommand] Unbanned: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("unbanUsingSlashCommand",
@@ -339,10 +334,10 @@ public class ModerationLib {
                             .queue();
 
                     if (originalReason.length() > 1900) {
-                        attachFile(event, originalReason, BotConfig.LOG_CHANNEL_ID);
+                        GenericLib.sendTextAsAttachedFile(event, originalReason,"reason_too_long.txt.", BotConfig.LOG_CHANNEL_ID);
                     }
 
-                    log.info("[unmuteUsingSlashCommand] Unmuted: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
+                    log.debug("[unmuteUsingSlashCommand] Unmuted: {} by moderator: {} for reason: {}", targetUser, slashCommandUser, originalReason);
                 }, new ErrorHandler()
                         .handle(ErrorResponse.MISSING_PERMISSIONS, e -> {
                             logError("unmuteUsingSlashCommand",
@@ -417,27 +412,6 @@ public class ModerationLib {
         embed.setTimestamp(Instant.now());
 
         return embed.build();
-    }
-
-    private static void attachFile(Event event, String reason, String channelId) {
-
-        File file = new File("reason_too_long.txt");
-
-        try {
-            if (file.createNewFile()) {
-                FileWriter fw = new FileWriter(file);
-                fw.write(reason);
-                fw.flush();
-                fw.close();
-                event.getJDA()
-                        .getChannelById(TextChannel.class, channelId)
-                        .sendFiles(FileUpload.fromData(file))
-                        .queue();
-                file.delete();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static void logError(String methodName, String error) {
