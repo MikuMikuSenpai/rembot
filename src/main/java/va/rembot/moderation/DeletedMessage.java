@@ -5,16 +5,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.FileUpload;
 import va.rembot.BotConfig;
 import va.rembot.database.dao.MessageDao;
 import va.rembot.database.models.DiscordMessage;
 import va.rembot.exceptions.MessageNotFoundException;
+import va.rembot.lib.GenericLib;
 import va.rembot.lib.MessageLib;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
@@ -66,30 +63,17 @@ public class DeletedMessage extends ListenerAdapter {
                         log.info("[onMessageDelete] Message was deleted: {}", messageObject);
                     });
         } else {
-            try {
-                File file = new File("long_message_deleted.txt");
-
-                if (file.createNewFile()) {
-                    FileWriter fw = new FileWriter(file);
-                    fw.write(messageContent);
-                    fw.flush();
-                    fw.close();
-
-                    String finalMessageContent = messageContent;
-                    logChannel
-                            .sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + "Message content was too long see attached file below for original message.>\n" + attachmentLinks + mediaUrl)
-                            .and(logChannel.sendFiles(FileUpload.fromData(file)))
-                            .queue(success -> {
-                                log.info("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", user, finalMessageContent, attachmentLinks);
-                            });
-                    file.delete();
-                }
-
-            } catch (IOException e) {
-                log.error("[onMessageDelete] Something went wrong while storing deleted message as file format.");
-                log.error("[onMessageDelete] Error: {}", e.getMessage());
-                log.error("[onMessageDelete] Stack trace: {}", (Object) e.getStackTrace());
-            }
+            String finalMessageContent = messageContent;
+            logChannel
+                    .sendMessage("**[MESSAGE DELETED]** " + author + " <C:" + "Message content was too long see attached file below for original message.>\n" + attachmentLinks + mediaUrl)
+                    .queue(success -> {
+                        GenericLib.sendTextAsAttachedFile(
+                                event,
+                                finalMessageContent,
+                                "long_message_deleted.txt",
+                                BotConfig.LOG_CHANNEL_ID);
+                        log.debug("[onMessageDelete] Message was deleted by: {} message content: {} attachment links: {}", user, finalMessageContent, attachmentLinks);
+                    });
         }
     }
 }
