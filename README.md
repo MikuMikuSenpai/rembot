@@ -29,6 +29,8 @@ Features
 
 ### Production/Hosting:
 
+> [!WARNING] Do not use `latest` as reMbot version / IMAGE_TAG in [.env.example](.env.example) instead use a [release](https://github.com/MikuMikuSenpai/rembot/releases) for example `v1.0.0`.
+
 1. Invite bot with these permissions in [OAuth2](https://discord.com/developers/home) tab:
     * Kick Members
     * Ban Members
