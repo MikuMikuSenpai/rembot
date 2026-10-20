@@ -267,7 +267,7 @@ public class BotConfig extends ListenerAdapter {
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
                                 .addOption(OptionType.USER, "username", "The user to be unmuted.", true)
                                 .addOption(OptionType.STRING, "reason", "Reason for unmute.", false))
-                .queue(success -> log.info("Successfully loaded all slash commands."));
+                .queue();
     }
 
     private static String[] getBannedWordsArray() {
