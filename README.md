@@ -35,12 +35,14 @@ Features
     * Moderate Members
     * Send Messages
     * Manage Messages
-2. Clone the project: `git clone https://github.com/MikuMikuSenpai/rembot.git`
-3. Change to the new `rembot` directory.
-4. Create a new file called `.env` paste the contents of `.env.example` in `.env`
-5. Edit the `.env` file with your information (e.g. BOT_TOKEN).
-6. Start the bot by opening a terminal in the `rembot` directory and executing the command: `docker compose up`
-7. To stop the bot, in the rembot directory use this command: `docker compose stop`
+2. Set `Install Link` to "None" in the Installation tab
+3. Turn off `Public Bot` in the Bot tab
+4. Clone the project: `git clone https://github.com/MikuMikuSenpai/rembot.git`
+5. Change to the new `rembot` directory.
+6. Create a new file called `.env` paste the contents of `.env.example` in `.env`
+7. Edit the `.env` file with your information (e.g. BOT_TOKEN).
+8. Start the bot by opening a terminal in the `rembot` directory and executing the command: `docker compose up`
+9. To stop the bot, in the rembot directory use this command: `docker compose stop`
 
 For more information regarding docker consult their documentation.
 
