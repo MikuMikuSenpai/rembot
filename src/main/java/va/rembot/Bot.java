@@ -34,9 +34,9 @@ public class Bot {
                     .build();
             printLogo();
         } catch (InvalidTokenException e) {
-            log.error("Bot token is invalid, check your .env file.");
+            log.error("[main] Bot token is invalid, check your .env file.");
         } catch (Exception e){
-            log.error("Something went wrong while starting the bot.");
+            log.error("[main] Something went wrong while starting the bot.");
             log.error(e.getMessage());
         }
 

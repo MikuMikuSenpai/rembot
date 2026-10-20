@@ -47,8 +47,8 @@ public class EditedMessage extends ListenerAdapter {
         String messageContentFromDB = message.messageContent();
         String messageContentFromEvent = event.getMessage().getContentRaw();
 
-        log.debug("messageContentFromDB: {}", messageContentFromDB);
-        log.debug("messageContentFromEvent: {}", messageContentFromEvent);
+        log.debug("[onMessageUpdate] messageContentFromDB: {}", messageContentFromDB);
+        log.debug("[onMessageUpdate] messageContentFromEvent: {}", messageContentFromEvent);
 
         if (messageContentFromEvent.equals(messageContentFromDB)) return;
         /*
