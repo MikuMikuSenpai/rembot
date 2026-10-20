@@ -83,7 +83,7 @@ public class BotConfig extends ListenerAdapter {
 
             if (antiSpamTimeAmountInt <= 0) {
                 log.error("[onReady] ANTI_SPAM_TIME_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
-                log.error("[onReady] rembot can not start without fixing this issue first.");
+                log.error("[onReady] reMbot can not start without fixing this issue first.");
                 bot.shutdown();
             }
         } catch (NumberFormatException e) {
@@ -99,7 +99,7 @@ public class BotConfig extends ListenerAdapter {
 
             if (antiSpamMuteAmountInt <= 0) {
                 log.error("[onReady] ANTI_SPAM_MUTE_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
-                log.error("[onReady] rembot can not start without fixing this issue first.");
+                log.error("[onReady] reMbot can not start without fixing this issue first.");
                 bot.shutdown();
             }
         } catch (NumberFormatException e) {
@@ -160,9 +160,9 @@ public class BotConfig extends ListenerAdapter {
         }
 
         if (bot.getGuilds().size() > 1) {
-            log.error("[onReady] rembot can only be connected to one server at a time. Fix this issue by only adding the bot to your main server.");
+            log.error("[onReady] reMbot can only be connected to one server at a time. Fix this issue by only adding the bot to your main server.");
             log.error("[onReady] Current connected guilds/servers: {}", bot.getGuilds());
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         }
 
@@ -170,11 +170,11 @@ public class BotConfig extends ListenerAdapter {
             bot.getGuildById(GUILD_ID).getJDA();
         } catch (NullPointerException e) {
             log.error("[onReady] GUILD_ID {} is not valid, fix your .env file.", GUILD_ID);
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         } catch (IllegalArgumentException e) {
             log.error("[onReady] GUILD_ID may not be empty, fix your .env file.");
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         }
 
@@ -182,7 +182,7 @@ public class BotConfig extends ListenerAdapter {
             bot.getRoleById(MOD_ROLE_ID).getJDA();
         } catch (NullPointerException e) {
             log.error("[onReady] MOD_ROLE_ID {} is not valid, fix your .env file.", MOD_ROLE_ID);
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         } catch (IllegalArgumentException e) {}
 
@@ -190,11 +190,11 @@ public class BotConfig extends ListenerAdapter {
             bot.getChannelById(TextChannel.class, LOG_CHANNEL_ID).getJDA();
         } catch (NullPointerException e) {
             log.error("[onReady] LOG_CHANNEL_ID {} is not valid, fix your .env file.", LOG_CHANNEL_ID);
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         } catch (IllegalArgumentException e) {
             log.error("[onReady] LOG_CHANNEL_ID may not be empty, fix your .env file.");
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         }
 
@@ -202,11 +202,11 @@ public class BotConfig extends ListenerAdapter {
             bot.getChannelById(TextChannel.class, DARWIN_CHANNEL_ID).getJDA();
         } catch (NullPointerException e) {
             log.error("[onReady] DARWIN_CHANNEL_ID {} is not valid, fix your .env file.", DARWIN_CHANNEL_ID);
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         } catch (IllegalArgumentException e) {
             log.error("[onReady] DARWIN_CHANNEL_ID may not be empty, fix your .env file.");
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         }
 
@@ -214,12 +214,12 @@ public class BotConfig extends ListenerAdapter {
         try {
             if (Integer.parseInt(ANTI_SPAM_MESSAGES_AMOUNT) <= 0) {
                 log.error("[onReady] ANTI_SPAM_MESSAGES_AMOUNT is 0 or a negative number, it must be a POSITIVE number. Check your .env file.");
-                log.error("[onReady] rembot can not start without fixing this issue first.");
+                log.error("[onReady] reMbot can not start without fixing this issue first.");
                 bot.shutdown();
             }
         } catch (NumberFormatException e) {
             log.error("[onReady] ANTI_SPAM_MESSAGES_AMOUNT may not be empty.");
-            log.error("[onReady] rembot can not start without fixing this issue first.");
+            log.error("[onReady] reMbot can not start without fixing this issue first.");
             bot.shutdown();
         }
 

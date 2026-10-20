@@ -1,5 +1,5 @@
 # reMbot
-Remastered mbot get it mbot rembot yeah my bad
+Remastered Mbot get it Mbot reMbot yeah my bad
 
 ## Reference Sheet
 
@@ -14,7 +14,7 @@ Slash Commands (/)
         /unmute username [reason]
 Non-Slash Commands (&)
     &nuke - role play as Kim Jong-un and nuke a country
-    &ping - returns "pong", time took in milliseconds (ms) and what version of rembot is running.
+    &ping - returns "pong", time took in milliseconds (ms) and what version of reMbot is running.
 Features
     Moderation
         Auto-delete messages that contain a banned word(s)
