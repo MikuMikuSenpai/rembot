@@ -36,7 +36,7 @@ Features
     * Send Messages
     * Manage Messages
 2. Set `Install Link` to "None" in the [Installation](https://discord.com/developers/home) tab
-3. Turn off `Public Bot` in the [Bot](https://discord.com/developers/home) tab
+3. Turn off `Public Bot`, turn on `Server Members Intent` and turn on `Message Content Intent` in the [Bot](https://discord.com/developers/home) tab
 4. Clone the project: `git clone https://github.com/MikuMikuSenpai/rembot.git`
 5. Change to the new `rembot` directory.
 6. Create a new file called `.env` paste the contents of `.env.example` in `.env`
