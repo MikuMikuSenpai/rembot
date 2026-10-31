@@ -24,9 +24,11 @@ public class MessageLib {
                 "https?://w{0,3}\\.?instagram\\.com/reels/\\S+|" +
                 "https?://w{0,3}\\.?kick\\.com/\\S+/clips/\\S+|" +
                 "https?://w{0,3}\\.?klipy\\.com/gifs/\\S+|" +
+                "https?://w{0,3}\\.?leetify\\.com/app/highlight/\\S+|" +
+                "https?://w{0,3}\\.?medal\\.tv/games/\\S+|" +
                 "https?://w{0,3}\\.?open\\.spotify\\.com/track/\\S+|" +
-                "https?://w{0,3}\\.?reddit\\.com/r/\\S+/s/\\S+|" +
                 "https?://w{0,3}\\.?reddit\\.com/r/\\S+/comments/\\S+|" +
+                "https?://w{0,3}\\.?reddit\\.com/r/\\S+/s/\\S+|" +
                 "https?://w{0,3}\\.?soundcloud\\.com/\\S+/\\S+|" +
                 "https?://w{0,3}\\.?tiktok\\.com/\\S+/video/\\S+|" +
                 "https?://w{0,3}\\.?twitch\\.tv/\\S+/clip/\\S+|" +
