@@ -36,6 +36,7 @@ public class MessageLib {
                 "https?://w{0,3}\\.?vm\\.tiktok\\.com/\\S+|" +
                 "https?://w{0,3}\\.?x\\.com/\\S+/status/\\S+|" +
                 "https?://w{0,3}\\.?youtu\\.be/\\S+|" +
+                "https?://w{0,3}\\.?youtube\\.(?:be|com)/shorts/\\S+|" +
                 "https?://w{0,3}\\.?youtube\\.com/watch\\?v=\\S+|" +
                 ")", Pattern.CASE_INSENSITIVE);
 
